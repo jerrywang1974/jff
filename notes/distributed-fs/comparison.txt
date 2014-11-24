@@ -34,6 +34,32 @@ Remote block device:
     DRBD (http://www.drbd.org)
     ATA over Ethernet
 
+理想特性：
+    * 统一文件命名空间，对物理存储位置透明
+    * 高可用性
+        * 某个服务进程崩溃不影响服务，某个存储节点故障不影响服务
+        * 在线扩容和迁移数据
+        * 加入、去掉节点时自动平衡数据
+        * 自动修复 replication level
+        * 根据 free space 和 cpu/memory/network load 自动迁移或者复制数据，避免热点
+        * 更细粒度的文件级别的 replication level 而非粗粒度的 device 级别的 replication level
+        * 同步复制
+        * 支持根据 geographical location, rack, machine 定制 placement strategy，以最大程度增强可用性
+        * 跨地域复制
+    * 同时支持大量小文件和少量大文件的高效定位、读写，允许存储大量小文件
+    * 条带化存储，并行读写
+    * 客户端文件缓存
+    * 多种访问方式
+        * POSIX 接口，并支持特殊文件(符号链接、硬链接、设备文件、socket、pipe )、文件属性、文件 ACL
+        * HTTP REST API,  Amazon S3 API
+        * 支持 object storage
+        * 支持多种网络: Ethernet(iWARP, RoCE), InfiniBand, FibreChannel
+        * MPI 支持
+    * 易维护，服务进程种类少，可以在用户态运行，不依赖内核模块
+    * 目录级别的 quota
+    * 快照
+    * 回收站
+    * 支持 Hierarchical Storage Management，自动在高速昂贵存储与低速便宜存储之间按需移动数据
 
 ================================================================
 XtreemFS: http://www.xtreemfs.org/
@@ -69,8 +95,11 @@ MooseFS
     + 可以在线扩容
     + 支持回收站
     + 支持快照
+    + 支持文件级别的复制，针对不同文件设置不同的 replication goal
+    + 自动修复 replication goal 没有达到的文件
     - master server 存在单点故障
-    - master server 很耗内存
+    - 元数据放在内存里，因此 master server 很耗内存，对文件个数有限制
+    - 没考虑 placement strategy 去优先把 replicas 放到不同机架的机器上
 
 MogileFS
     - 不适合做通用文件系统，适合存储静态只读小文件，比如图片
@@ -79,17 +108,25 @@ GlusterFS (http://gluster.com/community/documentation/index.php/GlusterFS_Featur
     + 无单点故障问题
     + 支持回收站
     + 模块化堆叠式架构
-    + 使用文件名 hash (Elastic Hashing Algorithm)定位文件，没有 metadata server
+    + 使用文件名 hash (Elastic Hashing Algorithm)定位文件，没有 metadata server，因此对文件个数没有限制
     - 对文件系统格式有要求，ext3/ext4/zfs 被正式支持，xfs/jfs 可能可以，reiserfs 经测试可以
       (http://gluster.com/community/documentation/index.php/Storage_Server_Installation_and_Configuration#Operating_System_Requirements)
     - 需要以 root 用户身份运行（用了 trusted xattr，mount 时加 user_xattr 选项是没用的，官方说法是
             glusterfsd 需要创建不同属主的文件，所以必需 root 权限)
-    - 不能在线扩容(不 umount 时增加存储节点)，计划在 3.1 里实现
+    + 从 3.1 版本开始支持在线扩容(不 umount 时增加存储节点)以及迁移
+    + 从 3.2 版本开始支持跨地域备份, http://www.gluster.org/community/documentation/index.php/Gluster_3.2_Release_Notes:_What%27s_New_in_Gluster_3.2%3F
+    + 从 3.2 版本开始支持 directory quota
+    + 从 3.3 版本开始支持自动恢复 replication level，http://www.gluster.org/community/documentation/index.php/About33
+    + 从 3.5 版本开始支持 file snapshot
+    + 从 3.6 版本开始支持 volume snapshot，并且 client 端可以无需管理员参与即可访问 snapshot
     - 分布存储以文件为单位，条带化分布存储不成熟
-    - 不使用 client side cache
-    - replication 通过在两个 devices（可能在不同机器上）间做 RAID1 实现，因此
-      需要的 device 数目是偶数，复制是设备级别，不是文件级别，相当于网络级别的
-      soft RAID1
+    - 不使用 client side cache (可能在 4.0 版本支持: http://www.gluster.org/community/documentation/index.php/Planning40)
+    - 放置数据时不考虑 rack (可能在 3.7 版本支持: http://www.gluster.org/community/documentation/index.php/Planning37)
+    - replication 通过在多个 devices（可能在不同机器上）间做 RAID1 实现，一个
+      device 根据需要有一个或者多个 mirror devices, 复制是设备级别，不是文件级别，
+      相当于网络级别的soft RAID1，要求 device 的容量相匹配 (从 3.6 版本开始在放置
+      文件时会考虑 device size)
+    - 不能自动移动数据以平衡负载
 
 GFS2
     http://sourceware.org/cluster/wiki/DRBD_Cookbook
@@ -197,6 +234,7 @@ Lustre
     + 读写性能很高
     + 支持动态扩展
     + 支持 POSIX 标准
+    + 元数据存储在磁盘上，允许大量的文件数目
     - 需要对内核打补丁，深度依赖 Linux 内核和 ext3 文件系统
     - 依赖底层文件系统或者RAID 达到冗余，但依然不能保证高可用，因为没有复制
       数据到多个 object store targets 上
