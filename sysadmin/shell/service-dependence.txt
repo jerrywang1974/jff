@@ -1,0 +1,53 @@
+dns: firewall
+dhcp: firewall
+ntp: firewall
+
+kerberos: dns firewall ntp
+
+# libnss-ldapd provides users/groups information
+ldap: dns firewall kerberos
+
+ssh: firewall kerberos
+
+imap: dns firewall kerberos
+smtp: dns firewall kerberos imap
+
+apache: dns firewall kerberos
+
+postgresql:
+
+mailman: dns apache smtp
+
+roundcube: dns apache imap smtp postgresql
+
+calendar: dns apache kerberos
+davical: dns apache postgresql
+
+mantis: dns apache postgresql
+bugzilla: dns apache postgresql
+
+foswiki: dns apache
+moinmoin: dns apache
+
+ejabberd: dns firewall kerberos apache
+
+samba: firewall
+
+subversion: dns firewall kerberos
+git: dns firewall kerberos ssh
+
+trac: dns apache
+redmine: dns apache postgresql
+
+viewvc: dns apache
+
+drupal: dns apache postgresql
+
+nagios: dns apache
+ganglia: dns apache firewall
+
+reviewboard: dns apache postgresql
+
+gitolite: dns apache ssh
+
+gerrit: dns firewall apache

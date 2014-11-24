@@ -1,0 +1,130 @@
+<!doctype html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<title>install Mark It!</title>
+
+<link rel="stylesheet" href="css/blueprint/screen.css" type="text/css" media="screen, projection" />
+<link rel="stylesheet" href="css/blueprint/print.css" type="text/css" media="print" />
+<!--[if lt IE 8]><link rel="stylesheet" href="css/blueprint/ie.css" type="text/css" media="screen, projection"/><![endif]-->
+
+<style type="text/css">
+    #noscript {
+        border: 5px red solid;
+        text-align: center;
+        padding: 10px;
+    }
+</style>
+
+<script type="text/javascript" src="js/jquery-1.4.2.min.js"></script>
+<script type="text/javascript">
+$(function() {
+    var a = document.getElementById("loader-url");
+    var href = a.href;
+    var root = location.href.substring(0, location.href.lastIndexOf("/")) + "/";
+    var debug = location.href.indexOf("?debug") != -1;
+
+    $("#markit_key").val("change me!");
+    $("#markit_key").one("focus", function() {
+        $(this).val("");
+    });
+
+    $("#btn_update").click(function() {
+        if ($("#markit_key").val().length == 0) {
+            alert("MarkIt 密钥不能为空!");
+            return false;
+        }
+
+        update_link();
+
+        if (debug) {
+            alert("Mark It! : " + a.href.length + "\n" + a.href);
+        } else {
+            alert("请重新拖动\"Mark It!\"链接到书签栏，并请记住 MarkIt 密钥！");
+        }
+
+        return false;   // avoid submit the form!
+    });
+
+    update_link();
+
+    function update_link() {
+        a.href = href.replace(
+                    /##MARKIT_ROOT##/g, root).replace(
+                    /##MARKIT_URL##/g, debug ? "markit.js" : "markit.min.js").replace(
+                    /##MARKIT_KEY##/g, $("#markit_key").val());
+
+        $("#loader-url").fadeOut(1000, function() {
+            $(this).fadeIn(1000);
+        });
+    }
+});
+</script>
+</head>
+
+<body>
+<div class="container">
+<div id="main" class="span-24 last">
+
+<noscript>
+    <p id="noscript">此页面需要 JavaScript 支持！</p>
+</noscript>
+
+<h1>MarkIt 安装程序</h1>
+
+<p>
+使用说明：
+<ul>
+    <li>将 "Mark It!" 链接拖到浏览器的书签栏(Bookmarks Toolbar)或右键添加到“收藏夹栏”(IE 8)，点击此书签，会在当前窗口显示或隐藏 MarkIt 对话框；</li>
+
+    <li>此书签包含了 "Mark It!" 账号信息，请不要保留在公共计算机上。如有泄漏，请点击此页面的 "重新生成链接"按钮，并重做书签；</li>
+
+    <li>适用 IE 8+、Chrome 3.0+、Firefox 3.5+、Safari 4+，不支持 Opera 10.60 以及 IE 6.0；
+
+    <li>与 Firefox 的 NoScript 扩展冲突，请禁用 NoScript，或者关闭 NoScript 配置中的 ABE 并允许此网站以及所访问网站的 JavaScript 脚本执行；</li>
+
+    <!--
+    把 markit.min.js 放在本地用 file:// 协议访问时，Firefox 会报告 Security
+    Error，无法加载 markit.min.js，请参考:
+    http://stackoverflow.com/questions/192080/firefox-links-to-local-or-network-pages-do-not-work
+
+    This could be turned off in firefox:
+
+        * type "about:config" in the address bar and accept "i'll be careful"
+        * find "security.checkloaduri" in older versions or "security.fileuri.strict_origin_policy" in newer versions of firefox and change the value to "false"
+        * restart firefox
+
+    That should do it for you. You have more information here:
+
+        * http://kb.mozillazine.org/Security.fileuri.strict_origin_policy
+        * http://kb.mozillazine.org/Security.fileuri.origin_policy
+
+
+    if you are using the NoScript add-on, check the Advanced \ Trusted \
+    Allow local links option.
+    -->
+
+</ul>
+</p>
+
+<hr/>
+<form>
+    <p>
+    <label for="markit_key">MarkIt 密钥：</label>
+    <input type="text" id="markit_key"/>
+    </p>
+
+    </p>
+    <button id="btn_update">更新链接</button>
+    <a id="loader-url" href='##LOADER_URL##'>Mark It!</a>
+    </p>
+</form>
+
+<hr/>
+<p> 作者：Liu Yubao (yubao dot liu at gmail dot com), 2010-06-27</p>
+
+</div>
+</div>
+</body>
+</html>
+

@@ -1,0 +1,178 @@
+safe_rm
+cfgtool
+no-recommends-suggests
+etckeeper(没有保存软件包列表) metastore(-c 输出太简单)
+apt-listbugs
+keychain
+aptitude install -R
+liveUSB: rm -rf /usr/share/doc, /usr/share/locale/...
+
+===================================================
+(1) x-window-system: xserver-xorg
+
+(2) x-display-manager: slim
+    xdm     相当简单、丑陋
+    wdm     功能丰富，但丑陋
+    slim    默认配置很漂亮，没有在 dm 里关机、重启的选项
+    qingy   不可靠，没加载 fb 模块 uvesafb 时 /dev/fb0 打开失败，
+            默认配置没有适应 Debian。
+
+需要的功能：关机、重启、会话选择
+            语言、休眠
+
+(3) x-session-manager: openbox
+    openbox
+    lxsession
+    ~/.xsession 执行 xsm :  太简陋
+
+(4) x-window-manager: openbox
+    openbox     提供 x-session-manager 功能，被 LXDE 采用，
+                干净，默认配置符合通常习惯。
+                obconf + obmenu
+    icewm
+    sawfish     Lisp
+    fvwm
+    blackbox
+    fluxbox
+    awesome     对鼠标操作不友好，无法移动 xeyes 和 xsm。
+
+标题栏：Alt-Space
+关闭：Alt-F4
+显示桌面：Win + d
+运行：Alt-F2, Win + r
+ctrl-alt-left/right: 切换虚拟桌面
+shift-alt-left/right: 将当前窗口移动到指定虚拟桌面
+可以置顶显示
+可以在所有虚拟桌面都显示
+alt-tab 显示当前虚拟桌面的窗口
+?? 显示所有虚拟桌面的窗口
+win 系统菜单
+桌面背景
+桌面快捷方式
+
+(4.1) 系统菜单
+菜单：Debian menu, menu-xdg 包，man update-menus, /usr/share/doc/menu/
+xdg-utils 的 xdg-desktop-menu
+x11-utils 的 xprop, xwininfo...
+gnome-main-menu, gnome-menus, lxmenu-data
+devscripts 的 desktop2menu + libfile-desktopentry-perl, libx11-freedesktop-desktopentry-perl
+libfile-basedir-perl
+libfile-mimeinfo-perl
+
+http://wiki.archlinux.org/index.php/XdgMenu
+http://archlinux-stuff.googlecode.com/svn/trunk/xdg-menu
+Perl 编写，支持多个 wm
+
+http://cvs.fedoraproject.org/viewvc/devel/openbox/xdg-menu?view=log
+Python 编写，只支持 openbox
+
+FD menu 的 .menu + .desktop + .directory 和 Debian /usr/lib/menu
+数据用于互补生成菜单:
+* menu-xdg 由 /etc/menu-methods/menu-xdg 生成 .menu 文件，供符合 FD menu
+  标准的程序读取。
+* devscripts 的 desktop2menu: desktop -> menu 然后由 /etc/menu-methods/
+  生成 WM 菜单。
+
+方案：libxml2-utils 的 xmllint --format 处理 .menu 文件；
+      解析 gnome-menus 包的 .menu 文件，建立菜单放置规则，读取 .desktop 文件，
+      输出菜单树，转换成 WM 支持的方式。
+      /usr/share/menu 是 Debian 独有的，放入 Debian 子菜单，并利用
+      desktop2menu 的映射关系，将菜单放入菜单树，与第一步的菜单树合并。
+
+(4.2) 自动启动
+/etc/xdg/autostart
+
+(4.3) 文件关联
+Debian mime-support
+
+(4.4) startup notification
+
+(5) x-terminal-emulator: rxvt-unicode-ml
+    rxvt-unicode-ml     支持 Perl 扩展
+    mlterm
+
+支持标签页、url 识别、CLIPBOARD、Primary 复制粘贴。
+
+(6) panel: tint2 + conky + hddtemp
+    fbpanel
+    xfce4-panel     体积大了点
+
+主菜单, 快速启动, cpu 温度，硬盘温度，CPU/memory/network/swap/load/disk
+使用情况监测，天气预报，网络连接，托盘区，日期，音量，注销，锁屏，
+待机、休眠、重启、关机、切换用户、显示桌面、回收站、虚拟桌面切换、
+任务栏、按虚拟桌面分类的窗口栏。
+
+电池充电阈值。
+
+(7) 软件
+scrot
+feh
+mtpaint
+wicd
+
+gliv
+gthumb      too many dependencies
+gqview      too many dependencies
+xpaint      too old
+gpaint      no rect selection tool
+
+devicekit-disks -> udisks
+devicekit-power -> upower
+policykit
+
+dzen2
+xli
+xloadimage
+=========================================
+safe_rm
+no-recommends-suggests
+apt-listbugs
+
+系统菜单  ： # gnome-menu
+             libfile-basedir-perl
+文件管理器： xfe/tuxcmd/emelfm2/thunar/rox-filer/pcmanfm/nautilus
+密钥管理： keychain
+自动 mount：
+配置管理： cfgtool/etckeeper/changetrack/filetraq/diffmon/metastore 
+CHM阅读器：chmsee/iceweasel chmreader extension
+词典：stardict/goldendict
+图片编辑：mtpaint gimp inkscape
+IRC: xchat/chatzilla
+下载：transmission/amule/mldonkey-server
+计算器：extcalc/gcalctool/galculator/qalculator/gnome-genius/speedcrunch
+备份：rsnapshot/rdiff-backup/flexbackup/faubackup/backup-manager/backup2l/backuppc/sbackup/vbackup/
+安全：shorewall
+      tripwire aide stealth samhain fcheck integrit osiris debsums tiger
+      bastille harden
+      lxc, openvz, vserver, selinux, grsecurity, apparmor
+      fail2ban denyhosts
+      snort, portsentry, nessus, nmap, amap
+      /etc/security
+      /etc/pam.d
+!!! aide 用 splint 检查， commandconf.c 问题，bug 列表
+!!! /etc/cron.d/fcheck: /usr/sbin/fcheck -asxrf  => 漏了 -d 参数。
+!!! aide 模仿 fcheck cron，加入 nice ionice -c3。
+!!! aide 加入对 log 文件旧内容的检查。
+!!! strip/sstrip aide，编译时用随机字符串混淆可执行文件里的字符串，避免被辨认出来。 用这个随机字符串加密配置文件。
+
+apparmor, tomoyo, smack, selinux 的界面，模仿网络防火墙，拦截 open、exec、connect 等调用。
+搭配 lxc、openvz、vserver  等构成应用沙箱。
+需要解决如何判断输入来自硬件(ConsoleKit?)，让提示窗口置顶、捕获焦点、不可拦截、不接受其它窗口的消息等等。
+
+
+utility: shush
+
+=========================================
+背景图片
+desktop-base:
+
+moreblue-orbit-grub.png  moreblue-orbit-splash.png
+moreblue-orbit-wallpaper.png  moreblue-orbit-wallpaper-widescreen.png
+
+=========================================
+检查内存占用
+ps -eo pcpu,pmem,pri,rss,size,sz,vsz,cmd --sort rss
+
+=========================================
+检查终端用户可以执行的特权操作：
+pkaction --verbose | perl -ne 'if (s/^org.*\K:$//) { push @a, $_ } elsif (/\sactive:\s*yes$/) { print $a[$#a]; @a=() }'

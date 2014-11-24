@@ -1,0 +1,41 @@
+<VirtualHost *:80>
+    ServerName svn.corp.example.com
+    ServerAdmin webmaster@corp.example.com
+    DocumentRoot /nonexistent
+
+
+    ErrorLog ${APACHE_LOG_DIR}/svn-error.log
+
+    # Possible values include: debug, info, notice, warn, error, crit,
+    # alert, emerg.
+    LogLevel warn
+
+    CustomLog ${APACHE_LOG_DIR}/svn-access.log combined
+
+    WSGIDaemonProcess viewvc-sites user=viewvc group=viewvc processes=4
+    WSGIScriptAlias /view   /usr/lib/viewvc/wsgi/viewvc.wsgi
+    #WSGIScriptAlias /query  /usr/lib/viewvc/wsgi/query.wsgi
+
+    Alias /static   /usr/share/viewvc/docroot
+
+    RedirectMatch   ^/$     /view
+
+    <Directory /usr/lib/viewvc/wsgi/>
+        AuthType Kerberos
+        Require valid-user
+
+        AllowOverride None
+        Order allow,deny
+        Allow from all
+
+        WSGIProcessGroup viewvc-sites
+        WSGIApplicationGroup %{GLOBAL}
+    </Directory>
+
+    <Directory /usr/share/viewvc/docroot>
+        AllowOverride None
+        Order allow,deny
+        Allow from all
+    </Directory>
+</VirtualHost>
+

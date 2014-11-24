@@ -1,0 +1,51 @@
+Adblock Plus
+Element Hiding Helper for Adblock Plus  (Ctrl-Shift-S or Ctrl-Shift-K)
+ChatZilla
+CHMReader
+Collusion
+DoNotTrackPlus
+Download Statusbar
+DownThemAll!
+Firebug
+Fission     (Progress bar in the address bar)
+FoxTab      (3D tab management)
+FoxProxy
+Ghostery
+Greasemonkey
+    http://userscripts.org/scripts/show/9310    GoogleMonkeyR
+jsonview
+NoScript
+ReminderFox
+Remove It Permanently
+ScrapBook
+Stylish
+Tab Mix Plus
+userChromJS
+MultirowBookmarksToolbar
+Autofill Forms
+
+http://code.google.com/speed/page-speed/docs/overview.html
+
+
+Prevent tab pages from reloading on startup:
+    Firefox 4.x:  browser.sessionstore.max_concurrent_tabs = 0
+    Firefox 3.x:  BarTab addon
+    Or switch to offline mode (File -> Offline) on quit.
+
+        https://addons.mozilla.org/en-US/firefox/addon/load-control/
+        http://www.ghacks.net/2010/09/19/firefox-4-development-update/
+
+        http://getsatisfaction.com/mozilla/topics/why_does_firefox_have_to_reload_all_my_tabs_every_time_it_restores_a_session
+
+
+=======================================
+
+ThunderBird
+
+External Editor
+Lightning
+Provider for Microsoft Exchange
+Quote Colors
+Display Mail User Agent
+MinimizeToTray Plus
+Add-on Compatibility Reporter

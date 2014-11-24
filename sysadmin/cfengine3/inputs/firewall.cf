@@ -1,0 +1,12 @@
+#
+# firewall.cf
+#
+
+bundle agent firewall
+{
+reports:
+
+    cfengine_3::
+    "Hello from firewall!";
+}
+

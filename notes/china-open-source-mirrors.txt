@@ -1,0 +1,6 @@
+http://mirrors.163.com/
+http://mirrors.sohu.com/
+http://mirrors.aliyun.com/
+
+http://mirrors.hust.edu.cn/
+http://mirrors.ustc.edu.cn/

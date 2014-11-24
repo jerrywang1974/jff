@@ -1,0 +1,113 @@
+#
+# kerberos.cf
+#
+# Reference:
+#   http://techpubs.spinlocksolutions.com/dklar/kerberos.html
+#   Debian GNU: Setting up MIT Kerberos 5
+#   Davor Ocelic
+#   SPINLOCK - advanced GNU/Linux and Unix solutions for commercial and education sectors.
+
+bundle agent kerberos
+{
+vars:
+
+    "match_package" slist   => {
+                                "krb5-admin-server",
+                                "krb5-kdc",
+                                "krb5-user",
+                                "krb5-clients",
+                                "libpam-krb5",
+                                "pwgen"
+                               };
+
+    "krb_addresses" slist   => {
+                                "127.0.0.1	kerberos.corp.example.com kerberos krb",
+                                "::1		kerberos.corp.example.com kerberos krb"
+                               };
+
+    "krb_log_file" slist    => {
+                                "/var/log/krb5kdc.log",
+                                "/var/log/kadmin.log",
+                                "/var/log/krb5lib.log"
+                               };
+
+    "krb_realm" string      => "CORP.EXAMPLE.COM";
+
+    "krb5kdc_db" string     => "/var/lib/krb5kdc/principal";
+
+    "kdc_db_pw" string      => "/etc/krb5kdc/kdc_master_db_pw";
+
+classes:
+
+    "realm_not_created" not => fileexists("$(krb5kdc_db)");
+
+
+packages:
+
+    "$(match_package)"
+        package_method  => apt,
+        package_policy  => "add";
+
+commands:
+
+    realm_not_created.krb5_conf_changed.kdc_conf_changed::
+    "/bin/sh $(sys.workdir)/inputs/scripts/krb5_newrealm.sh $(kdc_db_pw) $(krb_realm) $(krb5kdc_db)"
+        comment => "Create the new realm and default policies";
+
+    realm_not_created|krb5_conf_changed|kdc_conf_changed::
+    "/usr/sbin/invoke-rc.d krb5-kdc restart"
+        comment => "Restart Kerberos v5 key server";
+
+    realm_not_created|krb5_conf_changed|kadm5_acl_changed::
+    "/usr/sbin/invoke-rc.d krb5-admin-server restart"
+        comment => "Restart Kerberos v5 admin server";
+
+files:
+
+    "/etc/hosts"
+        comment     => "Add host names for Kerberos V5 admin server and key server",
+        edit_line   => insert_lines("@(kerberos.krb_addresses)");
+
+    "/etc/krb5.conf"
+        comment     => "Kerberos 5 configuration file",
+        classes     => if_repaired("krb5_conf_changed"),
+        copy_from   => local_cp("$(sys.workdir)/inputs/etc/krb5.conf"),
+        perms       => mog("0644", "root", "root");
+
+    "/etc/krb5kdc/kdc.conf"
+        comment     => "Kerberos v5 key server configuration file",
+        classes     => if_repaired("kdc_conf_changed"),
+        copy_from   => local_cp("$(sys.workdir)/inputs/etc/krb5kdc/kdc.conf"),
+        perms       => mog("0644", "root", "root");
+
+    "/etc/krb5kdc/kadm5.acl"
+        comment     => "Kerberos v5 admin server ACL",
+        classes     => if_repaired("kadm5_acl_changed"),
+        copy_from   => local_cp("$(sys.workdir)/inputs/etc/krb5kdc/kadm5.acl"),
+        perms       => mog("0644", "root", "root");
+
+    "/etc/krb5kdc"
+        comment     => "Kerberos v5 key server configuration directory",
+        perms       => mog("0600", "root", "root");
+
+    "/var/lib/krb5kdc"
+        comment     => "Kerberos v5 key server's database",
+        perms       => mog("0600", "root", "root");
+
+    "$(krb_log_file)"
+        comment     => "Kerberos v5 log files",
+        perms       => mog("0640", "root", "root");
+
+    "$(kdc_db_pw)"
+        comment     => "Kerberos v5 key server's master database password",
+        perms       => mog("0600", "root", "root");
+
+    "/etc/krb5.keytab"
+        comment     => "Kerberos v5 keytab file",
+        perms       => mog("0600", "root", "root");
+
+    "/etc/krb5kdc/stash"
+        comment     => "Kerberos v5 key server's stash file",
+        perms       => mog("0600", "root", "root");
+}
+

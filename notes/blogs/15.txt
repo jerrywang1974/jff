@@ -1,0 +1,241 @@
+RoundCube 的配置，与 Dovecot 的斗争
+
+1. Dovecot 认证机制和密码存储方案
+
+http://wiki2.dovecot.org/Authentication
+http://wiki2.dovecot.org/Authentication/Mechanisms/DigestMD5
+http://wiki2.dovecot.org/AuthDatabase/PasswdFile
+
+Authentication mechanisms: 网络协议，密码以何种方式传送(明文，或者协议特定编码方式)
+
+Password scheme: 密码在 passdb 中以何种方式编码(明文，DES、MD5、SHA1 等)
+
+Password db: 用户和密码以何种方式保存(关系数据库、LDAP 等)
+
+auth mech 允许的 passwd scheme 对照表：
+
+| auth mech    | passwd scheme       |
+|--------------+---------------------|
+| PLAIN, LOGIN | Any                 |
+| CRAM-MD5     | PLAIN, CRAM-MD5     |
+| DIGEST-MD5   | PLAIN, DIGEST-MD5   |
+| APOP         |                     |
+| NTLM         | PLAIN, NTLM, LANMAN |
+| GSS-SPNEGO   |                     |
+| GSSAPI       |                     |
+| RPA          | PLAIN, RPA          |
+| ANONYMOUS    |                     |
+| OTP          | PLAIN, OTP          |
+| SKEY         | PLAIN, SKEY         |
+| EXTERNAL     |                     |
+
+
+passdb driver 的默认 password scheme 以及允许的 password schemes:
+
+| passdb driver             | default passwd scheme    | allowed other passwd schemes |
+|---------------------------+--------------------------+------------------------------|
+| SQL                       | MD5-CRYPT                | any                          |
+| LDAP                      | CRYPT                    | any                          |
+| PasswordFile              | CRYPT                    | any                          |
+| Passwd,Shadow,VPopMail    | CRYPT                    | none                         |
+| PAM,BSDAuth,CheckPassword | (Dovecot 不直接访问密码)    |                              |
+
+密码保存时可以显式标明是什么 scheme：{SCHEME-NAME}password
+
+DIGEST-MD5 scheme：
+$ echo -n "user:corp.example.com:123456" | md5sum
+e9650e0c2630f58366d6e84df967f957  -
+$ doveadm pw -s digest-md5 -u user@corp.example.com -p 123456
+{DIGEST-MD5}e9650e0c2630f58366d6e84df967f957
+
+注意这里 "corp.example.com" 是 realm，不是 domain，虽然这里把 realm 取成
+跟 domain 一样。另外 htdigest 生成的文件格式是：
+user:corp.example.com:e9650e0c2630f58366d6e84df967f957
+而 dovecot 要求 passwd-file 格式不能有 realm 那一列：
+
+  user@corp.example.com:e9650e0c2630f58366d6e84df967f957
+  user@corp.example.com:{DIGEST-MD5}e9650e0c2630f58366d6e84df967f957
+  user@corp.example.com:{DIGEST-MD5.HEX}e9650e0c2630f58366d6e84df967f957
+
+如果设置了 auth_username_format = %n，那么第一列用户名只能是 user,
+Dovecot 以经过 auth_username_format 转换后的名字查询 passdb，但是
+算那个摘要时一定要确保 server 和 client 一致，如果客户端使用
+"user@corp.example.com" 作为 authentication id，比如
+$ gsasl --imap -a 'webmail@corp.example.com' -m DIGEST-MD5 -p 123456 imap.corp.example.com --verbose
+那么 /etc/dovecot/master-users 里的摘要要这么算：
+$ echo -n "webmail@corp.example.com:corp.example.com:123456" | md5sum
+
+
+RoundCube 只支持 DIGEST-MD5, CRAM-MD5, PLAIN, LOGIN 认证方式，
+DIGEST-MD5 最安全(RoundCube 使用的 Auth_SASL 库还支持 Digest-MD5
+的改良版 SCRAM，但 RoundCube 并没用它，而且 Dovecot 也不支持)。
+
+
+2. Dovecot 的 passdb 和 userdb
+
+passdb 是用来查询密码以验证用户，userdb 是验证通过后查询 user 的 mail
+location 等信息以决定怎么投递邮件或者读取邮件。
+
+
+3. Dovecot master user
+
+http://wiki2.dovecot.org/Authentication/MasterUsers
+
+两种 master user 登录方式：
+  a. 只有 PLAIN 支持，authentication id = master user, authorization id = real user;
+  b. 用 real_user*master_user 名字登录。
+
+本来想用 DIGEST-MD5 作为 master passdb(/etc/dovecot/master-users)
+里密码存储方式以及 master user 认证方式，结果发现很悲剧的是不可能，
+原因是 imap 客户端以 "real_user*master_user:corp.example.com:password"
+计算 hash，而 master passdb 里只能用 "master:corp.example.com:password"
+计算 hash（因为不可能为所有 user*master 组合计算 hash，而且 imap-login
+进程查找 master 用户时是在 master passdb 中找 master 用户名）。这个问题
+对于 RoundCube 还是比较容易修正的，毕竟是脚本语言，修改下 Digest-MD5
+认证部分代码识别 "*" 特殊标记就可以了。
+
+
+用 CRAM-MD5 作为认证方式和密码保存方式是可以的, CRAM-MD5 的密码 hash
+跟用户名和 realm 无关：
+$ doveadm pw -s CRAM-MD5 -u webmail@corp.example.com    # passwd: 123456
+$ cat >>/etc/dovecot/master-users
+webmail:{CRAM-MD5}dd59f669267e9bb13d42a1ba57c972c5b13a4b2ae457c9ada8035dc7d8bae41b
+^D
+$ gsasl --imap imap.corp.example.com --verbose -m CRAM-MD5 \
+    -a 'dieken*webmail@corp.example.com' -p 123456
+
+由于 auth_username_format = %n 的设置，以及 CRAM-MD5 算密码 hash 时
+与 authorization id 无关，所以这里两处 @corp.example.com 可要可不要。
+
+
+但是要让这个 master 用户 CRAM-MD5 认证成功，需要修改一下 Dovecot 2.0.17 代码，
+在 src/auth/auth.c 中的 auth_passdb_list_have_lookup_credentials() 中对 auth->masterdbs
+也遍历一下：
+
+http://hg.dovecot.org/dovecot-2.0/file/684381041dc4/src/auth/auth.c
+    121 static bool auth_passdb_list_have_lookup_credentials(struct auth 
+*auth)
+    122 {
+    123     struct auth_passdb *passdb;
+    124
+    125     for (passdb = auth->passdbs; passdb != NULL; passdb = passdb->next) {
+    126         if (passdb->passdb->iface.lookup_credentials != NULL)
+    127             return TRUE;
+    128     }
+
+            for (passdb = auth->masterdbs; passdb != NULL; passdb = passdb->next) {
+                if (passdb->passdb->iface.lookup_credentials != NULL)
+                    return TRUE;
+            }
+
+    129     return FALSE;
+    130 }
+
+没有这个补丁的话，如果 /etc/dovecot/conf.d/10-auth.conf 中设置了
+auth_mechanisms = gssapi digest-md5 cram-md5， imap-login 进程会
+因为非 master passdb(我的配置里只有一个 pam passdb) 不支持
+DIGEST-MD5 和 CRAM-MD5 而退出：
+DIGEST-MD5 mechanism can't be supported with given passdbs
+或者
+CRAM-MD5 mechanism can't be supported with given passdbs
+
+在 Dovecot 邮件列表问了下，Dovecot 作者 Timo Sirainen 表示“我猜也许可以这样改”。。。
+
+http://hg.dovecot.org/dovecot-2.0/rev/b05793c609ac
+似乎是这次修改忘记了原来其它代码依赖于检查所有 passdb，给 Tim 提了个补丁:
+http://dovecot.org/list/dovecot/2012-January/062966.html
+
+另一个问题是 master passdb 的 "pass" 选项，从配置文件里注释看，
+这只是 master user 认证通过后再判断下 real_user 是否真的存在(不检查
+可能导致 dovecot 创建一个用户)，但 pass=true 时是去查找 passdb 而非
+userdb，查找 PAM passdb 时因为这种 passdb 不支持 lookup_credentials 而失败，
+其实只用 "lookup_username" 成功就可以了，这地方的实现逻辑有点问题，或者
+是我理解有问题。
+
+
+4. DIGEST-MD5 认证
+
+因为调试 master 用户登录时 DIGEST-MD5 认证为啥失败，研究了下这个算法，
+这里记录一下。
+
+DIGEST-MD5 里，server 和 client 都要算出一个摘要值来，这个摘要值一致
+就表明认证通过，计算过程见如下脚本：
+
+#!/usr/bin/perl
+use strict;
+use warnings;
+use Digest::MD5 qw/md5 md5_hex/;
+
+# See http://hg.dovecot.org/dovecot-2.0/file/38972af8bd29/src/auth/mech-digest-md5.c
+
+# "username:realm:password" => 16 bytes MD5 digest
+my $credential = md5('dieken*webmail:corp.example.com:123456');
+
+my $nonce = $ARGV[0] || "random-string-generated-by-server";
+my $cnonce = $ARGV[1] || "random-string-generated-by-client";
+my $nonce_count = $ARGV[2] || 1;    # monotone increasing serial number
+my $authorization_id = "";
+my $qop = "auth";   # or auth-int, auth-conf  (quality of protocol)
+my $digest_uri = "imap/imap.corp.example.com";
+my ($a1_hex, $a2_hex);
+
+if ($authorization_id) {
+    $a1_hex = md5_hex("$credential:$nonce:$cnonce:$authorization_id");
+} else {
+    $a1_hex = md5_hex("$credential:$nonce:$cnonce");
+}
+
+if ($qop eq 'auth-int' or $qop eq 'auth-conf') {
+    # most servers and clients don't implement auth-int/auth-conf,
+    # they use dummy MD5 digest for body.
+    $a2_hex = md5_hex("AUTHENTICATE:$digest_uri:" . ('0' x 32));
+} else {
+    $a2_hex = md5_hex("AUTHENTICATE:$digest_uri");
+}
+
+print "a1_hex=$a1_hex, a2_hex=$a2_hex, response=",
+    md5_hex("$a1_hex:$nonce:" .
+            sprintf("%08ld", $nonce_count) .
+            ":$cnonce:$qop:$a2_hex"), "\n";
+
+
+如果 DIGEST-MD5 验证失败而密码确实无误，那么只可能是
+用户名错了(比如加了 @xxx 或者没加，以及 MUA 不识别
+* 记号) 或者 realm 错了(没指定或者应该为空)，这时就
+可以用上面的代码验证下。
+
+
+5. RoundCube 对 SSO 的支持
+
+RoundCube 并没有直接提供单点登录支持，有两种方式解决：
+
+(1) 利用 Apache + mod_auth_kerb 的 KrbSaveCrendentials
+特性，把 client 的 kerberos ticket 保存到 Apache 所在
+服务器上，然后 RoundCube 可以用这个 ticket 向 Dovecot
+做 gssapi 认证，但是这个做法问题很大。
+
+首先，Firefox里不仅要设置 network.negotiate-auth.trusted-uris 以支持
+GSS SPNEGO 认证，而且要设置 network.negotiate-auth.delegation-uris
+以允许将 ticket 传给 Apache。
+
+其次，为了安全起见，mod_auth_kerb 在每一个请求处理前把
+ticket 写入一个临时文件并设置 KRB5CCNAME 环境变量，在
+请求处理完后删除这个临时文件，这导致效率非常低下。
+
+第三，这个 ticket 传给 Apache 后，webapp 就能代表用户
+做任意 gssapi 认证，比如登录 ssh，这个风险实在太大了。
+
+
+(2) 利用 Apache + mod_auth_kerb 做 GSS SPNEGO 认证，
+Apache 会设置 REMOTE_USER 环境变量，给 RoundCube
+做一个插件，让其使用 master 用户以 REMOTE_USER 身份
+登录 Dovecot。如果修改其 DIGEST-MD5 代码使其识别
+Dovecot master user，那就更完美了，否则只能使用
+CRAM-MD5, PLAIN, LOGIN。
+
+
+这个办法问题是一旦 RoundCube 有安全问题导致 master
+password 泄漏，那么所有人的邮件都暴露了。但总之比
+第一种的安全风险小的多，我也没想到什么其它办法既能
+避免用户输入密码，又能不使用 master 用户的技巧。
+

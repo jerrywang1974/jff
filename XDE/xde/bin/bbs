@@ -1,0 +1,41 @@
+#!/usr/bin/expect --
+
+if { 0 == $argc } {
+    spawn -noecho ssh -1 bbs.newsmth.net
+} else {
+    eval spawn -noecho $argv
+    #eval [linsert $argv 0 spawn -noecho]
+
+    # for tcl >=8.5
+    #spawn -noecho {*}$argv
+}
+
+set timeOut 0
+set pendingMsg 0
+
+# avoid nasty error when the spawned process exits
+expect_background {
+    eof     exit
+    -re {第 [0-9]+ 条消息 / 共 [0-9]+ 条消息}   {
+            if $timeOut {
+                send "\n(Robot) Sorry, I'm not around.\n"
+            } else {
+                incr pendingMsg
+            }
+        }
+}
+
+for {} 1 {} {
+    interact {
+        timeout  60 {
+            if $pendingMsg {
+                send "\n(Robot) Sorry, I'm not around.\n"
+                    set pendingMsg [expr {$pendingMsg - 1}]
+            }
+            set timeOut 1
+                send "\x00"
+        }
+
+        -nobuffer -re "." { set timeOut 0; set pendingMsg 0 }
+    }
+}

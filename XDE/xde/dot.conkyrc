@@ -1,0 +1,149 @@
+# vi: ft=conf
+
+# Bugs:
+#   When no app such as nautilus, pcmanfm and rox is used as desktop,
+# own_window can't be yes when double_buffer is true for conky 1.7.2.
+# (For 1.7.1, own_window can be yes if double_buffer is true and
+# own_window_type isn't normal)
+#
+#    When pcmanfm is used as desktop, own_window can't be yes when
+#  double_buffer is true and own_window_type is desktop, because conky
+#  will disappear when click the desktop.
+#
+#   Comments produce blank lines on Conky 1.7.1 but not on Conky 1.7.2
+#   which is good:-)
+#
+#   ${if... false}
+#   ...
+#   ${endif}
+#   This produces a blank line which is bad, that's one of the reasons
+#   why I use many long templates and long text lines, it's very tricky!
+#
+# License:
+#   BSDL ( http://opensource.org/licenses/bsd-license.php )
+#
+# Author:
+#   Liu Yubao <yubao.liu@gmail.com>     2010-01-18
+#
+# References:
+#   http://conky.sourceforge.net/conkyrc-brenden
+#   oicu@newsmth's conkyrc: http://www.newsmth.net/bbscon.php?bid=392&id=763569
+
+alignment               top_right
+background              no
+border_width            1
+cpu_avg_samples         2
+default_color           blue
+default_outline_color   black
+default_shade_color     black
+double_buffer           yes
+draw_borders            no
+draw_graph_borders      yes
+draw_outline            no
+draw_shades             no
+if_up_strictness        address
+maximum_width           270
+minimum_size            270 100
+net_avg_samples         2
+no_buffers              yes
+out_to_console          no
+out_to_stderr           no
+override_utf8_locale    yes
+own_window              yes
+own_window_class        Conky
+own_window_colour       hotpink
+own_window_hints        undecorated,below,sticky,skip_taskbar,skip_pager
+own_window_transparent  yes
+own_window_type         desktop
+show_graph_range        no
+show_graph_scale        no
+stippled_borders        3
+update_interval         1
+uppercase               no
+use_spacer              none
+use_xft                 yes
+xftalpha                0.8
+xftfont                 DejaVu Sans Mono:size=8
+
+# left-right graphs
+# Usage: ${template0 cmd1 dev1 cmd2 dev2}
+template0 ${\1 \2 25,130 ff0000 0000ff} $alignr${\3 \4 25,130 0000ff ff0000}
+
+# network speed info
+# Usage: ${template1 net isNotLeading}...${endif}
+template1 ${if_up \1}${if_match \2 != 0}\n${endif}\1: total down ${totaldown \1}${alignr}total up ${totalup \1}\n    down ${downspeedf \1} KiB/s ${alignr}up ${upspeedf \1} KiB/s\n${template0 downspeedgraph \1 upspeedgraph \1}
+
+# hard disk I/O info
+# Usage: ${template2 dev isNotLeading}
+template2 ${if_existing /proc/partitions \1}${if_match \2 != 0}\n${endif}/dev/\1: read ${diskio_read \1} ${alignr}write ${diskio_write \1}\n${template0 diskiograph_read \1 diskiograph_write \1}${endif}
+
+# bar
+# Usage: ${template3 bar_cmd}
+template3 ${alignr}${\1 6,70}
+
+##################################################################################
+# extra text
+#
+#   ${font Dungeon:style=Bold:pixelsize=12}MPD: ${alignc}$mpd_artist - $mpd_title
+#   $mpd_bar
+#   ${alignc}$mpd_status
+#   $stippled_hr
+#   Name              PID     CPU%   MEM%
+#    ${top name 1} ${top pid 1} ${top cpu 1} ${top mem 1}
+#    ${top name 2} ${top pid 2} ${top cpu 2} ${top mem 2}
+#    ${top name 3} ${top pid 3} ${top cpu 3} ${top mem 3}
+#   Mem usage
+#    ${top_mem name 1} ${top_mem pid 1} ${top_mem cpu 1} ${top_mem mem 1}
+#    ${top_mem name 2} ${top_mem pid 2} ${top_mem cpu 2} ${top_mem mem 2}
+#    ${top_mem name 3} ${top_mem pid 3} ${top_mem cpu 3} ${top_mem mem 3}
+
+#   hardware info:  hddtemp,hwmon,i2c,i8k,ibm,nvidia,pb_battery,platform
+#                   smapi*,sony*, apm*, acpi*, apcupsd*
+#   music player:   audacious..., bmpx..., mixer, moc*, mpd, xmms*
+#   filesystem:     fs*
+
+TEXT
+$nodename - $sysname $kernel on $machine
+Uptime: $uptime - Load: $loadavg
+${loadgraph ff0000 0000ff}
+${stippled_hr 1}
+#
+#   CPU usage
+#
+${if_existing /proc/cpuinfo processor	: 1}cpu1: ${cpu 1}% ${freq_g 1}GHz ${alignr}cpu2: ${cpu 2}% ${freq_g 2}GHz
+${template0 cpugraph 1 cpugraph 2}${else}cpu: ${cpu}% ${freq_g}GHz ${template3 cpubar}
+${cpugraph ff0000 0000ff}${endif}
+Processes: total $processes - running $running_processes
+${stippled_hr 1}
+#
+#   Ram, swap usage
+#
+RAM Usage: $mem/$memmax - $memperc% ${template3 membar}
+${memgraph ff0000 0000ff}
+Buffer: $buffers - Cache: $cached
+Swap Usage: $swap/$swapmax - $swapperc% ${template3 swapbar}
+${stippled_hr 1}
+#
+#   Hard disk I/O
+#
+${template2 sda 0}${template2 sdb 1}${template2 hda 1}${template2 hdb 1}
+${stippled_hr 1}
+#
+#   Network I/O
+#
+${template1 eth0 0}${endif}${template1 eth1 1}
+ESSID: ${wireless_essid eth1} - Quality: ${wireless_link_qual_perc eth1}%${endif}
+${stippled_hr 1}
+#
+#   Battery, temperature
+#
+Battery: $battery ${battery_percent}% $battery_time
+Temperature: CPU ${acpitemp}°C - HDD /dev/sda ${hddtemp /dev/sda}°C
+##  (hwmon cpu temp: ${hwmon temp 1}°C - i8k cpu temp: ${i8k_cpu_temp}°C)
+##Fans: left ${i8k_left_fan_rpm}rpm $i8k_left_fan_status - right ${i8k_right_fan_rpm}rpm $i8k_right_fan_status
+${stippled_hr 1}
+#
+#   Volume, multimedia info, date, calendar
+#
+${font Sans:pixelsize=24}${time %H:%M:%S}${font} ${time %Y-%m-%d}${alignr}Volume: ${if_mixer_mute}mute${else}${mixer}%$endif
+${execpi 1800 cal -h | sed -e "s/\<\(`date +%-d`\)\>/\${color red}\1\${color}/"}

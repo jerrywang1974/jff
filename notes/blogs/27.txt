@@ -1,0 +1,237 @@
+Monitoring Systems
+
+
+浅尝辄止的一点笔记。在正文之前的总结：
+
+监控一个系统，无非是两种需求： 持续的监视各个组件的表现(performance)，比如
+QPS、latency、CPU、memory、disk、network 等等，得知系统运行是否顺畅，资源
+利用是否充分；另一个重要需求是在性能超出预定范围时及时通知管理员，比如
+内存不足、CPU 占用太高、磁盘剩余空间不够。
+
+    * 警报(alerting): Nagios 或者 Icinga 无疑是这方面事实上的王者。
+    * 性能图表(performance graph)：
+        * 有了 Nagios/Icinga 后可以重用它们收集的性能数据，自行搭配Nagios的各种
+          Web UI 以及 Cacti，或者使用 OpsView、isyVmon 那样的集成包；
+        * 或者再单独用其它系统收集性能数据并展现，这方面推荐 Ganglia，其实
+          Ganglia 收集的数据也可以送给 Nagios 来判断是否发出警报，这样就
+          不用 Nagios 收集数据了。
+
+对于系统管理员来说，警报比起性能图表有用的多，谁有精力整天盯着漂亮的图表看？
+这也就解释了 Nagios 在 LinuxQuestions.org Members Choice 中占据了约 65% 的
+票数：
+http://www.linuxquestions.org/questions/2011-linuxquestions-org-members-choice-awards-95/network-monitoring-application-of-the-year-919908/
+http://www.linuxquestions.org/questions/2011mca.php
+
+想尝试商业支持力度大的非 Nagios 衍生的开源产品，可以试试 Pandora FMS、Zabbix、
+NetXMS、Zenoss，注意它们各自的收费版本相比其开源版本，功能更强大。
+
+
+http://en.wikipedia.org/wiki/Comparison_of_network_monitoring_systems
+
+监控系统必不可少的三个部分：
+    * 数据采集：如 SNMP 方式，TCP/IP 主动探测服务方式，采集系统内存、负载信息；
+    * 数据存储：使用 rrdtool 保存到 rrd 数据文件里，或者保存到关系数据库里；
+    * 数据展现：常用 rrdtool 绘制时间序列图。
+
+数据采集部分如果能支持自动服务发现会方便很多，不用一项项基础服务都手动配置一遍；
+数据采集完后送给数据存储时，可以根据预定义的条件触发警报；
+在数据展现层面可以做一些数据分析，如服务状态的预测。
+
+
+* Nagios Core
+
+标配不支持服务自动发现，配置繁琐。长于数据收集和预警，预警的逻辑考虑周全。
+标配的数据展现非常弱。
+
+  Remote check:
+    * check_by_ssh
+    * NRPE
+    * nsclient
+    * check_snmp
+    * nrdp: replacement of nsca
+    * nsca
+    * check-mk
+    * nagios-statd-server
+
+  Web UI:
+    * Nagios CGI
+    * Centreon
+    * Ninja
+    * Nagvis
+    * Thruk
+    * Check-MK Multisite
+
+* Icinga
+
+Nagios 的派生版本，改进了 Web UI，使用了一些 HTML 5 特性。
+https://www.icinga.org/nagios/feature-comparison/ 并没有很重大的改进。
+
+http://robertogaloppini.net/2010/11/25/sos-open-source-reports-open-source-monitoring-icinga-vs-nagios/
+The "community" behind Icinga is the company Netways. Their business model was
+to hijack the Nagios brand until Ethan Galstad told them to stop selling
+Nagios as if it were their own.
+
+比较怀疑是一部分开发者被踢出局没分到好处。这个 netways 公司很奇怪，其
+主页上的产品列表把 Nagios/JasperReport/Puppet/MuleESB/RT/Bacula/TWiki
+全列上去(http://www.netways.de/en/de/produkte/products/)，产品图标
+换了，又没有明显链接到各自官方网站，确实颇有欺世盗名之嫌。
+
+
+* Shinken
+
+http://www.shinken-monitoring.org/what-is-in-shinken-not-in-nagios-and-vice-versa/
+
+Python 编写，基本是重新实现 Nagios，兼容 Nagios 的插件，独立执行的组件之间分工很明确。
+喜欢 Python 的兄弟不妨试试。
+
+
+* OpsView
+
+打包 Nagios + NagVis + NagiosGraph + MRTG + NMIS.
+
+
+* isyVmon (http://www.isyvmon.com/)
+
+打包 Nagios + Centreon.
+
+
+* Munin
+
+数据收集、存储和展现，后两者都依赖 rrdtool。Perl 编写，数据采集插件丰富，
+尤其插件自动激活很好用，达到服务自动发现的效果，很省事。可能是因为 Perl
+编写的缘故，以及 munin 没有一个为 web ui 提供数据的持续运行的 server，
+每次展现都要重新生成图表以及读取 rrd 文件，导致 munin CPU 消耗较大，我
+试用的结果是频繁有百分之十五到二十的 CPU 占用率。
+
+munin 从 monitor agent 收集信息存入 rrd 文件以及生成 html 页面供
+web 界面使用，这有两种方式实现，默认是用每五分钟执行的 cron 任务，
+这个任务以 munin 用户身份执行，写入 /var/cache/munin 和 /var/lib/munin
+下，另一种方式是让 munin cgi 程序被调用时实时生成，这种方式耗费资源更多，
+但实时性强。注意第二种方式是以 apache 用户身份执行，也就是 www-data
+用户，切换执行方式时需要注意上面提到的两个目录里文件权限，权限不对
+会导致 munin 无法更新 rrd 文件，各种性能图不会更新。
+
+Munin 的最大亮点是其丰富而且自动配置的插件，munin 也支持基本的报警，但
+太嫩，推荐通过 Nagios 报警:
+http://munin-monitoring.org/wiki/HowToContact
+http://waste.mandragor.org/munin_tutorial/munin.html#alerting
+
+
+* Ganglia
+
+收集信息并使用 rrdtools 存储、画图，漂亮，高效，扩展大多用 C 编写，
+以动态库形式载入 Ganglia monitor 服务进程，虽然高效，但感觉耦合太大，
+崩溃的风险比较大。
+
+不知道是不是错觉，虽然也是用 rrdtools 画图，我觉得 Ganglia 画出来
+的图表就是要漂亮的多，貌似跟用色、线条有关系。
+
+Ganglia 默认使用 UDP 多播通信，可能需要路由以及防火墙的额外配置，如果没
+这个条件的话可以用 UDP 单播。
+
+
+* Collectd
+
+收集 cpu/ram/disk/network/irq/processes 信息写入 rrd 文件，没有直接支持
+画图功能，报警特性还处于初级阶段。
+
+
+* Cacti
+
+专注于数据展现，基本是 RRDTool 的 Web 前端，用于展示各种性能图表，依赖 MySQL 数据库。
+
+
+* Zabbix
+
+依赖 SQL 数据库， 服务进程会派生很多子进程，网页响应很慢，比较重量级。
+支持性能监控和报警，文档和功能都比较丰富，有企业级派头。zabbix proxy 的
+设计很适合企业监管地理隔离的多个机房。
+
+zabbix 的 web 界面支持 HTTP 认证，但是是用 PHP 的内置 http 认证特性做的，不支持
+web 服务器的 http 认证，糙快猛的修改很容易，grep -nr ZBX_AUTH_HTTP /usr/share/zabbix，
+给 HTTP 认证加上对 REMOTE_USER 的判断就差不多了。
+
+Debian 对 Zabbix 的打包有两个坑人的地方，zabbix_agentd.conf 里 Server
+选项官方设置的是 127.0.0.1，Debian 改成 localhost 了，可能是新版
+zabbix 不再解析主机名或者域名了，导致 zabbix-agent 阻止了来自 127.0.0.1
+的连接请求，zabbix web 界面的 Graphs 部分显示不了图形，这个问题在
+zabbix_agentd.log 里显示：
+Listener error: Connection from [127.0.0.1] rejected. Allowed server is [localhost]
+
+另一个问题是官方的 zabbix_agentd.conf 里 Hostname 是 "Zabbix server",
+这个是跟 zabbix web UI 里的 hosts 设置对应的，zabbix-agent 靠这个名字
+找它的配置，但 Debian 打包的这个文件里此设置是空的，默认是主机名，跟
+zabbix Web UI 里的 "Zabbix server" 不匹配，导致 Zabbix Web UI 里
+报错说 Zabbix server unreachable，在 Zabbix agent 日志里显示：
+No active checks on server: host [gold] not found
+
+虽然 Zabbix 的 Web UI 做的挺好，但是我有点排斥这种把配置信息记录到
+数据库里的做法，不便于版本跟踪（真是难伺候啊，没有 Web UI 抱怨不友好，
+有 Web UI 又抱怨没有控制感）。
+
+
+* Zenoss
+
+使用 Python 编写，依赖 MySQL 数据库，官方有提供给 Debian 用的 Zenoss Core
+deb 包。Web UI 很强大，支持部分 Nagios 插件，号称不需要 agent（猜测是用
+ssh 远程运行探测脚本)。
+
+
+* Pandora FMS
+
+被其 Web UI 抓图震住了，很漂亮，很强大的样子。
+
+Pandora agent 和 server 采用 Perl 编写，使用 MySQL 存储数据，Web UI
+使用 PHP。
+
+
+* OpenNMS
+
+使用 Java 编写，我觉得监控的东西应该耗资源越少越好，所以一看是 Java
+的我就没兴趣了，伊还依赖关系数据库(PostgreSQL)，Web 服务器(Tomcat or Jetty)。
+
+伊还是颇占了一小块市场份额，猜测是因为强大的 Web 界面以及通过 NRPE、NSClient
+使用 Nagios 的插件。
+
+
+* NetXMS
+
+官网 http://www.netxms.org/ 有适用于 Debian 的 deb 包，控制台原来是个
+Win32 GUI 做的，现在基于 Eclipse 了，看抓图很强大的样子。
+
+NetXMS 跟很多监控系统一样，分 agent/server/console 三大块，agent 很小，
+运行在被监控机上；server 存储监控数据，NetXMS server 依赖关系数据库；
+console 用来查看监控数据。
+
+NetXMS 可以收集数据、展现并报警，有意思的是它可以使用大部分 nagios
+插件，并且拥有自己的脚本语言。
+
+我没有试用这东西，有兴趣的同学可以试试，官方文档做的不错。
+
+
+* MRTG
+
+使用 SNMP 收集信息，并使用 rrdtools 画图。
+
+
+* cricket (http://cricket.sourceforge.net)
+
+收集信息并使用 rrdtools 存储、画图，看项目状态还很嫩的样子。
+
+
+* xymon
+
+UI 太 geeky 了，sourceforge 项目主页上有不少好评，貌似很容易安装。粗略看
+起 Web UI 的输出，看起来检测都是用 shell 脚本分析的，比如分析 df、
+netstat 输出，连 web 的 CGI 脚本都是用 shell 写的。
+
+
+* ntop
+
+网络性能监控，依赖网卡混杂模式嗅探数据包，能检测到局域网中每台机器的流量。
+
+
+* argus (argus-client, argus-server)
+
+网络性能监控。
+

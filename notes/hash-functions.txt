@@ -1,0 +1,35 @@
+http://research.neustar.biz/2012/02/02/choosing-a-good-hash-function-part-3/
+http://blog.reverberate.org/2012/01/state-of-hash-functions-2012.html
+http://en.wikipedia.org/wiki/List_of_hash_functions
+
+Criteria of hash function choice:
+    collision rate
+    avalanche characteristics (one bit change in input data should lead many bits change in output)
+    hard to detect distribution of hash value   (cryptographic hash functions)
+        Notice: random seed isn't enough
+
+
+Choice:
+    For security:   SipHash     (suppose to be replacement for Murmurhash)
+    For speed:      SpookyHash on 64bit OS
+                    Murmurhash on 32bit OS
+
+==============================================
+
+Fowler-Noll-Vo hash function    (bad quality)
+    FNV-1
+    FNV-1a (better avalanche characteristics)
+
+Bob Jenkins hash function
+    one-at-a-time
+    SpookyHash          (fast, good quality)
+
+MurmurHash2 (deprecated)        (vulnerable by hash DoS attack)
+MurmurHash3                     (vulnerable by hash DoS attack)
+
+CityHash    (base on Murmurhash)    (need CRC32 instructions in modern CPU,
+                                     vulnerable by hash DoS attack,
+                                     not maintain backward compatibility, not for persistent storage)
+
+SipHash     (cryptographic hash function, safe and fast, not vulnerable by hash DoS attack)
+

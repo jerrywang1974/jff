@@ -1,0 +1,87 @@
+1. Cfengine 3 consists of a number of components:
+
+    cf-agent        Active agent
+    cf-serverd      Server agent
+    cf-execd        Scheduler
+    cf-monitord     Passive monitoring agent
+    cf-promises     Promise validator
+    cf-runagent     Remote run agent
+    cf-graph        Graph data extractor
+    cf-know         Knowledge modelling agent
+    cf-report       Self-knowledge extractor
+
+
+2. Concepts
+
+Promise
+A statement about the state we desire to maintain.
+
+Promise bundles
+    A collection of promises.
+
+Promise bodies
+    A part of a promise which details and constrains its nature.
+
+Data types
+    An interpretation of a scalar value: string, integer or real number.
+
+Variables
+    An association of the form "LVALUE represents RVALUE", where rval
+    may be a scalar value or a list of scalar values.
+
+Functions
+    Built-in parameterized rvalues.
+
+Classes
+    Cfengine's boolean classifiers that describe context.
+
+
+3. Installation
+
+# aptitude install libssl-dev libdb-dev libpcre3-dev libselinux1-dev \
+           libldap2-dev libmysqlclient15-dev libpq-dev libgraphviz-dev \
+           libacl1-dev flex bison
+ (cfengine-3.0.2b4 要求 /usr/include/pgsql，但是 Debian lenny 在 /usr/include/postgresql)
+
+$ ./configure --prefix=/usr/local --enable-DCE --enable-selinux --with-sql
+$ make
+# make install
+
+
+4. cfengine syntax
+
+COMPONENT_TYPE: common, agent, server, executor, monitor, reporter, runagent, knowledge
+PROMISE_TYPE: vars, classes, interfaces, processes, storage, packages,
+              commands, methods, files, access, reports,
+              delete_lines, field_edits, replace_patterns, insert_lines
+
+bundle COMPONENT_TYPE <name>
+{
+PROMISE_TYPE:
+
+CLASSES::
+PROMISER -> { PROMISEE1, PROMISEE2 }
+    ATTRIBUTE => <value>,
+    ATTRIBUTE => <value>;
+}
+
+=====================================
+body ATTRIBUTE_TYPE <name>
+{
+    ATTRIBUTE => <value>;
+classes::
+    ATTRIBUTE => <value>;
+}
+
+body COMPONENT_TYPE control
+{
+    ... => ...;
+    ... => ...;
+}
+
+=====================================
+"ifelapsed" parameter for all promises.
+cf-agent --verbose -K -f some.cf
+        -I (inform)
+=====================================
+report: -r option for all cfengine component.

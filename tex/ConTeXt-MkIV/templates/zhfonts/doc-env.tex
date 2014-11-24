@@ -1,0 +1,52 @@
+\startenvironment doc-env
+
+%% --------------------------- 中文字体
+\usetypescriptfile[zhfonts]
+\usetypescript[myfont]
+\setupbodyfont[myfont,rm,12pt]
+\setscript[hanzi]
+\mainlanguage[cn]
+
+%% --------------------------- 交互设置
+\setupcolors[state=start]
+\setupcolor[hex]
+\setupinteraction[state=start,
+                  title={ConTeXt MkIV 中文文档模板},
+                  subtitle={Using MkIV},
+                  author={Liu Yubao},
+                  keyword={ConTeXt MkIV LuaTeX Chinese},
+                  focus=standard,
+                  color=blue]
+\setupinteractionscreen[option=bookmark]
+\placebookmarks[chapter,section][chapter]
+
+
+%% --------------------------- 版式
+% 纸张
+\setuppapersize[A4][A4]
+
+% 布局
+\setuplayout[width=fit,height=middle,
+             leftmargin=3cm,rightmargin=3cm,
+             backspace=4cm,topspace=2cm,
+             headerdistance=.5cm,footerdistance=.5cm,
+             leftmargindistance=.5cm,rightmargindistance=.5cm,
+             header=1cm,footer=1cm]
+% 目录
+\setupcombinedlist[content][alternative=c]
+
+% 页眉页脚
+
+% 章节标题
+\setupheads[indentnext=yes]
+
+% 段落缩进、行间距、段落间距
+\setupindenting[always,2em,first]
+\setupinterlinespace[big]
+\setupwhitespace[big]
+\setupindenting[always,first,2em]
+\setupfloats[indentnext=yes]
+
+
+\stopenvironment
+

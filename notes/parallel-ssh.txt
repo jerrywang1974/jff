@@ -1,0 +1,55 @@
+Parallel SSH
+
+http://code.google.com/p/csshx/
+    Mac OS app, tiling windows for many servers
+http://code.google.com/p/parallel-ssh/
+    pssh, pscp, prsync, pnuke, and pslurp
+https://code.google.com/p/pdsh/
+    pdsh, pdcp, rpdcp, dshbak
+
+http://www.ansibleworks.com/
+    ansible all -i my-hosts -c ssh -f 20 -a uptime
+http://fabfile.org/
+    written in Python
+http://capistranorb.com/
+    written in Ruby
+    can't read host list from a file
+    v2 fail to open too many files if hosts are too many, v3 improves it
+http://rexify.org/
+    written in Perl, very like Capistrano.
+
+http://fuse.sourceforge.net/sshfs.html
+================================
+multissh(mssh) http://packages.debian.org/sid/mssh
+    GTK+ app, tiling windows for many servers  (not so bad)
+http://www.heiho.net/pconsole/
+    Xwindow app, tiling windows for many servers  (buggy)
+http://sourceforge.net/apps/mediawiki/clusterssh/index.php?title=Main_Page
+    Perl/Tk app, tiling windows for many servers     (buggy)
+http://clusterit.sourceforge.net/
+    barrier barrierd clustersed dsh dshbak dtop dvt jsd jsh pcp pdf prm rseq run rvt
+    Xwindow app, tiling windows for many servers
+
+http://pussh.sourceforge.net/
+    parallel send commands to many servers
+http://mussh.sourceforge.net/
+    MUltihost SSH Wrapper: shell script to execute multiple ssh in parallel
+https://github.com/ndenev/mpssh
+    written in C
+http://sourceforge.net/projects/mpssh
+    collapse output
+http://sourceforge.net/projects/mssh/
+http://packages.debian.org/sid/dsh
+http://www.csm.ornl.gov/torc/C3/index.html
+http://freeshell.de/~drimiks/gnu/dish.shtml
+
+xargs -P maxprocs
+GNU Parallel
+
+
+http://taktuk.gforge.inria.fr/
+http://taktuk.gforge.inria.fr/kanif
+
+http://saltstack.com/
+https://fedorahosted.org/func/
+

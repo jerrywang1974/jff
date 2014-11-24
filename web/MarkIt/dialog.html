@@ -1,0 +1,45 @@
+<div id="markit-dialog">
+<style type="text/css">
+    #markit-dialog {
+        position: fixed;
+        left: 20px;
+        top: 20px;
+        background: #F39814;
+        border: 1px solid black;
+        padding: 5px 5px;
+        z-index: 65000;
+    }
+
+    #markit-marks {
+        padding: 2px 5px;
+        border-collapse:separate;
+        border-spacing: 0px 10px;
+    }
+
+    #markit-marks tr {
+        background: white;
+        padding: 2px;
+    }
+
+</style>
+<div>
+<span id="markit-info"></span>
+<a href="##MARKIT_ROOT##" target="_blank">MarkIt v<span id="markit-version"></span><span id="markit-version2"></span></a>
+</div>
+
+<div>
+<button id="markit-btn_mark">标记</button>
+<button id="markit-btn_save">保存</button>
+<button id="markit-btn_comment">评论</button>
+</div>
+
+<div>
+<label for="markit-tags">Tags: </label><input type="text" id="markit-tags" size="30" value="tag1 tag2"/>
+</div>
+
+<div>
+<table id="markit-marks">
+</table>
+</div>
+
+</div>

@@ -1,0 +1,11 @@
+#
+# failsafe.cf
+#
+
+body common control
+{
+    bundlesequence  => { "update" };
+    inputs          => { "update.cf" };
+    version         => "1.0";
+}
+

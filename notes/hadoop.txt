@@ -1,0 +1,328 @@
+===============================================================
+Hadoop
+~~~~~~
+
+Phases:
+    map -> sort [->combine] -> partition -> shuffle -> merge -> reduce
+
+input data type:
+    Key -> WritableComparable
+    Value -> Writable
+
+        BooleanWritable, ByteWritable, DoubleWritable, FloatWritable,
+        IntWritable, LongWritable, Text, NullWritable
+
+mapper: extends MapReduceBase implements Mapper
+    IdentityMapper, InverseMapper, RegexMaper, TokenCountMapper
+
+reducer: extends MapReduceBase implements Reducer
+    IdentityReducer, LongSumReducer
+
+parititioner: implements Partitioner
+    HashPartitioner
+
+combiner: local reducer
+
+input format:   implements InputFormat
+    TextInputFormat, KeyValueTextInputFormat, SequenceFileInputFormat,
+    NLineInputFormat
+
+customized input format: extends FileInputFormat
+    wrap LineRecordReader or KeyValueLineRecordReader
+
+output format: implements OutputFormat
+    extends FileOutputFormat
+
+    TextOutputFormat, SequenceFileOutputFormat, NullOutputFormat
+
+GenericOptionsParser
+    -conf <configuration file>
+    -D <property=value>
+    -fs <local|namenode:port>
+    -jt <local|jobtracker:port>
+    -files <list of files>
+    -libjars <list of jars>
+    -archives <list of archives>
+
+See http://hadoop.apache.org/docs/current/hadoop-project-dist/hadoop-common/DeprecatedProperties.html
+    -Dmapred.reduce.tasks=0
+    -Dmapreduce.job.reduces=0       // new name
+
+    -Dmapred.reduce.tasks=1
+    -Dmapreduce.job.reduces=1       // new name
+
+    -Dmapred.map.tasks=4
+    -Dmapreduce.job.maps=4          // new name
+
+    -Dkey.value.separator.in.input.line=,
+    -Dmapreduce.input.keyvaluelinerecordreader.key.value.separator=,
+
+    -Dmapred.min.split.size=268435456       decrease number of mapper tasks
+    -Dmapred.max.split.size=xxxx            increase number of mapper tasks
+
+    -Dmapred.job.queue.name=some_queue
+        to show queue acls:  $ mapred queue -showacls
+
+    -Dio.sort.mb=
+    -Dmapred.map.child.java.opts=
+
+    -Dmapred.compress.map.output=true
+
+    -Dmapred.map.speculative.execution=true
+    -Dmapred.reduce.speculative.execution=true
+
+Hadoop Streaming
+    $ hadoop jar share/hadoop/tools/lib/hadoop-streaming-*.jar \
+        -input xxx.txt  \
+        -output out     \
+        -Dmapred.job.name "MyJob" \
+        -file some-script   \
+        -mapper "...shell command..."   \
+        -reducer "...shell command..." | aggregate
+
+    aggregate: http://hadoop.apache.org/docs/current/api/org/apache/hadoop/mapreduce/lib/aggregate/package-summary.html
+        reducer outputs "function:key\tvalue", eg.  "DoubleValueSum:33  55.66"
+
+Chain map-reduce jobs:
+    (1) sequential: multiple Job objects, one by one
+    (2) dependency based: Job.addDependingJob(Job other)
+                          JobControl.addJob();
+                          JobControl.run();
+                          JobControl.allFinished();
+                          JobControl.getFailedJobs();
+    (3) preprocess and postproprocess in single job
+        ChainMapper.addMapper(...);
+        ChainMapper.addMapper(...);
+        ...
+        ChainReducer.setReducer(...);
+        ChainReducer.addMapper(...);
+        ChainReducer.addMapper(...);
+        ...
+
+Join data:
+    (1) share/hadoop/tools/lib/hadoop-datajoin-0.23.5.jar
+        reduce-side join, repartitioned sort-merge join
+
+        Three abstract classes:
+            DataJoinMapperBase
+            DataJoinReducerBase
+            TaggedMapOutput
+
+    (2) org.apache.hadoop.mapreduce.lib.join
+        map-side join
+
+    (3) org.apache.hadoop.filecache.DistributedCache
+        replicated join,  DistributedCache-based join
+
+        hadoop jar -files ... -libjars ... -archives ...
+
+    (4) semi-join: filter on map side with a small group key list file
+    accessed by DistributedCache, or with pre-generated bloom filter,
+    then join on reduce side
+
+        bloom filter: perhaps false positive
+            minimize fale positive rate: k = ln2 * (m/n) = 0.7 * (m/n)
+            false rate = 0.6185 ^ (m / n)
+                m: count of bits
+                n: count of items
+
+        org.apache.hadoop.util.bloom.BloomFilter
+
+Kill job:
+    $ hadoop job -kill <job_id>
+
+Report:
+    streaming:    reporter:status:<message>
+                  reporter:counter:<group>,<counter>,<amount>
+
+    Java:   Reporter.incrCounter(String group, String counter, long amount)
+            Reporter.incCounter(Enum key, long amount)
+
+Skip bad records:
+    SkipBadRecords.setMapperMaxSkipRecords(...)     -Dmapred.skip.map.max.skip.records=xx
+    SkipBadRecords.setReducerMaxSkipGroups(...)     -Dmapred.skip.reduce.max.skip.groups=xx
+
+    JobConf.setMaxMapAttempts()         -Dmapred.map.max.attempts=xx
+    JobConf.setMaxReduceAttempts()      -Dmapred.reduce.max.attempts=xx
+
+    SkipBadRecords.setAttemptsToStartSkipping(..)       -Dmapred.skip.attempts.to.start.skipping=xx
+
+    SkipBadRecords.setSkipOutputPath(...)               -Dmapred.skip.out.dir=xx
+
+    skipped records are put to _log/skip/ directory, use "hadoop fs -text <filepath>" to read them
+
+    SkipBadRecords.setAutoIncrMapperProcCount(..)       -Dmapred.skip.map.auto.incr.proc.count=false
+    SkipBadRecords.setAutoIncReducerProcCount(..)       -Dmapred.skip.reduce.auto.incr.proc.count=false
+        streaming:  reporter:counter:SkippingTaskCounters,MapProcessedRecords,1
+                    reporter:counter:SkippingTaskCounters,ReduceProcessedGroups,1
+        Java:       reporter.incrCounter(SkipBadRecords.COUNTER_GROUP, SkipBadRecords.COUNTER_MAP_PROCESSED_RECORDS, 1)
+                    reporter.incrCounter(SkipBadRecords.COUNTER_GROUP, SkipBadRecords.COUNTER_REDUCE_PROCESSED_GROUPS, 1)
+
+IsolationRunner:
+    -Dkeep.failed.tasks.files=true
+
+    some-node$ cd ${mapred.local.dir}/taskTracker/jobcache/<job_id>/<attempt_id>/work
+    some-node$ export HADOOP_OPTS="-agentlib:jdwp=transport=dt_socket,server=y,address=8000"
+    some-node$ bin/hadoop org.apache.hadoop.mapred.IsolationRunner ../job.xml
+    some-node$ jdb -attach 8000
+
+Compress mapper's output:
+    -Dmapred.compress.map.output=true
+    -Dmapred.map.output.compression.codec=org.apache.hadoop.io.compress.GzipCodec
+
+Sequence file:
+    Java:
+        conf.setInputFormat(SequenceFileInputFormat.class);
+        conf.setOutputFormat(SequenceFileOutputStream.class);
+        SequenceFileOutputFormat.setOutputCompressionType(conf, CompressionType.BLOCK);
+        FileOutputFormat.setCompressOutput(conf, true);
+        FileOutputFormat.setOutputCompressorClass(conf, GzipCodec.class);
+
+    streaming:
+        -outputformat org.apache.hadoop.mapred.SequenceFileOutputFormat
+        -inputformat org.apache.hadoop.mapred.SequenceFileInputFormat
+        -Dmapred.output.compression.type=BLOCK
+        -Dmapred.output.compress=true
+        -Dmapred.output.compression.codec=org.apache.hadoop.io.compress.GzipCodec
+
+Reuse JVM for multiple tasks in same job:
+    -Dmapred.job.reuse.jvm.num.tasks=<number>
+    useful to avoid initialization overhead when use DistributedCache
+
+Speculative execution:
+    Should turn off it when tasks have side effect, such as writing external files
+
+    -Dmapred.map.tasks.speculative.execution=false
+    -Dmapred.map.tasks.speculative.execution=false
+
+Multiple outputs:
+    MultipleOutputFormat: separate different rows to different files
+    MultipleOutputs: separate different rows or columns to different files
+
+Check quota:
+    $ hadoop fs -count -q <directory>...
+
+Trash bin:
+    core-site.xml:      fs.trash.interval   => 1440  (minutes)
+
+===============================================================
+PIG
+~~~
+
+    Running:    pig -x local|mapreduce
+
+    http://wiki.apache.org/pig/PiggyBank
+
+===============================================================
+Hive
+~~~~
+
+https://cwiki.apache.org/confluence/display/Hive/HCatalog
+
+    contains three parts:
+        hive driver ---connect---> metastore service ---connect---> RDBMS
+    * embedded mode: all in single JVM for development, use Derby as RDBMS.
+    * local mode: hive driver + metastore service in same JVM, external RDBMS
+    * remote mode: separate three processes, hide RDBMS from clients
+            setting: hive-site.xml, "hive.metastore.uris": thrift://localhost:9083
+                     hive.metastore.sasl.enabled: true
+                     hive.metastore.kerberos.principal: ....
+                     hive.security.authorization.enabled: true
+                     hive.security.authorization.manager: org.apache.hcatalog.security.HdfsAuthorizationProvider
+            running: $ METASTORE_PORT=9083 $HIVE_HOME/hcatalog/sbin/hcat_server.sh start
+                     or
+                     $HIVE_HOME/bin/hive --service metastore &
+
+    building:
+
+        PIG-0.12:
+        $ ...edit ivy.xml, remove or comment out these lines:
+             <dependency org="org.apache.hadoop" name="hadoop-core" rev="${hadoop-core.version}"
+               conf="hadoop20->default"/>
+             <dependency org="org.apache.hadoop" name="hadoop-test" rev="${hadoop-test.version}"
+               conf="hadoop20->default"/>
+
+        $ ant -Dhadoopversion=23 -Dhadoop-core.version=0.23.9 -Dhadoop-test.version=0.23.9 -Dhadoop-common.version=0.23.9 -Dhadoop-hdfs.version=0.23.9 -Dhadoop-mapreduce.version=0.23.9
+
+
+        HIVE-0.12:
+        $ ...edit shims/src/0.23/java/org/apache/hadoop/mapred/WebHCatJTShim23.java
+            comment out method body of getJobProfile(), getJobStatus() because hadoop-0.23 doesn't have RunningJob.getJobStatus()
+        $ ...edit hcatalog/core/src/main/java/org/apache/hcatalog/mapreduce/Security.java
+            comment out method body of isSecurityEnabled() because HCatalog
+            blindly follows hadoop authentication, actually in development
+            mode metastore doesn't enable SASL.
+
+        $ ant clean package -Dhadoop.version=0.23.9 -Dhadoop-0.23.version=0.23.9 -Dhadoop.mr.rev=23 -Dskip.javadoc=true -Dmvn.hadoop.profile=hadoop23 -Dhadoop23.version=0.23.9
+            # artifacts are put in build/dist/
+
+    installation:
+        (1) install hadoop, set environment HADOOP_HOME or HADOOP_PREFIX, HADOOP_CONF_DIR
+        (2) download hive-0.12.0-bin.tar.gz and untar it
+        (3) $ cd hive-0.12.0-bin/conf; cp hive-default.xml.template hive-site.xml;
+            ...update "hive.metastore.warehouse.dir" if necessary...
+            ...edit line 2000, fix </auth> to </value>
+        (4) $ bin/schematool -dbType derby -initSchema
+            # this initializes database in ./metastore_db
+        (5) $ mv hive-0.12.0-bin/lib/slf4j-log4j12-1.6.1.jar hive-0.12.0-bin/lib/slf4j-log4j12-1.6.1.jar=
+            # because hadoop also ships this library
+        (6) optionally, set environment variables HIVE_HOME, HIVE_CONF_DIR
+        (7) $ bin/hive
+
+    use HCatalog with PIG:  https://cwiki.apache.org/confluence/display/Hive/HCatalog+LoadStore
+        export HADOOP_HOME=...
+        export HADOOP_CONF_DIR=...  # if separate conf/ directory
+        export HIVE_HOME=/path/to/hive-0.12.0-bin
+        export HCAT_HOME=/path/to/hive-0.12.0-bin/hcatalog
+
+        ...edit hive-site.xml: "hive.metastore.uris": thrift://localhost:9083
+
+        $ pig -useHCatalog -Dhive.metastore.uris=thrift://<hostname>:<port> xxx.pig
+            # seems -Dhive.metastore.urls is unnecessary, PIG can find it in $HIVE_HOME/conf
+
+    ~/.hiverc:
+        set mapred.output.compress=true;
+        set mapred.min.split.size=268435456;
+        set mapred.job.queue.name=some-queue;
+        set hive.exec.reducers.bytes.per.reducer=536870912;
+        set hive.exec.reducers.max=1000;
+
+===============================================================
+HCatalog
+Oozie
+japl    http://code.google.com/p/jaql/
+Hive
+HBase
+Chukwa      http://incubator.apache.org/chukwa
+Cascading
+Cascalog    https://github.com/nathanmarz/cascalog
+CloudBase   http://cloudbase.sourceforget.net
+Hama        http://hama.apache.org
+    a pure BSP (Bulk Synchronous Parallel) computing framework on top of
+    HDFS (Hadoop Distributed File System) for massive scientific
+    computations such as matrix, graph and network algorithms.
+Mahout
+Sqoop       http://sqoop.apache.org
+    transfer bulk data between HDFS and structured datastores such as
+    relational databases
+OpenNLP     http://opennlp.apache.org
+Nutch
+Lucene
+Solr
+Katta       http://katta.sourceforget.net
+Tika        http://tika.apache.org
+    meta data and content extraction
+Flume       http://flume.apache.org
+    log collecting
+Spark       http://spark-project.org/
+Drill       http://wiki.apache.org/incubator/DrillProposal
+Impala      http://github.com/cloudera/impala
+BlinkDB     http://blinkdb.org/
+http://search-hadoop.com
+
+Hadoop HDFS proxy: readonly
+Hoop/HttpFS: standalone service, Hoop is integrated into Hadoop 0.23.1 as HttpFS
+WebHDFS: part of NameNode and DataNode, new in Hadoop 1.0, provide data locality;
+         client must be able to directly access all data nodes.
+
+

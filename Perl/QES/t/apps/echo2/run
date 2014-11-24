@@ -1,0 +1,32 @@
+#!/usr/bin/env perl
+use strict;
+use warnings;
+use FindBin;
+use lib "$FindBin::Bin/../../../lib";
+
+use Data::Dumper;
+use Event::Plumber;
+use LWP::UserAgent;
+use JSON;
+
+die "Must be called by Plumber!" unless exists $ENV{PLUMBER_PORT} &&
+    exists $ENV{PLUMBER_COOKIE};
+
+my $plumber = Event::Plumber->new();
+my @response = $plumber->establish();
+
+die "Bad response: $response[1]" if $response[0] ne "ok";
+
+shift @response;
+print STDERR "pid $$ got args: , ", Dumper(\@response);
+
+@response = $plumber->establish2(int(rand(65536)), "secret-$$");
+
+die "Bad response: $response[1]" if $response[0] ne "ok";
+
+shift @response;
+print STDERR "pid $$ got response: @response\n";
+
+print STDERR "pid $$ go to sleep\n";
+sleep 9999999
+

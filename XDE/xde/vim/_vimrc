@@ -1,0 +1,352 @@
+"===================================BEGIN========================================
+
+"------------------------------------from default .vimrc of GVIM 6.4 for Win32 --
+set nocompatible
+source $VIMRUNTIME/vimrc_example.vim
+if !has('unix')
+    source $VIMRUNTIME/mswin.vim
+    behave mswin
+
+    set diffexpr=MyDiff()
+    function MyDiff()
+      let opt = '-a --binary '
+      if &diffopt =~ 'icase' | let opt = opt . '-i ' | endif
+      if &diffopt =~ 'iwhite' | let opt = opt . '-b ' | endif
+      let arg1 = v:fname_in
+      if arg1 =~ ' ' | let arg1 = '"' . arg1 . '"' | endif
+      let arg2 = v:fname_new
+      if arg2 =~ ' ' | let arg2 = '"' . arg2 . '"' | endif
+      let arg3 = v:fname_out
+      if arg3 =~ ' ' | let arg3 = '"' . arg3 . '"' | endif
+      let eq = ''
+      if $VIMRUNTIME =~ ' '
+        if &sh =~ '\<cmd'
+          let cmd = '""' . $VIMRUNTIME . '\diff"'
+          let eq = '"'
+        else
+          let cmd = substitute($VIMRUNTIME, ' ', '" ', '') . '\diff"'
+        endif
+      else
+        let cmd = $VIMRUNTIME . '\diff'
+      endif
+      silent execute '!' . cmd . ' ' . opt . arg1 . ' ' . arg2 . ' > ' . arg3 . eq
+    endfunction
+endif
+
+"-------------------------------------key mappings-------------------------------
+"nnoremap j gj
+"nnoremap k gk
+
+"   :help :caddexpr
+"   :help :laddexpr
+"   see Tip #1063 below.
+nnoremap <F2> :g//laddexpr expand("%") . ":" . line(".") . ":" . getline(".")<CR>:lopen<CR>
+
+nnoremap <F3>  :redir @a<CR>:g//<CR>:redir END<CR>:new<CR>:put! a<CR><CR>
+"   Tip #1063 Send results of a g// to a new window
+"   http://www.vim.org/tips/tip.php?tip_id=1063
+"
+"   How to Use:-
+"   perfect your g/regexp/
+"   The when you are satisfied hit <F3>
+"
+"   Explanation:-
+"   :redir @a            redirect output to register a
+"   :g//                    repeat last global command
+"   :redir END          end redirection
+"   :new                  create new window
+"   :put! a                paste register a into new window
+"
+"   Idea  by Peppe (map by me zzapper)
+"
+
+" when `paste' is set, filetype indent and autoindent don't work
+nnoremap <F4> :set paste<CR>"*p:set nopaste<CR>
+nnoremap <F5> :set paste<CR>"+p:set nopaste<CR>
+inoremap <F4> <ESC>:set paste<CR>"*p:set nopaste<CR>i
+inoremap <F5> <ESC>:set paste<CR>"+p:set nopaste<CR>i
+
+" copy to CLIPBOARD selection
+vnoremap <F6> "+y
+
+" Let F7 to show buf explorer(bufexplorer plugin)
+map <F7> <ESC>\be
+imap <F7> <ESC>\be
+
+" Define g:qb_hotkey before source qbuf.vim
+"   For Putty, <S-F7> may don't work, use
+"   let g:qb_hotkey="^vS-F7" instead. ^vS-F7
+"   means: press Ctrl-v, then press Shift and F7.
+let g:qb_hotkey="<S-F7>"
+
+" mru.vim
+nnoremap <silent> <F8> :MRU<CR>
+
+" Taglist plugin
+nnoremap <silent> <F9> :TlistToggle<CR>
+
+" autopreview.vim
+nnoremap <S-F9> :AutoPreviewToggle<CR>
+inoremap <S-F9> <ESC>:AutoPreviewToggle<CR>i
+
+" inspired by flw@newsmth
+nmap <Left>  <C-W><:unlet! t:flwwinlayout<CR>
+nmap <Right> <C-W>>:unlet! t:flwwinlayout<CR>
+nmap <Up>    <C-W>+:unlet! t:flwwinlayout<CR>
+nmap <Down>  <C-W>-:unlet! t:flwwinlayout<CR>
+function FlwSaveOrRestoreLayout()
+    if exists("t:flwwinlayout")
+        execute t:flwwinlayout
+        unlet t:flwwinlayout
+    else
+        let t:flwwinlayout=winrestcmd()
+        execute "normal \<C-W>_\<C-W>|"
+    endif
+endfunction
+nmap <silent> <F12> :call FlwSaveOrRestoreLayout()<CR>
+imap <silent> <F12> <ESC>:call FlwSaveOrRestoreLayout()<CR>a
+
+nnoremap <TAB>      gt
+nnoremap <S-TAB>    gT
+nnoremap <C-N>      <C-W>w
+nnoremap <C-P>      <C-W>W
+
+if version >= 700
+    " open file in new tabpage
+    nnoremap gf <C-W>gf:tabmove<CR>
+endif
+
+" for cscope, see :h cscope
+nmap <C-k>s :cs find s <C-R>=expand("<cword>")<CR><CR>
+nmap <C-k>g :cs find g <C-R>=expand("<cword>")<CR><CR>
+nmap <C-k>c :cs find c <C-R>=expand("<cword>")<CR><CR>
+nmap <C-k>t :cs find t <C-R>=expand("<cword>")<CR><CR>
+nmap <C-k>e :cs find e <C-R>=expand("<cword>")<CR><CR>
+nmap <C-k>f :cs find f <C-R>=expand("<cfile>")<CR><CR>
+nmap <C-k>i :cs find i ^<C-R>=expand("<cfile>")<CR>$<CR>
+nmap <C-k>d :cs find d <C-R>=expand("<cword>")<CR><CR>
+
+"--------------------------------------for plugins-------------------------------
+" for Vundle: https://github.com/gmarik/Vundle.vim
+set nocompatible
+filetype off
+set rtp+=~/.vim/bundle/Vundle.vim
+call vundle#begin()
+Plugin 'gmarik/Vundle.vim'
+Plugin 'Valloric/YouCompleteMe'
+call vundle#end()
+filetype plugin indent on
+
+" for YouCompleteMe
+let g:ycm_extra_conf_globlist = ['~/.ycm_extra_conf.py']
+nnoremap <leader>jd :YcmCompleter GoToDefinitionElseDeclaration<CR>
+
+" incompatibility between vim 6.x and 7.0
+" :help incompatible-7
+" :help ft-tex-plugin
+let g:tex_flavor = "latex"        " plaintex, context, latex
+
+
+" for taglist plugin
+let Tlist_Show_Menu = 1
+let Tlist_Ctags_Cmd = 'ctags --fields=+ainS --extra=+f --c-kinds=+px --c++-kinds=+px'
+let Tlist_File_Fold_Auto_Close = 1
+let Tlist_Show_One_File = 1
+let Tlist_WinWidth = 40
+let tlist_html_settings = 'html;a:anchor;f:js function;m:js method;p:js property;c:js class;v:global variable'
+let tlist_javascript_settings = 'javascript;f:function;m:method;p:property;c:class;v:global'
+
+
+" for mru.vim
+let MRU_Max_Entries = 100
+
+" for autopreview.vim, below is default setting
+"let g:AutoPreview_enabled = 0
+"let g:AutoPreview_allowed_filetypes = ["c", "cpp", "java"]
+
+" for showmarks.vim
+let g:showmarks_include="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+
+" for GetLatestVimScripts
+let g:GetLatestVimScripts_allowautoinstall=1
+
+" for syntax/vala.vim
+"let vala_ignore_valadoc = 1
+let vala_comment_strings = 1
+let vala_space_errors = 1
+"let vala_no_trail_space_error = 1
+let vala_no_tab_space_error = 1
+"let vala_minlines = 120
+
+"--------------------------------------misc settings-----------------------------
+" recursively search tag file upwards, see :help file-searching
+set tags=./tags;,tags;
+
+" recursively search file downwards for gf command
+"set path+=/home/dieken/src/vim7/**
+
+" I often do gf on XXXXX=/some/file, so let vim not think '=' is valid char in file name.
+set isfname-==
+
+set nu
+
+set ignorecase smartcase
+
+set sidescrolloff=10
+"set scrolloff=5
+" to keep the cursor centered in the window
+" set scrolloff=999
+" set sidescrolloff=999
+
+if has("gui_running")
+    colorscheme peachpuff
+else
+"   colorscheme murphy
+"   hi link String Comment
+    colorscheme torte   "elflord murphy
+    hi MatchParen ctermbg=Blue
+endif
+
+if version >= 700
+    set cursorline
+    if has("gui_running")
+        hi CursorLine guibg=LightGreen
+    endif
+endif
+
+set showmatch
+" set time to 0.5 second
+"set matchtime=5
+
+set writebackup
+set nobackup
+" useful for some VCSes that use hardlink in working copy
+set backupcopy+=breakhardlink
+
+set wildmode=list:full
+set wildmenu
+
+set formatoptions+=tcroqvlmMB
+set autoindent smartindent
+
+set textwidth=72
+set colorcolumn=+1
+set expandtab
+set tabstop=4
+set shiftwidth=4
+set smarttab
+"set cinoptions=t0,:0,(0,g0,j1,J1
+set cinoptions=t0,:0,g0,j1,J1
+set linespace=2
+
+"set guifont=Bitstream\ Vera\ Sans\ Mono\ 10,Monospace\ 10,Courier\ New\ 11
+
+" always show status line
+set laststatus=2
+set statusline=%F%*\ %y[%{&ff}][%{&fenc}]\ %2*%r%m%*\ %l,%c\ %=%l/%L\ (%p%%)%*\ %{strftime('%Y-%m-%d-%H:%M')}
+
+set virtualedit=block
+
+set fileformats+=mac
+set fencs=ucs-bom,utf-8,gbk,latin1
+"set encoding=utf-8
+set ambiwidth=double
+
+" see http://guoyoooping.blog.163.com/blog/static/135705183201003172555951/
+"     http://guoyoooping.blog.163.com/blog/static/13570518320101291442176/
+"
+" required: ghostscript, cmap-adobe-gb1
+if has("unix") && version >= 700
+    set printencoding=utf-8
+    set printmbcharset=ISO10646
+    " see /var/lib/defoma/gs.d/dirs/fonts/cidfmap
+    set printmbfont=r:UMingCN,i:UKaiCN,c:yes
+    "set printmbfont=r:UMingCN,b:ZenHei,i:UKaiCN,c:yes
+
+    set printexpr=MyPrintFile(v:fname_in,\ v:cmdarg)
+    function MyPrintFile(fname, args)
+        return system('ps2pdf ' . a:fname . ' - | lpr' .
+            \   (&printdevice == '' ? '' : ' -P' . &printdevice) . ' ' . a:args) .
+            \   delete(a:fname) + v:shell_error
+    endfunc
+endif
+
+set nowrap
+set nowrapscan
+
+set more
+set mouse=nv
+
+" no beep or flash
+set vb t_vb=
+
+set display=lastline
+
+set listchars+=extends:>,precedes:<
+
+set updatetime=2000
+
+" for linux kernel source
+if getcwd() =~ 'linux-2.6'
+    set noet tabstop=8 shiftwidth=8
+endif
+if has("cscope") && version >= 700
+    if executable('mlcscope')
+        set cscopeprg=mlcscope\ -d\ -k\ -q
+    else
+        set cscopeprg=cscope\ -d\ -k\ -q
+    endif
+    set cscopequickfix=s-,c-,d-,i-,t-,e-
+    set nocsverb
+    " add any database in current directory
+    let cscope_db=findfile("cscope.out", "./;,.;")
+    if filereadable(cscope_db)
+        execute "cs add" cscope_db cscope_db[0:-12]
+    " else add database pointed to by environment
+    elseif $CSCOPE_DB != ""
+        cs add $CSCOPE_DB
+    endif
+    set csverb
+endif
+
+"------------------------------ commands "---------------------------------------
+command -range=% -nargs=? Nl :<line1>,<line2>s/^/\=printf(
+    \   strlen("<args>") ? "<args>" :
+    \                      "%" . strlen(<line2> - <line1> + 1) . "d ",
+    \   line(".") - <line1> + 1)/ | nohl
+
+"--------------------------------------for autocmd and filetype------------------
+syntax on
+filetype plugin on
+filetype indent on
+
+" press v in quickfix window to preview
+au FileType qf :nnoremap <buffer> v <Enter>zz:wincmd p<Enter>
+
+" for gf command to open java source file at import clause
+au FileType java :set suffixesadd+=.java
+
+" Keep indentation consistent with erlang-mode in Emacs
+au FileType erlang :set noet tabstop=8 softtabstop=4 shiftwidth=4
+
+" backup last search pattern for each window
+au WinEnter * :if exists("w:blsp") && w:blsp != '' | let @/=w:blsp | endif
+au WinLeave * :let w:blsp=@/
+
+" make tab characters and trailing whitespace obvious
+au FileType * :if &ft != 'help' | 2match Error /\t\|\s\+$/ | endif
+
+au BufRead,BufNewFile *.json set ft=javascript
+
+au BufRead *.vala set efm=%f:%l.%c-%[%^:]%#:\ %t%[%^:]%#:\ %m
+au BufRead *.vapi set efm=%f:%l.%c-%[%^:]%#:\ %t%[%^:]%#:\ %m
+au BufRead,BufNewFile *.vala            setfiletype vala
+au BufRead,BufNewFile *.vapi            setfiletype vala
+
+" au BufNewFile,BufRead *.c,*.cpp
+"     \   :setlocal equalprg=d:\program\astyle\bin\AStyle.exe\ --style=kr\ -l
+
+" au VimEnter * :Vexplore | :vertical resize 20 | :wincmd l
+
+"===================================END==========================================
+

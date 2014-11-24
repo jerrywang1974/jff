@@ -1,0 +1,67 @@
+Good options:
+
+http://echarts.baidu.com/
+    BSD license.
+
+http://www.highcharts.com
+    free for non-commercial, highstock is better than highcharts on time series data
+    can export image
+
+http://www.amcharts.com
+    free with watermark, excellent interactive UI for time series data
+    can export image
+
+
+
+https://developers.google.com/chart/
+    support zooming but not specially designed for time series data.
+
+http://code.shutterstock.com/rickshaw/
+    licensed under MIT, based on d3.js, supports zooming for time series data.
+    Designed for streaming data points.
+
+http://www.jqplot.com
+    licensed under MIT or GPLv2, interactive UI for time series data is bad, only zooming on rectangular area
+
+http://www.flotcharts.org/
+    MIT-like licence. Supports zooming and panning but no out-of-box UI.
+    Designed for streaming data points, used by Graphite monitoring system.
+
+http://dygraphs.com/
+    licensed under MIT, only for time series data.
+    Chart isn't so pretty, supports zooming & panning but UI isn't so friendly.
+    Designed for streaming data points.
+
+http://square.github.io/cubism/
+    Apache license. Special chart for time series data,  use much less vertical space.
+    Designed for streaming data points.
+
+
+
+http://syntagmatic.github.io/parallel-coordinates/
+http://dc-js.github.io/dc.js/
+http://square.github.com/crossfilter/
+    Highly efficient exploration on large multi-dimensional dataset.
+
+
+
+http://d3js.org/
+    Low level drawing
+
+http://nvd3.org
+    Based on d3js, supports line/scatter/bubble/area/bar/pie/bullet chart.
+
+http://raphaeljs.com/
+    Low level drawing
+
+http://g.raphaeljs.com/
+    Based on RaphaelJs,  supports pie/bar/line/dot chart.
+
+
+============================================
+Bad options:
+
+
+http://www.jscharts.com
+    free with watermark, no interactive UI for time series data
+

@@ -1,0 +1,16 @@
+http://arborjs.org/
+	a graph visualization library using web workers and jQuery
+
+http://code.google.com/p/canviz/
+	JavaScript library for drawing Graphviz graphs to a web browser canvas
+
+http://flare.prefuse.org/
+	Beautiful and powerful Flash based graph drawing
+
+http://thejit.org/demos.html
+http://philogb.github.io/jit/demos.html
+	Jit, an interactive, multi-purpose graph drawing and layout framework
+
+http://mbostock.github.io/d3/
+http://d3js.org/
+

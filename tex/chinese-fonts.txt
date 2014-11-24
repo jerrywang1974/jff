@@ -1,0 +1,35 @@
+Arphic Song/Kai:
+    http://www.arphic.com/tw/service/support/support_mac_cont.asp?id=8&toppage=1
+    文鼎细上海宋（繁体 Big5码）、文鼎中楷（繁体 Big5码）、文鼎简报宋（简体 GB码）、文鼎简中楷（简体 GB码）
+    开源社区补字版本：UMing, UKai
+
+    http://www.arphic.com/cn/news/epaper/agent/201004/news-1.html
+    文鼎ＰＬ明体U20-L(繁体Unicode 2.0码)、文鼎ＰＬ报宋2GBK(简体GBK码)
+
+Droid Hei
+WenQuanYi Song/Hei，黑体是从 Droid Hei (旧版本??) 补字而来
+
+Fandol Song/Fangsong/Kai/Hei    (GB2312)
+    http://mirror.bjtu.edu.cn/CTAN/fonts/fandol/
+
+方正免费字体：
+    http://www.foundertype.com/index/release_info.html
+    针对个人非商业使用，方正电子公司推出《方正字酷》家庭版，其中23款字体免费，
+    其他字体每款2-3元，具体产品介绍见 http://diy.foundertype.com/fontmanager/clientdownload.aspx
+
+    免费字体：包括四种字体，即方正黑体、方正书宋、方正仿宋、方正楷体，针对“商业发布”用途免费。
+
+汉仪 17 款免费字体：
+    http://www.ifont.cn/fontsearch.php?encode=YTozOntzOjg6ImtleXdvcmRzIjtzOjQ6IsPit9EiO3M6MzoiYWN0IjtzOjQ6InRhZ3MiO3M6MTg6InNlYXJjaF9lbmNvZGVfdGltZSI7aToxNDAyMzI0OTkyO30=
+    当前位置：首页 > 精彩字体 > 免费
+
+-------------
+商业字体：
+
+Adobe 字体：涵盖 GB18030 字符集
+    Adobe Song/Hei: 可以从 Adobe Reader 获得
+    Adobe Fangsong/Kai: 可以从 Adobe Creative Suite 获得
+
+华文字体：常州华文印刷新技术有限公司制作，Mac OS 自带
+冬青黑：Hiragino Sans GB，Mac OS 自带，日本设计公司字游工坊设计，再与汉仪合作产生
+

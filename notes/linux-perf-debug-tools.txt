@@ -1,0 +1,22 @@
+gdb
+gstack
+perf
+oprofile
+dtrace
+strace
+ltrace
+
+sysstat
+    sar, iostat, mpstat, pidstat, sadf, nfsiostat, cifsiostat
+
+atop
+htop
+ntop
+
+perf-tools
+    https://github.com/brendangregg/perf-tools
+    https://packages.debian.org/jessie/perf-tools-unstable
+
+ftrace perf_events
+eBPF
+

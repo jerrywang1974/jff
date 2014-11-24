@@ -1,0 +1,45 @@
+http://en.wikipedia.org/wiki/3D_modeling
+
+modeling methods:
+    Polygonal modeling
+        用多边形建模，应用广泛，渲染快速，但对于曲面的表现
+        要用大量多边形，不完全精确
+    NURBS modeling
+        能精确表现曲面，但不太容易使用
+    Splines & Patches modeling
+        在弹性和易用性上介于 polygon 和 nurbs 之间
+    Primitives modeling
+        用球、圆柱体、圆锥体、立方体等基本几何体建模，
+        快速、容易、精确，但不适合光滑多变的有机体
+    Sculpt modeling
+        相当新的建模方法
+
+    Mesh
+    Subdivision Surface
+    Smooths 3gons
+    Smooths ngons
+    Bezier curves
+    metaball
+    digital sculpting
+
+雕刻建模： ZBrush, Mudbox
+silo, modo
+rhino, google sketchup, blender
+
+
+http://en.wikipedia.org/wiki/List_of_game_engines
+http://en.wikipedia.org/wiki/Physics_engine
+
+http://www.blender.org/education-help/tutorials/game-engine/
+
+http://www.panda3d.org/
+http://www.ogre3d.org/
+http://sourceforge.net/projects/nebuladevice/
+http://irrlicht.sourceforge.net/
+http://www.crystalspace3d.org/main/Main_Page
+http://www.delta3d.org/
+http://www.openscenegraph.org/projects/osg
+http://www.cafu.de/
+http://www.yake.org/
+http://www.visualizationlibrary.org/documentation/index.html
+

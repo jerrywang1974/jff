@@ -1,0 +1,46 @@
+Making reliable distributed systems in the presence of software errors,
+    by Joe Armstrong
+中文版：《面对软件错误构建可靠的分布式系统》 段先德 译，邓辉 审
+
+======================================================================
+emacs configuration:
+    (setenv "ESHELL" "/bin/bash")
+    (setq load-path (cons "/usr/local/lib/erlang/lib/tools-2.6.10/emacs" load-path))
+    (setq erlang-root-dir "/usr/local/lib/erlang")
+    (setq exec-path (cons "/usr/local/bin" exec-path))
+    (require 'erlang-start)
+    (require 'erlang-flymake)
+======================================================================
+
+http://learnyousomeerlang.com/content
+
+1. read manual: $ erl -man lists
+
+2. erlang shell
+   * get help:  help().
+   * show variable bindings: b().
+   * forget variables: f().  f(X).
+   * quit erlang shell: 
+      * init.stop().   (别名是 q())
+      * halt().       (强制退出)
+      * Ctrl + g to access menus.
+      * Ctrl + c to access menu on Unix like OS.
+
+3. ordering of data types:
+number < atom < reference < fun < port < pid < tuple < list < bit string
+
+
+2. toolbar:start().
+3. rb:start().
+   rb:help().
+4. appmon:start().
+5. debugger:start().
+7. webtool:start(). 分析 erl_crash.dump 文件。
+8. register/2, unregister/1, whereis/1, registered/0
+9. spawn_link/1, process_flag/2, link/1, unlink/1, exit/1, exit/2, monitor/2
+
+======================================================================
+* core module
+ - erlang
+ - init
+

@@ -1,0 +1,35 @@
+[core]
+    #fileMode = false
+    #symlinks = false
+    logallrefupdates = true
+
+[user]
+    email = yubao.liu@gmail.com
+    name = Liu Yubao
+
+[rerere]
+    enabled = true
+
+[color]
+    ui = auto
+
+[diff]
+    renames = copy
+
+[status]
+    relativePath = true
+
+[alias]
+    b  = branch
+    #l  = log --graph --pretty=format:'%Cred%h%Creset %C(yellow)%d%Creset %s %Cgreen(%cr)%Creset' --abbrev-commit
+    l  = log --graph --pretty=format:'%Cred%h%Creset %C(yellow)%d%Creset %s %Cgreen(%cd)%Creset %Cblue[%aN]%Creset' --abbrev-commit --date=short
+    st = status
+    ci = commit
+    co = checkout
+    desc = describe
+    wtf = whatchanged
+
+[i18n]
+    commitEncoding = utf-8
+    #logOutputEncoding = utf-8
+

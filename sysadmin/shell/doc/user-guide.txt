@@ -1,0 +1,286 @@
+MyServer User Guide
+===================
+
+    For administrator, please read README first, especially the
+    "Passwords" section.
+
+
+++ DNS ++
+
+Set DNS server to IP of the server, or adjust /etc/hosts or
+C:\Windows\System32\Drivers\etc\hosts according to ./etc/hosts.
+
+
+++ Kerberos ++
+
+Use KFW-3.2.2(Kerberos for Windows) on Windows and krb5-user on Linux,
+realm is "CORP.EXAMPLE.COM", domain is "corp.example.com", Kerberos
+server is "kerberos.corp.example.com", you MUST adjust /etc/krb5.conf
+or krb5.ini if you don't use the DNS server above.
+
+    KFW Options menu -> Network Identity Manager Configuration
+        Kerberos v5:    Default Realm: CORP.EXAMPLE.COM
+            Realms:     Create new realm "CORP.EXAMPLE.COM";
+                        Server is "kerberos.corp.example.com", admin "yes", master "yes";
+                        Domain is "corp.example.com".
+
+In the main window, after you obtain Kerberos ticket, remeber to right
+click on your credential and select "Set as default".
+
+Notice for KFW-3.2.2 on 64bit Windows 7:
+    (1) KFW on 64bit Win7 may not be able to write to C:\Windows\krb5.ini,
+    you need to grant write perm to C:\Windows\krb5.ini, then after you
+    save preference, KFW will delete it and write to
+    C:\Users\YOUR-ACCOUNT\AppData\Local\VirtualStore\Windows\krb5.ini,
+    you MUST copy it to C:\Windows\krb5.ini because other kerberozied
+    applications don't know the VirtualStore\Windows\ directory.
+
+    (2) Use kfw-3-2-2.msi on http://web.mit.edu/kerberos/dist/#kfw-3.2,
+    this installer adds MIT\Kerberos\bin to PATH environment and writes
+    Windows registry, the former is important for Firefox/ThunderBird/TortoiseSVN,
+    the latter is important for Putty/TortoiseSVN, they use PATH or registry to
+    find gssapi32.dll or gssapi64.dll.
+
+    (3) 64bit TortoiseSVN requires gssapi64.dll, you need to extract
+    *64.dll files from kfw-3-2-3-amd64.zip on
+    http://web.mit.edu/kerberos/dist/testing.html#kfw-3.2.3 and copy
+    them to C:\Program Files\TortoiseSVN\bin, for 64bit Subversion command
+    line client, you need to set registry entry
+    HKLM\SOFTWARE\Carnegie Mellon\Project Cyrus\SASL Library:
+        SearchPath: C:\Program Files\TortoiseSVN\bin
+
+    Reference: http://svn.apache.org/repos/asf/subversion/trunk/notes/sasl.txt
+
+
+Configure Firefox and Thunderbird to enable HTTP Negotiate authentication.
+
+   Thunderbird: Edit -> Preferences -> Advanced -> Config Editor
+            or  Tools -> Options -> Advanced -> Config Editor
+   Firefox: input "about:config" in URL box and press Enter key
+
+    network.negotiate-auth.trusted-uris: corp.example.com
+    network.negotiate-auth.using-native-gsslib: true
+    network.auth.use-sspi: false        (Only on Windows)
+
+All services below use HTTP Negotiate/GSSAPI authentication if not explictly state.
+If you get unauthorized error message in your web browser, make sure you
+have obtained Kerberos ticket and setup Negotiate authentication in Firefox.
+
+
+++ SSH ++
+
+Putty on Windows support GSSAPI authentication, KFW is required.
+Only pubkey and GSSAPI authentication is allowed for SSH service.
+
+SSH on MacOS X disables GSSAPIAuthentication by default, you need
+add "GSSAPIAuthentication yes" to ~/.ssh/config or add "-o GSSAPIAuthentication=yes"
+to ssh or scp at command line.
+
+Host is "gold.corp.example.com".
+
+
+++ IMAP ++
+
+        Account: dieken@corp.example.com
+
+        Server Name: imap.corp.example.com
+        Port: 143
+        User Name: dieken
+        Connection security: STARTTLS
+        Authentication method: Kerberos / GSSAPI
+
+
+    Sieve addon (xul-ext-sieve: http://sieve.mozdev.org/index.html)
+        $ kinit dieken
+        $ cat proxy.conf
+        server      imap.corp.example.com
+        port        4190
+        listen      41900
+        user        dieken
+        password    random-secret-shared-only-by-proxy-and-thunderbird
+        $ chmod 600 proxy.conf
+        $ ./gssapi-sieve-proxy.pl --conf proxy.conf --debug &
+
+    Tools -> Sieve Filter Settings...
+        select option "Yes, manage Sieve scripts for this account";
+        click button "Change Settings";
+
+        "Server" tab page:
+          Server Name:
+            Other Server: localhost
+          Server Port:
+            Other: 41900
+
+        "Security" tab page:
+          Connection Security:
+            NO TLS
+          Authentication:
+            Username and Password: dieken
+
+
+++ SMTP ++
+
+        Account: dieken@corp.example.com
+
+        Server Name: smtp.corp.example.com
+        Port: 25
+        User Name: dieken
+        Connection security: STARTTLS
+        Authentication method: Kerberos / GSSAPI
+
+
+++ Mailing list ++
+
+http://list.corp.example.com/
+
+It doesn't support GSSAPI authentication yet.
+
+
+++ Web mail ++
+
+http://mail.corp.example.com/
+
+
+++ Calendar ++
+
+Use ThunderBird + Lightning extension.
+
+  Darwin CalendarServer:
+    http://calendar.corp.example.com/calendars/users/dieken/calendar/
+
+  DAViCal:
+    http://cal.corp.example.com/caldav.php/dieken/calendar/
+
+The DAViCal service doesn't support automatic account creation, its
+web administration page: http://cal.corp.example.com/ .
+
+
+++ Bug Tracking System ++
+
+Mantis:     http://bug.corp.example.com/
+Bugzilla:   http://bugzilla.corp.example.com/
+
+
+++ Wiki ++
+
+Foswiki:    http://wiki.corp.example.com
+MoinMoin:   http://moin.corp.example.com
+
+
+++ XMPP Instant Messaging ++
+
+For multiple user chat log, access http://xmpp.corp.example.com/ .
+
+Create XMPP account in Pidgin:
+    "Basic" tab page:
+        Protocol:   XMPP
+        Username:   dieken
+        Domain:     corp.example.com
+    "Advanced" tab page:
+        Connection security:    Require encryption
+        Connect port:           5222
+        Connect server:         xmpp.corp.example.com
+
+
+++ Samba ++
+
+Administrator has to use "pdbedit" to add users explictly. No GSSAPI
+authentication.  $HOME/samba directory is shared.
+
+
+++ Subversion ++
+
+Source Code Browser:    http://svn.corp.example.com/
+Checkout:               svn://svn.corp.example.com/REPOS_NAME/
+
+It uses GSSAPI SASL mechanism to authenticate. TortoiseSVN + KFW is OK.
+
+
+++ GIT ++
+
+The service is built with Gitolite, it supports both ssh and http protocol.
+
+HTTP protocol:
+    $ kinit dieken
+    $ curl --negotiate -u : http://git.corp.example.com/git/info
+    $ git clone http://dieken@git.corp.example.com/git/testing
+
+SSH protocol:
+   Copy the ssh key files "dieken" and "dieken.pub" to ~/.ssh/;
+   Setup ~/.ssh/config:
+        Host git.corp.example.com
+            User git
+            IdentityFile ~/.ssh/dieken
+    $ ssh git.corp.example.com info
+    $ git clone git.corp.example.com:testing
+
+See "Usage" section at http://sitaramc.github.com/gitolite/http.html .
+
+
+++ Trac ++
+
+http://trac.corp.example.com/
+
+
+++ Redmine ++
+
+http://redmine.corp.example.com/
+
+
+++ Drupal ++
+
+http://www.corp.example.com/
+
+
+++ Nagios3 ++
+
+http://monitor.corp.example.com/nagios3/
+http://monitor.corp.example.com/pnp4nagios/
+
+http://monitor.corp.example.com/munin-cgi/  (on demand generated html pages)
+http://monitor.corp.example.com/munin/  (batch generated html pages)
+
+http://monitor.corp.example.com/ganglia/
+
+http://monitor.corp.example.com/zabbix/ (Default admin account: Admin/zabbix)
+
+
+++ ReviewBoard ++
+
+http://codereview.corp.example.com/
+
+
+++ Gerrit ++
+
+http://gerrit.corp.example.com/
+
+Clone repository:
+
+    $ git clone ssh://dieken@gerrit.corp.example.com:2022/REPOSITORY_NAME.git
+    $ cd REPOSITORY_NAME
+    $ git config user.name Dieken
+    $ git config user.email dieken@corp.example.com
+
+Obtain client commands and hooks:
+
+    $ scp -p -P 2022 dieken@gerrit.corp.example.com:bin/gerrit-cherry-pick ~/bin/
+    $ scp -p -P 2022 dieken@gerrit.corp.example.com:hooks/commit-msg REPOS/.git/hooks/
+
+    Or
+    $ curl -O http://gerrit.corp.example.com/tools/bin/gerrit-cherry-pick
+    $ curl -O http://gerrit.corp.example.com/tools/hooks/commit-msg
+    $ chmod a+rx gerrit-cherry-pick commit-msg
+    $ mv gerrit-cherry-pick ~/bin/
+    $ mv commit-msg REPOS/.git/hooks/
+
+
+Bugzilla link in code review comments:
+    (BUG|Bug|bug|BUGZILLA|Bugzilla|bugzilla|BZ|Bz|bz|TICKET|Ticket|ticket|ISSUE|Issue|issue)\s*:?\s*#?(\d+)'
+
+    Such as:  This seems root cause of bug 33 too.
+
+Bugzilla tracking ids in commit messages, multiple bug numbers are allowed:
+    Ticket: \b\d{1,10}\b
+
+    Such as: Ticket: 33 34 45
+

@@ -1,0 +1,22 @@
+http://www.linuxlinks.com/article/20110306113701179/GUIsforR.html
+
+R gui:
+
+R -g Tk
+RStudio
+Rattle
+Red-R
+Deducer
+RKWard
+R Commander
+JGR
+Emacs ESS
+TeXmacs
+
+
+R distribution, the former the faster:
+    Revolution R Open: http://mran.revolutionanalytics.com/
+    OpenBLAS + R    https://packages.debian.org/jessie/libopenblas-base
+    Atlas + R   https://packages.debian.org/unstable/libatlas3-base
+    BLAS + R    https://packages.debian.org/unstable/libblas3
+

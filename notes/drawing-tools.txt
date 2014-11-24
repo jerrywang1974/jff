@@ -1,0 +1,22 @@
+Dia
+InkScape
+mypaint
+Xournal     <-> MicroSoft OneNote
+Jarnal
+
+cmaptools
+FreeMind
+
+ArgoUML
+Jude (Astah)
+umlet
+yEd
+
+R
+pstricks
+pgf/tikz    http://pgf.sf.net
+pgfplots    http://pgfplots.sf.net
+metapost
+Asymptote
+gnuplot
+

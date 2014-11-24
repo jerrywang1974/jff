@@ -1,0 +1,99 @@
+#
+# cf-config.cf
+#
+
+bundle common g
+{
+vars:
+
+    SuSE::
+    "crontab" string    => "/var/spool/cron/tabs/root";
+
+    redhat::
+    "crontab" string    => "/var/spool/cron/root";
+
+    (!SuSE).(!redhat)::
+    "crontab" string    => "/var/spool/cron/crontabs/root";
+}
+
+######################################################################
+
+body agent control
+{
+    environment => {
+                    "APT_LISTBUGS_FRONTEND=none",
+                    "APT_LISTCHANGES_FRONTEND=none",
+                    "DEBIAN_FRONTEND=noninteractive",
+                    "LANG=en_US.UTF-8",
+                    "LC_ALL=en_US.UTF-8"
+                   };
+    ifelapsed   => "15";
+}
+
+######################################################################
+
+body monitor control
+{
+    forgetrate => "0.7";
+    histograms => "true";
+}
+
+######################################################################
+
+body executor control
+{
+    exec_command    => "$(sys.cf_twin) -f failsafe.cf && $(sys.cf_agent)";
+    mailmaxlines    => "30";
+    mailto          => "cfengine_mail@corp.example.org";
+    smtpserver      => "localhost";
+    splaytime       => "1";
+}
+
+######################################################################
+
+body reporter control
+{
+    reports         => { "performance", "last_seen", "monitor_history" };
+    build_directory => "$(sys.workdir)/reports";
+    report_output   => "html";
+}
+
+######################################################################
+
+body runagent control
+{
+    hosts   => {
+                "127.0.0.1"
+                # , "myhost.example.com:5308", ...
+               };
+}
+
+######################################################################
+
+body server control
+{
+    allowallconnects    => { "127.0.0.1" , "::1" };
+    allowconnects       => { "127.0.0.1" , "::1" };
+    allowusers          => { "root" };
+    cfruncommand        => "$(sys.cf_twin) -f failsafe.cf && $(sys.cf_agent)";
+    logallconnections   => "true";
+    maxconnections      => "100";
+    trustkeysfrom       => { "127.0.0.1" , "::1" };
+}
+
+######################################################################
+
+bundle server access_rules
+{
+access:
+
+    "$(g_update.master_location)"
+        admit   => { ".*" };
+
+
+roles:
+
+    ".*"
+        authorize   => { ".*" };
+}
+

@@ -1,0 +1,55 @@
+; vi: noet ts=8 sts=8 sw=8
+
+$TTL 86400
+
+@	3600	IN	SOA	ns postmaster (
+				2011120400	; serial number
+				2h		; refresh
+				20m		; retry
+				28d		; expire
+				2h )		; negative cache ttl
+	3600	IN	NS	ns
+	3600	IN	MX	10 smtp
+	3600	IN	A	10.0.0.10
+
+
+gold			A	10.0.0.10
+
+ns			A	10.0.0.10
+smtp			A	10.0.0.10
+www			CNAME	gold
+kerberos		CNAME	gold
+krb			CNAME	gold
+ldap			CNAME	gold
+imap			CNAME	gold
+mail			CNAME	gold
+list			CNAME	gold
+calendar		CNAME	gold
+cal			CNAME	gold
+bug			CNAME	gold
+bugzilla		CNAME	gold
+wiki			CNAME	gold
+moin			CNAME	gold
+git			CNAME	gold
+svn			CNAME	gold
+xmpp			CNAME	gold
+trac			CNAME	gold
+redmine			CNAME	gold
+monitor			CNAME	gold
+codereview		CNAME	gold
+gerrit			CNAME	gold
+
+; see http://web.mit.edu/kerberos/krb5-1.9/krb5-1.9.2/doc/krb5-install.html#Hostnames-for-the-Master-and-Slave-KDCs
+_kerberos		TXT	"CORP.EXAMPLE.COM"
+_kerberos._udp		SRV	0 0 88 gold
+_kerberos._tcp		SRV	0 0 88 gold
+_kerberos-master._udp	SRV	0 0 88 gold
+_kerberos-master._tcp	SRV	0 0 88 gold
+_kerberos-adm._tcp	SRV	0 0 749 gold
+_kpasswd._udp		SRV	0 0 464 gold
+_kpasswd._tcp		SRV	0 0 464 gold
+
+_ldap._tcp		SRV	0 0 389 gold
+
+_sieve._tcp		SRV	0 0 4190 gold
+

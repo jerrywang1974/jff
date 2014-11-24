@@ -1,0 +1,49 @@
+#
+# promises.cf
+#
+
+body common control
+{
+    bundlesequence  => {
+                        "update",
+
+                        "cfengine", #"anomalies",
+                        "locale",
+                        "apt",
+                        "audit",
+                        "etckeeper",
+                        "firewall",
+                        "ntp",
+                        "kerberos",
+                        "ldap",
+                        "dhcp",
+                        "dns",
+                        "mta",
+                        "imap",
+                        "backup",
+                       };
+
+    inputs          => {
+                        "update.cf",
+                        "cfengine_stdlib.cf",
+                        "cf-config.cf",
+
+                        "cfengine.cf",
+                        "locale.cf",
+                        "apt.cf",
+                        "audit.cf",
+                        "etckeeper.cf",
+                        "firewall.cf",
+                        "ntp.cf",
+                        "kerberos.cf",
+                        "ldap.cf",
+                        "dhcp.cf",
+                        "dns.cf",
+                        "mta.cf",
+                        "imap.cf",
+                        "backup.cf",
+                       };
+
+    version         => "1.0";
+}
+

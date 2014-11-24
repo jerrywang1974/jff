@@ -1,0 +1,57 @@
+<VirtualHost *:80>
+    ServerName git.corp.example.com
+    ServerAdmin webmaster@corp.example.com
+    DocumentRoot /nonexistent
+
+    ErrorLog ${APACHE_LOG_DIR}/git-error.log
+
+    # Possible values include: debug, info, notice, warn, error, crit,
+    # alert, emerg.
+    LogLevel warn
+
+    CustomLog ${APACHE_LOG_DIR}/git-access.log combined
+
+    SuexecUserGroup git git
+
+    # Actually, suexec will clear these environment variables...
+    SetEnv GIT_PROJECT_ROOT         /srv/git/repositories
+    SetEnv GITOLITE_HTTP_HOME       /srv/git
+    SetEnv GIT_HTTP_EXPORT_ALL
+
+    ScriptAlias /git/ /srv/www/git/gitolite-shell-wrapper/
+    ScriptAlias /gitweb /srv/www/git/gitweb.cgi
+    Alias /static /usr/share/gitweb/static
+
+    <Directory /usr/share/gitweb/static>
+        AllowOverride None
+        Order allow,deny
+        Allow from all
+    </Directory>
+
+    <Location />
+        AuthType Kerberos
+        Require  valid-user
+
+        Order allow,deny
+        Allow from all
+    </Location>
+
+    <Location /git>
+        AuthType Kerberos
+        Require  valid-user
+
+        Order allow,deny
+        Allow from all
+    </Location>
+
+    <Location /gitweb>
+        AuthType Kerberos
+        Require  valid-user
+
+        Order allow,deny
+        Allow from all
+    </Location>
+
+    RedirectMatch   ^/$     /gitweb
+
+</VirtualHost>

@@ -1,0 +1,69 @@
+#!/bin/bash
+
+# References:
+#   ConsoleKit/src/ck-manager.c
+#   https://wiki.edubuntu.org/DebuggingGNOMEPowerManager
+#
+# NOTICE:
+#   Old linux distributions using HAL or devicekit-power use
+#   different D-Bus messages for these tasks, see the link
+#   above for details.
+#
+# Liu Yubao <yubao.liu@gmail.com>,  2010-08-14
+
+case "$1" in
+    shutdown|halt|stop)
+        action=org.freedesktop.consolekit.system.stop
+
+        dest=org.freedesktop.ConsoleKit
+        path=/org/freedesktop/ConsoleKit/Manager
+        message=org.freedesktop.ConsoleKit.Manager.Stop
+        ;;
+
+    restart|reboot)
+        action=org.freedesktop.consolekit.system.restart
+
+        dest=org.freedesktop.ConsoleKit
+        path=/org/freedesktop/ConsoleKit/Manager
+        message=org.freedesktop.ConsoleKit.Manager.Restart
+        ;;
+
+    hibernate)
+        action=org.freedesktop.upower.hibernate
+
+        dest=org.freedesktop.UPower
+        path=/org/freedesktop/UPower
+        message=org.freedesktop.UPower.Hibernate
+
+        pre_cmd="xscreensaver-command -lock"
+        ;;
+    suspend)
+        action=org.freedesktop.upower.suspend
+
+        dest=org.freedesktop.UPower
+        path=/org/freedesktop/UPower
+        message=org.freedesktop.UPower.Suspend
+
+        pre_cmd="xscreensaver-command -lock"
+        ;;
+
+    *)
+        echo "ERROR: unknown command '$1'" >&2
+        exit 1;
+        ;;
+esac
+
+if ! pkcheck --action-id $action --process $$; then
+    xmessage "Disallow to $1!"
+    exit 1
+fi
+
+msg="Sure to $1?"
+if [ `xmessage -buttons "Cancel,Ok" -default Cancel -nearmouse -print "$msg"` = Ok ]; then
+    if [ -n "$pre_cmd" ]; then
+        $pre_cmd
+        sleep 2
+    fi
+    dbus-send --system --dest=$dest --type=method_call --print-reply --reply-timeout=2000 $path $message
+fi
+

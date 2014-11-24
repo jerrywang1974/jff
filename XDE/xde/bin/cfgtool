@@ -1,0 +1,326 @@
+#!/bin/bash
+#
+# A little script to backup /etc or dot files in home directory
+# and record installed software list under version control.
+#
+# When executed with root permission, it does:
+#   * create a .git directory in /
+#   * fully manage /etc and partially /root, /var
+#   * record installed software list(dpkg --list and dpkg --get-selections)
+#     by APT hooks
+#
+# When executed without root permissioin, it does:
+#   * partially manage ~/.*
+#
+#
+# Example:
+#   # cfgtool init
+#   # cd /; cfgtool add etc; cfgtool commit -m "import /etc to init"
+#   # cfgtool hook
+#   # cfgtool log
+#
+#
+# Reference:
+#   * Tracking /etc etc
+#     http://www.selenic.com/mercurial/wiki/index.cgi/TrackingEtcEtc
+#   * Maintain /etc with mercurial on Debian
+#     http://michael-prokop.at/blog/2007/03/14/maintain-etc-with-
+#       mercurial-on-debian/
+#   * A case for hg on /etc
+#     http://ygingras.net/b/2007/11/a-case-for-hg-on-etc
+#
+# Author:
+#   Liu Yubao <yubao.liu@gmail.com>
+#
+# Copyright:
+#   Copyright (c) 2008 Liu Yubao, all rights reserved.
+#
+# License:
+#   This program is free software; you can redistribute it and/or
+#   modify it under the terms of the GNU General Public License
+#   as published by the Free Software Foundation; either version 2
+#   of the License, or (at your option) any later version.
+#
+# ChangeLog:
+#   2008-1-25 Liu Yubao
+#       * initial version 0.1.
+#   2008-1-26 Liu Yubao
+#       * add APT hook support, version 0.2.
+#   2008-4-27 Liu Yubao
+#       * remove hg support to make it simple.
+#       * remove simple wrapper functions.
+#       * rewrite some code to make it more robust.
+#       * release 0.3.
+#   2008-4-27 Liu Yubao
+#       * fix working tree problem, version 0.3.1.
+#   2008-4-29 Liu Yubao
+#       * add core.worktree to workaround git's wired behaviour, version 0.3.2.
+#   2008-11-7 Liu Yubao
+#       * fix a syntax error, bash doesn't allow "&&" at the beginning of line
+#       * move dpkg hook to /etc/apt/apt.conf.d/80cfgtool
+#       * release 0.4
+#
+# TODO:
+#   * record file permission
+#
+
+log () {
+    local opt_e
+
+    if [ "-e" = "$1" ]; then
+        opt_e="-e"
+        shift
+    fi
+    echo $opt_e "[cfgtool] $1"
+}
+
+
+init_env () {
+    LANG=C
+    LC_ALL=C
+    export LANG LC_ALL
+
+    VCS=git
+    IS_ROOT=
+    VCS_ROOT="$HOME"
+    VCS_REPOS=
+    VCS_REPOS_ARG=
+    VCS_CMD=
+
+    if [ 0 -eq `id -u` ]; then
+        VCS=/usr/bin/git
+        IS_ROOT=1
+        VCS_ROOT=
+    fi
+
+    VCS_REPOS="$VCS_ROOT/.git"
+    VCS_REPOS_ARG="--git-dir=$VCS_REPOS --work-tree=$VCS_ROOT/"
+    VCS_CMD="$VCS $VCS_REPOS_ARG"
+
+    if ! $VCS --version >/dev/null 2>&1; then
+        log "Can't find $VCS, please install it first, eg:"
+        log "  aptitude install git-core"
+        exit 1
+    fi
+}
+
+
+check_repos () {
+    if [ ! -d "$VCS_REPOS" ]; then
+        log "Can't find $VCS_ROOT/.git, please use 'cfgtool init' to initialize repository."
+        exit 1
+    fi
+}
+
+
+safe_commit () {
+    local a m
+
+    [ '-a' = "$1" ] && { a="-a"; shift; }
+    [ '-m' = "$1" ] && { m="$2"; shift 2; }
+    [ '-a' = "$1" ] && { a="-a"; shift; }
+
+    if [ `$VCS_CMD branch | wc -l` -eq 0 ]; then
+        $VCS_CMD commit $a -m "$m" "$@"
+    elif [ `$VCS_CMD diff --cached -- "$@" | wc -l` -gt 0 ]; then
+        $VCS_CMD commit $a -m "$m" "$@"
+    elif [ -n "$a" -a `$VCS_CMD diff -- "$@" | wc -l` -gt 0 ]; then
+        $VCS_CMD commit $a -m "$m" "$@"
+    else
+        return 0
+    fi
+}
+
+
+cmd_init () {
+    local a
+
+    log -e "Prepare repository $VCS_REPOS..."
+
+    cd "$VCS_ROOT/" || exit 1
+
+    if ! ($VCS_CMD init "$@" && $VCS_CMD config core.worktree ".." &&
+            chmod 700 "$VCS_REPOS"); then
+        exit 1
+    fi
+
+    # save output from dpkg --list and dpkg --get-selections
+    if [ "$IS_ROOT" ] && which dpkg >/dev/null 2>&1; then
+        a=0
+        [ -e root/dpkg--list.txt ] && { $VCS_CMD add root/dpkg--list.txt; a=1; }
+        [ -e root/dpkg--get-selections.txt ] && { $VCS_CMD add root/dpkg--get-selections.txt;
+            a=1; }
+        [ 1 -eq $a ] && ( safe_commit -m  \
+            "save output from dpkg --list and dpkg --get-selections before cfgtool init" \
+            root/dpkg--list.txt root/dpkg--get-selections.txt || exit 1)
+
+        dpkg --list > /root/dpkg--list.txt || exit 1
+        dpkg --get-selections "*" > /root/dpkg--get-selections.txt || exit 1
+
+        $VCS_CMD add root/dpkg--list.txt
+        $VCS_CMD add root/dpkg--get-selections.txt
+        safe_commit -m  \
+            "save new output from dpkg --list and dpkg --get-selections after cfgtool init" \
+            root/dpkg--list.txt root/dpkg--get-selections.txt || exit 1
+    fi
+
+    log
+    log -e "Use 'cfgtool add' or '$VCS add' to add some files into"
+    log -e "repository, eg. /etc, ~/.*\n\n"
+}
+
+
+cmd_hook () {
+    if [ ! "$IS_ROOT" ]; then
+        log "Only root can use this function!"
+        return 1
+    fi
+
+    if ! which apt-get >/dev/null 2>&1; then
+        log "Can't find apt-get in PATH, is this Debian system?"
+        return 1
+    fi
+
+    # install cfgtool to /root/cfgtool
+    if [ ! -e /root/cfgtool ]; then
+        log
+        log "!!!!! Please copy cfgtool to /root/cfgtool and"
+        log "!!!!! run 'chmod 500 /root/cfgtool'"
+        log
+    fi
+
+    # install APT hook
+    cd "$VCS_ROOT/"
+
+    local f=etc/apt/apt.conf.d/80cfgtool
+    local d=$(dirname "$f")
+
+    [ -d "$d" ] || {
+        mkdir -p "$d" || exit 1
+    }
+
+    if [ -e "$f" ]; then
+        log "Cfgtool hook exists: $f"
+    else
+        cat >> "$f" <<EOF
+
+// added automatically by cfgtool ------------> begin
+DPkg {
+  Pre-Invoke { "if [ -x /root/cfgtool ]; then /root/cfgtool hook_pre; fi"; };
+  Post-Invoke { "if [ -x /root/cfgtool ]; then /root/cfgtool hook_post; fi"; };
+}
+// added automatically by cfgtool <------------ end
+
+EOF
+        $VCS_CMD add "$f"
+        safe_commit -m "save $f after hook APT" "$f" ||
+            exit 1
+        log "Cfgtool has been install in $f"
+    fi
+}
+
+
+do_hook () {
+    local pid
+
+    if [ ! "$IS_ROOT" ]; then
+        log "Only root can use this function!"
+        return 1
+    fi
+
+    dpkg --list > /root/dpkg--list.txt || exit 1
+    dpkg --get-selections "*" > /root/dpkg--get-selections.txt || exit 1
+
+    pid=$PPID
+    while [ $pid -gt 0 ]; do
+        caller=`/bin/ps -p $pid -o cmd= h`
+        (echo $caller | /bin/grep 'aptitude\|apt-get\|update') && break
+        pid=`/bin/ps -p $pid -o ppid= h`
+    done
+
+    [ $pid -eq 0 ] && caller=`/bin/ps -p $PPID -o cmd= h`
+
+    cd / &&
+        $VCS_CMD add root/dpkg--list.txt &&
+        $VCS_CMD add root/dpkg--get-selections.txt &&
+        $VCS_CMD add etc &&
+        ($VCS_CMD ls-files -d | xargs -r $VCS_CMD rm -r -q) &&
+        safe_commit -a -m "snapshot from $LOGNAME $1: $caller"
+}
+
+
+cmd_hook_pre () {
+    do_hook "before" >/dev/null 2>&1
+}
+
+
+cmd_hook_post () {
+    do_hook "after" >/dev/null 2>&1
+}
+
+
+cmd_version () {
+    cat <<EOF
+Cfgtool 0.3.1, Copyright (C) 2008 Liu Yubao
+
+Cfgtool comes with ABSOLUTELY NO WARRANTY, it is free software, and
+you are welcome to redistribute it under certain conditions; read
+comment in the beginning of this script for details.
+
+EOF
+}
+
+
+cmd_help () {
+    cat <<EOF
+Usage: cfgtool subcommand arguments...
+
+Cfgtool is a little script to backup /etc or dot files in home directory
+and record installed software list under version control.
+
+Most commands are simple wrappers to the corresponding commands in GIT,
+you can use GIT directly.
+
+Available sub commands and their equivalent commands in GIT:
+
+    init      : git --git-dir=/path/to/.git --work-tree=/path/to init
+    hook      : install Pre-Invoke and Post-Invoke hooks to APT
+    <cmd>     : git --git-dir=/path/to/.git --work-tree=/path/to <cmd>
+    version   : show version of Cfgtool
+    help      : show this help information
+
+The .git directory is in $HOME/ for normal user and / for root user.
+
+EOF
+}
+
+
+#------------- main entry -----------------------
+init_env
+
+CMD="$1"
+if [ -z "$CMD" ]; then
+    log "Missing arguments, use 'cfgtool help' to get help."
+    exit 1;
+fi
+
+shift
+case "$CMD" in
+    init)
+        cmd_init "$@"
+        ;;
+    hook|hook_pre|hook_post)
+        check_repos
+        cmd_$CMD "$@"
+        ;;
+    version|help)
+        cmd_$CMD "$@"
+        ;;
+    *)
+        check_repos
+        $VCS_CMD $CMD "$@"
+        ;;
+esac
+
+# vi: et ts=4 sw=4
+

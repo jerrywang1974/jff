@@ -1,0 +1,29 @@
+Redis 2.8.1
+
+需要注意的选项：
+    port    6379
+    save    ...
+    dbfilename dump.rdb
+    dir ./
+    slaveof <masterip> <masterport>
+    masterauth <master-password>
+    slave-serve-stale-data yes
+    slave-priority 100
+    requirepass fooobared
+
+    rename-command ...
+
+    maxmemory <bytes>
+    appendonly no
+    appendfilename appendonly.aof
+
+推荐修改的选项：
+    save ""
+    appendonly yes
+    tcp-keepalive 60
+    slave-serve-stale-data yes
+    repl-disable-tcp-nodelay yes
+    repl-backlog-size 50mb
+    repl-backlog-ttl 3600
+    activerehashing yes
+

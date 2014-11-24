@@ -1,0 +1,10 @@
+Package dependency resolver
+
+http://www.mancoosi.org/cudf/
+http://packages.debian.org/sid/cudf-solver
+http://packages.debian.org/sid/apt-cudf (glue between apt and cudf solver)
+
+SAT resolver:
+    https://github.com/openSUSE/libsolv/
+    https://github.com/akozumpl/hawkey  (base on libsolv)
+

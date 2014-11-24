@@ -1,0 +1,36 @@
+http://angularjs.org/
+http://emberjs.com/
+
+http://documentcloud.github.com/backbone/
+http://phonegap.com/
+
+Echo 3
+http://echo.nextapp.com/site/
+
+YUI
+http://developer.yahoo.com/yui/
+
+Qooxdoo
+http://www.qooxdoo.org/
+
+dijit
+http://www.dojotoolkit.org/
+
+SproutCore
+http://www.sproutcore.com/
+
+GWT
+http://code.google.com/webtoolkit/
+
+ExtJS (商业许可)
+http://www.extjs.com/
+
+bindows (商业许可)
+http://www.bindows.net/
+
+Cappuccino (模仿 Object-C 语法，在 JS 之上构造了 Object-J 语言）
+http://cappuccino.org/
+
+MochaUI (基于 Mootools，Mootools 对于自定义类、全局符号、内置函数污染很严重)
+http://mochaui.com/
+

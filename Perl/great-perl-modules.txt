@@ -1,0 +1,523 @@
+Great Perl Modules:
+
+http://www.perlfoundation.org/perl5/index.cgi?recommended_cpan_modules
+http://perl.net.au/wiki/Recommended_Perl_Modules
+http://wiki.perlchina.org/index.php/%E6%A8%A1%E5%9D%97%E6%8E%A8%E4%BB%8B
+http://search.cpan.org/~perigrin/Task-Kensho-0.18/lib/Task/Kensho.pm
+
+https://github.com/CPAN-API/cpan-api/wiki/API-docs
+http://search.metacpan.org
+http://deps.cpantesters.org
+
+#######################################################################
+
+Perl 5 改进
+==========
+    perl5i (Perl 5 Improved)
+    Moose/Mouse/Any::Moose
+    Modern::Perl
+
+POD 文档 GUI 查看器
+==================
+    podbrowser.pl (http://www.newsmth.net/bbscon.php?bid=226&id=36512)
+        比 Gtk2::Ex::PodViewer::Parser 自带的 podviewer 好用。
+    Pod::Browser        pod_browser_server.pl，美观方便的界面，使用了 ExtJS
+    Pod::POM::Web       帧结构，容易使用，可以看源码，安装 PPI::HTML 和 Search::Indexer
+                        后支持源码语法高亮以及全文搜索。
+
+    Pod::Server         pod_server, 启动快，有帧结构，比较漂亮，但还不够方便
+    Pod::WebServer      podwebserver, 很一般，启动时索引建立时间太长
+    Tk::Browser         mkbrowser, 启动慢，可以看源码，但不方便
+
+模板系统
+=======
+    Text::Xslate
+    Text::Template
+    HTML::Mason
+    HTML::Template::Pro
+    HTML::Template::Compiled
+    Template::Toolkit
+
+
+web app framework
+================
+    PSGI & Plack (http://plackperl.org/)
+    HTTP::Engine (old)
+
+    Catalyst    (成熟，太重量级)
+    Jifty (http://jifty.org/)   (比较重量级)
+    Continuity  (基于 continuation)
+    Gantry (http://code.google.com/p/gantry/)   (文档太少）
+
+    Mojo (http://mojolicious.org/)
+    Dancer
+
+    CGI::Application        (*****)
+    Titanium                (*****) 基于 CGI::Application
+    CGI::Application::Structured
+
+    solstice (http://solstice.eplt.washington.edu/)
+        http://perl.apache.org/products/app-server.html
+        http://www.perlfoundation.org/perl5/index.cgi?web_frameworks
+
+
+Server
+======
+    Gearman
+    Starman (High-performance preforking PSGI web server, UNIX only!)
+    PerlBal
+    Net::Server
+    HTTP::Daemon
+    HTTP::Server::Simple
+    POE::Component::Server::HTTP
+    POE::Component::Server::SimpleHTTP
+    POE::Loop::EV
+    POE::Loop::Event
+    POE::XS::Queue::Array
+    Mojo::Server::Hypnotoad
+    Twiggy
+    IO::Async
+    EV
+    AnyEvent
+    Coro
+
+
+数据库访问
+=========
+    DBI
+    Class::DBI          (*)
+    DBIx::Class         (***)
+    Rose::DB::Object    (**)
+    DBIx::Simple
+
+    Upgrade/Downgrade SQL schema:
+        DBIx::Class::DeploymentHandler
+        DBIx::VersionedDDL
+        DBIx::Migration::Directories
+        https://alembic.readthedocs.org/en/latest/tutorial.html
+
+
+面向对象
+=======
+    Moose
+    MooseX
+    Mouse
+    Moo
+    Class::XSAccessor
+    Class::XSAccessor::Array
+    Class::Struct
+    Class::Accessor
+    Class::Std
+    Class::MethodMaker
+    App::Benchmark::Accessors
+
+
+对象数据库
+==========
+    KiokuDB
+    DBM::Deep
+    MLDBM
+
+
+异常处理
+========
+    autodie
+    Exception::Class
+    Try::Tiny
+
+    Guard
+    Scope::Guard
+    B::Hooks::EndOfScope
+    Hook::Scope
+    Sub::ScopeFinalizer
+
+语法解析
+========
+    Parse::RecDescent   (不推荐，太慢)
+    Parse::Yapp
+    Parse::Eyapp
+    perl-byacc
+    http://home.earthlink.net/~slkpg/
+    http://packages.debian.org/re2c     thread safer lexer generator
+    http://packages.debian.org/lemon    thread safer parser generator
+
+
+HTML clean
+=========
+    HTML::Defang
+    HTML::Declaw
+    HTML::Scrubber
+    HTML::StripScripts
+    HTML::Restrict
+
+
+XML 处理
+=======
+    XML::LibXML (不推荐用 XML::Parser, XML::XPath, XML::DOM, 推荐用 XML::LibXML)
+    XML::Rules
+    XML::Simple
+    XML::Twig
+
+
+HTML 信息提取
+=============
+    Web::Scraper
+    Template::Extract
+    HTML::Seamstress
+    HTML::Selector::XPath
+    HTML::TreeBuilder
+    HTML::TreeBuilder::XPath
+    WWW::Mechanize
+    HTML::ExtractMain (Arc90's readability, Python decruft: http://code.google.com/p/decruft/)
+
+HTTP Client
+===========
+    LWP::*
+    HTTP::Tiny
+    AnyEvent::HTTP
+    HTTP::Lite  (Doesn't support redirection and mirroring)
+    Mojo::Client
+
+
+Email 处理
+=========
+    http://search.cpan.org/dist/Task-Email-PEP-All/
+    http://www.slideshare.net/rjbs/how-i-learned-to-stop-worrying-and-love-email-the-2007-pep-talk/
+    Compose Email:
+        Email::Simple
+        Email::MIME, Email::MIME::CreateHTML    (not efficient enough; ::FromHandle doesn't do MIME; doesn't stream, fairly small feature set)
+
+    Parse Email:
+        Mail::Message       (really big, loads 40+ extra modules; large interface)
+                            part of Mail::Box
+        MIME::Entity        (really big, loads 50+ extra modules; large interface; history of subtle bugs)
+
+        MIME::Tools
+        Email::StripMIME
+        Email::MIME::XPath
+
+        Mail::Internet      (deprecated)
+        MIME::Lite          (deprecated)
+
+    Write module, need an API for email:
+        Email::Abstract
+
+    Manage email collection:
+        Mail::Box
+        Email::Folder, Email::Folder::Reader, Email::Feature::Type, Email::FolderType
+        Email::Delete
+
+    Email delivery:
+        Email::LocalDelivery    (not efficient)
+
+    Fetch email:
+        Net::Protocol
+
+        Mail::POP3Client
+            Net::POP3
+                Net::IMAP
+        Net::IMAP::Simple
+            Mail::IMAPClient
+
+        Mail::IMAPTalk
+        Net::IMAP::Client
+
+    Send email:
+        Mail::SendEasy
+        Email::Stuffer
+        Email::Sender
+        Email::Sender::Simple
+        Email::Send, Email::Send::IO        (old, problematic)
+        Mail::Mailer
+        Mail::Sendmail
+        Mail::Transport     part of Mail::Box
+        http://www.caspian.dotconf.net/menu/Software/SendEmail/
+                    ( http://www.blat.net/ for Win32)
+
+    Filtering:
+        Mail::Audit
+        Email::Filter
+        Mail::Procmail
+        Mail::Sort
+
+    Email address:
+        Email::Address
+        Mail::Message::Field::Address
+        Email::Valid
+        Mail::Address       (deprecated)
+
+    Signed email:
+        Mail::GPG
+
+进程管理
+=======
+    Parallel::Prefork
+    Parallel::ForkManager
+    Proc::ProcessTable
+
+IPC
+===
+    IPC::Run3
+    IPC::Cmd
+    IPC::Run
+    IPC::Open3
+    Capture::Tiny
+    IO::Capture
+    IPC::Capture
+    Sys::RunAlone
+
+多线程
+======
+    http://migo.sixbit.org/papers/Perl_Threads/slide-index.html
+
+模块编写
+========
+    Dist::Zilla     *****
+    Module::Starter + Module::Release   ****
+    ExtUtils::ModuleMaker   较长时间没有维护
+    基础模块：ExtUtils::MakeMaker / Module::Install / Module::Build
+                老旧                依赖 Make       只依赖 Perl，更好
+    Sub::Exporter
+    Sub::Import
+
+开发调试
+========
+    local::lib
+    PAR::Packer
+    App::FatPacker (doesn't support XS module)
+    http://www.cavapackager.com/            Cava Packager
+    https://metacpan.org/release/Carton     Bundler for Perl
+    shipwright-generate (CPAN Shipwright)
+    App::cpanminus
+    App::pmuninstall
+    Perlbrew: http://www.perlbrew.pl/
+
+    Devel::Cover
+    Devel::DumpSizes
+    Devel::Hide
+    Devel::LineTrace
+    Devel::MemUsed
+    Devel::NYTProf
+    Devel::Size
+    Devel::Size::Report
+    Devel::SmallProf
+    Debug::Trace
+    Devel::Trace
+
+    Test::*
+    Test::Builder
+    Test::Builder::Tester
+    Test::Class
+    Test::Data::Array
+    Test::Deep
+    Test::Differences
+    Test::Exception
+    Test::File
+    Test::File::Contents
+    Test::FITesque
+    Test::Harness
+    Test::Kwalitee
+    Test::Memory::Cycle
+    Test::MockModule
+    Test::More
+    Test::NoWarnings
+    Test::NoXS
+    Test::Number::Delta
+    Test::Output
+    Test::Pod
+    Test::Pod::Coverage
+    Test::Simple
+    Test::Spelling
+    Test::Taint
+    Test::Trap
+    Test::Warn
+    Test::Without::Module
+    Test::WWW::Declare
+    Test::WWW::Mechanize
+    Test::WWW::Selenium
+
+    Perl::Critic
+    Perl::Tidy
+    Smart::Comments
+    Data::Printer (aka. DDP)
+    pmtools (http://search.cpan.org/~mlfisher/pmtools-1.10/)
+        (pmpath, pmvers, pmdirs, plxload, pmload, pminst, pmls, pmcat,
+         pmfunc, podgrep, podcat, podtoc, podpath)
+
+
+AMQP/STOMP
+==========
+    Net::Stomp
+    Net::STOMP::Client
+    Net::RabbitMQ
+
+Cache
+=====
+    CHI
+    Cache::Cache
+
+IP, INET
+=======
+    NetAddr::IP
+    Net::IP
+    Net::IP::XS
+
+    Net::IPv4Addr
+    Net::IPv6Addr
+
+    Net::IP::AddrRanges
+    Net::CIDR::Lite
+
+    Don't support IPv6:
+        Net::IP::Match::Regexp
+        Net::IP::Match::Bin
+        Net::IP::CMatch
+        Net::IP::Match
+        Net::IP::Match::Trie
+        Net::IP::Match::XS
+        Net::IP::Match::XS2
+
+    Data::Validate::IP
+    IO::Socket::IP
+
+Inside-out class
+================
+    https://www.socialtext.net/perl5/inside_out_object
+
+    Hash::Util::FieldHash
+    Class::InsideOut
+    Object::InsideOut
+
+
+Excel
+=====
+Spreadsheet::WriteExcel
+Excel::Writer::XLSX
+
+语言检测
+=======
+Lingua::YALI            (122 languages, support CJK, bad for short string)
+Lingua::Identify::Blacklists    (support CJK, call Lingua::Identify::CLD and Lingua::Identify, but buggy on limiting languages)
+Lingua::Identify::CLD   (support CJK, can't limit languages, use Chrome web browser's Language Detection library)
+Lingua::Identify        (no CJK, 26 languages: bg cs cy da de el en es fi fr hi hr hu id it la nl pl pt ro ru sl sq sv tr uk)
+Lingua::Lid             (45 languages, commercial software)
+Lingua::Ident           (no language model files provided)
+
+#######################################################################
+
+
+Task::Kensho    推荐模块
+
+
+========================================================
+Apache::DProf
+App::Ack
+App::Config
+App::CPAN::Fresh
+BerkeleyDB (比 DB_File 的接口更全面)
+Bundle::Test
+CGI
+CGI::Minimal
+CGI::Simple
+Clone
+Config::Any
+Config::General
+Config::MVP
+cpan2dist
+CPAN::Mini
+CPAN::Mini::FromList
+Cwd
+Data::Dumper
+Data::FormValidator
+Data::Section, Inline::Files
+Date::Business
+Date::Calc
+Date::Manip (太庞大，不推荐)
+Date::Parse
+DateTime
+DateTime::Format::Mail
+Time::ParseDate
+DBD::RAM
+DBD::SQLite
+Directory::Transactional
+Encode
+Encode::Detect::Detector
+Encode::Guess
+Lingua::ZH::HanDetect
+ExtUtils::Installed
+File::Basename
+File::Copy
+File::Find
+File::Find::Object
+File::Glob
+File::Path
+File::Spec
+File::Temp
+Filter::Simple
+Filter::Util::Call
+FindBin
+GetOpt::Long
+Getopt::Long::Descriptive
+GetOpt::Std
+Hash::MoreUtils
+Hash::Util
+HOP::Lexer
+Imager
+Inline
+IO::All
+IO::AtomicFile
+IO::CaptureOutput
+JSON::XS
+libgd-securityimage-perl (generate CAPTCHA)
+List::AllUtils
+List::MoreUtils
+List::Util
+List::Utils
+Log::Any
+Log::Dispatch
+Log::Log4perl
+Mail::Mailer
+Mail::Send
+Markdown
+Memorize
+mocked
+Net::*
+Object::Destroyer***
+ops
+Params::Validate
+Path::Class
+POE
+POSIX
+ptkdb
+Regexp::Assemble
+Regexp::Common
+Regexp::Trie
+Regexp::List
+Regexp::Optimizer
+Safe
+Scalar::MoreUtils
+Scalar::Util
+Smart::Comments
+SQL::Interp
+Storable
+Switch
+Sys::Mmap
+Term::*
+Text::Autoformat
+Text::CharWidth  (see vim:mbyte.c)
+Text::CSV_PP
+Text::CSV::Simple
+Text::CSV_XS
+Text::WrapI18N
+Tie::File
+Time::HiRes
+Tk
+typesafety
+uniread
+Win32::AdminMisc
+Win32::FileOp
+Data::Rmap
+Parallel::Scoreboard
+JE (a JavaScript engine written in Perl)
+snaked (Task scheduler)
+

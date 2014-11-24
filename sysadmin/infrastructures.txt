@@ -1,0 +1,88 @@
+Kerberos:
+    http://techpubs.spinlocksolutions.com/dklar/kerberos.html
+    http://kerberos.org/index.html
+    http://web.mit.edu/kerberos/
+
+=====================================================================
+libnss-ldap
+libpam-ldap
+libpam-ccreds
+nss-updatedb
+nscd
+slapd
+kerberos
+sasl
+sssd
+radius
+freeipa
+
+=====================================================================
+Single Sign-On
+http://www.ibm.com/developerworks/cn/security/se-sso/
+1) GSS-API, OSF DCE, PAM
+2) Broker-Based SSO: Kerberos v5, Sesame, IBM KryptoKnight
+3) Agent-Based SSO: SSH
+4) Token-Based SSO
+
+Web SSO:
+    CAS: Central Authentication Service
+    JOSSO: www.josso.org
+    CoSign:
+    WebAuth:
+    SAML:
+    OpenID:
+
+=====================================================================
+
+帐户管理: OpenLDAP, MySQL/PostgreSQL
+源码管理: Subversion, GIT, gitolite, git-http-backend, GRack
+代码评审: ReviewBoard, Rietveld, Gerrit
+邮件系统: Postfix, Mailman
+Wiki系统: TWiki/Foswiki, MoinMoin
+任务跟踪: Bugzilla
+自动构建: Hudson
+搜索引擎: mairix, swish++, namazu2
+
+=====================================================================
+http://en.wikipedia.org/wiki/Network-attached_storage
+NAS: SMB/CIFS, NFS, AFS
+FreeNAS (FreeBSD), NASLite(Linux), NexentaStor(NexentaOS)
+Openfiler
+
+http://en.wikipedia.org/wiki/Storage_area_network
+SAN: SCSI, Fibre Channel, iSCSI, ATA over Ethernet(AoE), HyperSCSI
+
+
+http://www.mirkomariotti.it/skels/xen0nfs.html
+
+=====================================================================
+http://www.techforce.com.br/news/layout/set/print/linux_blog/massive_installation_management_tools_p_3
+GOsa2
+http://www.gosa-project.org/
+
+EBox
+http://www.ebox-platform.com/
+
+Webmin
+
+http://www.zabbix.org/
+=====================================================================
+
+Bcfg2 notes
+
+1. quick start
+# aptitude install bcfg2 bcfg2-server
+# bcfg2-admin init
+# /etc/init.d/bcfg2-server start
+# bcfg2 -nqv
+#
+
+=====================================================================
+TeamViewer, UltraVNC
+VNN Client, LogMeIn Hamachi
+Mikogo
+
+=====================================================================
+daemontools
+monit
+

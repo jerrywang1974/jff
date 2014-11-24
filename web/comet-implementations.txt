@@ -1,0 +1,5 @@
+http://socket.io/
+https://github.com/Automattic/engine.io     (socket.io's transport layer)
+
+https://togetherjs.com/
+

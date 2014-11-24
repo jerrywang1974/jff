@@ -1,0 +1,50 @@
+key, secret, seed, pass
+
+handle "des_key" in /etc/roundcube/main.inc.php
+handle secret in /etc/redmine/default/session.yml
+
+
+
+/etc/security/access.conf
+
+https:// for all virtual hosts
+
+exim4: check From name against login name, necessary??
+       foreign email by smtp may have faked "From" name.
+
+exim4: limit receiptors by domain for bot users, such as
+       bugzilla, reviewboard, wiki, to avoid information leak
+       because users register foreign email addresses on these services.
+
+
+ReviewBoard: support http auth and auto user creation
+mailman: kerberos authentication
+
+RoundCube, ThunderBird: address book on OpenLDAP
+
+ejabberd: support auto user creation, package 3.0
+CalendarServer: package new version?
+
+DAViCal: support auto user creation     (doesn't matter much as CalendarServer can create user automatically)
+Zabbix: support auto user creation      (doesn't matter now, I don't use it)
+
+Check cron jobs that poll web pages which requires Kerberos authentication.
+
+RoundCube, Mantis:  sometimes they show login box
+
+Web apps: remove "register", "logout" and "find password" functions.
+
+Samba: don't support Kerberos authentication (I hope it uses password)
+
+security: aide samhain fail2ban snort...
+          SELinux, GrSecurity, AppArmor, Smack, TOMOYO, yama
+
+Kerberos two-factor authentication: google-authenticator, Barada
+
+vpn: openvpn, openswan/strongswan
+opengrok
+jenkins
+gerrit
+backula
+
+Search: Apache solr, katta.sf.net

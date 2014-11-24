@@ -1,0 +1,515 @@
+#!/usr/bin/env perl
+#
+# Purpose:
+#   This script implements a service to run controlled executable
+#   upon request from trusted network.
+#
+# Usage:
+#   $ ./plumber --port 9999 --exec-dir ./apps
+#
+# Protocol:
+#   (1) plumber listens on some port, such as 9999;
+#
+#   (2) clientA sends json data ["exec", "app_name", arg...] to plumber,
+#       the arguments can be arbitrary json data structures;
+#   (3) plumber forks and executes "LIBEXEC_PATH/$app_name/run", the child process(clientB)
+#       has extra environments PLUMBER_PORT and PLUMBER_COOKIE been set;
+#
+#   (4) the child process(clientB) sends json data ["establish", $PLUMBER_COOKIE] to plumber;
+#   (5) plumber replies clientB with json data ["ok", arg...];
+#
+#   (6) clientB setups, then sends json data ["establish2", $PLUMBER_COOKIE, new_arg...]
+#       to plumber, the arguments can be arbitrary json data structures;
+#   (7) plumber replies clientB with json data ["ok", "done"];
+#
+#   (8) to continue 3), plumber replies clientA with json data ["ok", new_arg...];
+#
+#   Plumber doesn't communicate with clientB by stdio/stdout, because
+#   it's too easy to mess up these two standard streams by mistake,
+#   clientB can redirect those itself if necessary.
+#
+# Authors:
+#   Yubao Liu <yubao.liu@gmail.com>
+#
+# Copyright:
+#   GPL v3
+#
+# ChangeLog:
+#   2011-10-13  Yubao Liu
+#       * initial version, implement the exec/establish/establish2 protocol
+
+use strict;
+use warnings;
+use FindBin;
+use lib "$FindBin::Bin/../lib";
+
+use Cwd;
+use Data::Dumper;
+use File::Spec;
+use Getopt::Long;
+use HTTP::Response;
+use IO::File;
+use JSON;
+use Log::Log4perl qw(:easy);
+use POE qw(Component::Server::TCP Filter::HTTPD);
+use POSIX ();
+use Try::Tiny;
+use constant APP_ENTRY_FILE     => "run";
+
+
+my $g_port = 9999;
+my $g_libexec_path = File::Spec->curdir;
+
+my %g_action_table = (
+    exec            => \&action_exec,
+    establish       => \&action_establish,
+    establish2      => \&action_establish2,
+);
+
+my %g_cookie_to_appinfo;
+
+#
+# Initialize Log4perl
+#
+Log::Log4perl->easy_init({
+        level   => $DEBUG,
+        layout  => "[%d] %-5p (%P) %F{1}:%-4L - %m%n",
+        #file   => ">plumber.log",
+    });
+
+
+#
+# Process command line options
+#
+GetOptions("port=i"     => \$g_port,
+           "exec=s"     => \$g_libexec_path);
+die "Bad port $g_port\n" if $g_port <= 0 || $g_port > 65535;
+die "Bad directory \"$g_libexec_path\"\n" unless -d $g_libexec_path;
+$g_libexec_path = File::Spec->rel2abs($g_libexec_path);
+
+INFO "listen on port $g_port";
+
+#
+# Start server, the master session listens for connection, the child sessions process requests.
+#
+POE::Component::Server::TCP->new(
+    Alias               => "Master",
+    Port                => $g_port,
+    Started             => \&on_master_started,
+    ClientFilter        => "POE::Filter::HTTPD",
+    ClientConnected     => \&on_client_connected,
+    ClientDisconnected  => \&on_client_disconnected,
+    ClientInput         => \&on_client_input,
+);
+
+POE::Kernel->run;
+exit;
+
+
+######################################################################
+
+# In master session
+#
+sub on_master_started {
+    my $kernel = $_[KERNEL];
+
+    register_HUP_INT_TERM_handler($kernel);
+
+    $kernel->state("reap_child" => \&reap_child);
+    $kernel->state("sig_CHLD", \&sig_CHLD);
+
+    $ENV{PLUMBER_PORT} = $g_port;
+}
+
+
+# In master session
+#
+sub reap_child {
+    my ($kernel, $session, $pid, $cookie) = @_[KERNEL, SESSION, ARG0, ARG1];
+
+    INFO "register SIGCHLD handler for pid $pid in session " . $session->ID;
+
+    $kernel->sig_child($pid, "sig_CHLD", $cookie);
+}
+
+
+# In master session
+#
+sub sig_CHLD {
+    my ($kernel, $session, $pid, $code, $cookie) =
+        @_[KERNEL, SESSION, ARG1, ARG2, ARG3];
+
+    INFO "got SIGCHLD: pid $pid in session " . $session->ID;
+
+    if (exists $g_cookie_to_appinfo{$cookie}) {
+        my $pid2 = $g_cookie_to_appinfo{$cookie}{pid};
+
+        WARN "different pids: got $pid but recorded $pid2" if $pid != $pid2;
+
+        my $target_session;
+        if (exists $g_cookie_to_appinfo{$cookie}{sid}) {
+            $target_session = $kernel->ID_id_to_session($g_cookie_to_appinfo{$cookie}{sid});
+        }
+
+        if (defined $target_session) {
+            # the request session hasn't got app launch acknowledgement from the app
+            $kernel->post($target_session, "fail_exec_app", $pid, $code, $cookie);
+        } else {
+            # It's OK the requester end the app launch request session
+            # before the app exits because app is often long running.
+        }
+
+        delete $g_cookie_to_appinfo{$cookie};
+    } else {
+        ERROR "app info not found for pid $pid(cookie=$cookie)";
+    }
+}
+
+
+# In master and child session
+#
+sub register_HUP_INT_TERM_handler {
+    my ($kernel) = @_;
+
+    $kernel->state("sig_HUP_INT_TERM", \&sig_HUP_INT_TERM);
+    $kernel->sig(HUP    => "sig_HUP_INT_TERM");
+    $kernel->sig(INT    => "sig_HUP_INT_TERM");
+    $kernel->sig(TERM   => "sig_HUP_INT_TERM");
+}
+
+
+# In master and child session
+#
+sub sig_HUP_INT_TERM {
+    my ($kernel, $heap, $sig) = @_[KERNEL, HEAP, ARG0];
+
+    my $who = "listener";
+    if (! exists $heap->{listener}) {
+        $who = "client";
+    }
+
+    WARN "$who got signal $sig!";
+
+    $kernel->yield("shutdown");
+    $kernel->sig_handled();
+}
+
+
+# In child session
+#
+sub on_client_connected {
+    my ($kernel, $heap) = @_[KERNEL, HEAP];
+
+    INFO "client connected from $heap->{remote_ip} " .
+        "port $heap->{remote_port}, " .
+        "session id " . $_[SESSION]->ID;
+
+    register_HUP_INT_TERM_handler($kernel);
+}
+
+
+# In child session
+#
+sub on_client_disconnected {
+    my $heap = $_[HEAP];
+
+    INFO "client disconnected from $heap->{remote_ip} " .
+        "port $heap->{remote_port}, " .
+        "session id " . $_[SESSION]->ID;
+}
+
+
+# In child session
+#
+sub on_client_input {
+    my ($kernel, $heap, $request) = @_[KERNEL, HEAP, ARG0];
+
+    # It's a response for the client if there was a problem
+    if ($request->isa("HTTP::Response")) {
+        my $response = $request;
+
+        $request = $response->request;
+        WARN "bad request: ", $request->message if $request;
+
+        $_[HEAP]{client}->put($response);
+        $_[KERNEL]->yield("shutdown");
+        return;
+    }
+
+    try {
+        my $response = handle_request($request);
+        if (defined $response) {
+            $heap->{client}->put($response);
+        } else {
+            # This is an async call
+            return;
+        }
+    } catch {
+        ERROR "caught exception when handle request: $_";
+
+        my $response = compose_http_response(500,
+            "Caught exception when handle request!",
+            "text/plain");
+        $heap->{client}->put($response);
+
+        $kernel->yield("shutdown");
+    };
+}
+
+
+# In child session
+#
+sub handle_request {
+    my ($request) = @_;
+    my $response;
+    my $ref;
+
+    if ($request->content) {
+        $ref = decode_json $request->content;
+    } else {
+        return compose_http_response(302,
+            "Not a JSON message, current time: " .
+            scalar(localtime), "text/plain");
+    }
+
+    if (defined $ref && ref($ref) eq 'ARRAY' && @$ref > 0) {
+        my $json = dispatch_json_request(@$ref);
+        if (defined $json) {
+            $response = compose_http_response(200, $json);
+        } else {
+            # This is an async call
+            return;
+        }
+    } else {
+        $response = compose_http_response(400,
+            "Invalid JSON array message: " . $request->content,
+            "text/plain");
+    }
+
+    return $response;
+}
+
+
+# In child session
+#
+sub compose_http_response {
+    my ($code, $content, $type) = @_;
+    my $length;
+
+    $type ||= "application/json";
+    {
+        use bytes;
+        $length = length($content);
+    }
+
+    my $response = HTTP::Response->new($code);
+    $response->push_header("Content-Type", $type);
+    $response->push_header("Content-Length", $length);
+    $response->content($content);
+
+    return $response;
+}
+
+
+# In child session
+#
+sub dispatch_json_request {
+    my ($action, @args) = @_;
+
+    if (exists $g_action_table{$action}) {
+        my $ref = $g_action_table{$action}(@args);
+        if (! defined($ref)) {
+            # This is an async call
+            return;
+        } elsif (ref($ref) ne 'ARRAY') {
+            LOGDIE "action handler for \"$action\" doesn't return single array reference!";
+        } else {
+            return encode_json($ref);
+        }
+    } else {
+        return encode_json(["bad", "Unknown action!"]);
+    }
+}
+
+
+# In child session
+#
+sub action_exec {
+    my ($app, @args) = @_;
+
+    if (! defined $app) {
+        return ["bad", "app name missed!"];
+    }
+
+    if ($app  !~ /^[a-zA-Z0-9~_\+\-\.]+/) {
+        return ["bad", "Invalid app name!"];
+    }
+
+    my $path = File::Spec->catfile($g_libexec_path, $app, APP_ENTRY_FILE);
+    if (! -f $path || ! -r $path || ! -x $path) {
+        return ["bad", "Bad app name!"];
+    }
+
+    my $cookie = $app . "-" . time() ."-$$-" . int(rand(9999));
+
+    my $heap = $poe_kernel->get_active_session()->get_heap();
+    my $who = $heap->{remote_ip} . ":" . $heap->{remote_port};
+
+    my $pid = fork();
+    if (! defined $pid) {
+        return ["bad", "Failed to run app!"];
+    }
+
+    if ($pid) {
+        INFO "created child process $pid";
+
+        $g_cookie_to_appinfo{$cookie} = {
+            pid => $pid,
+            sid => $poe_kernel->get_active_session()->ID,
+            arg => \@args,
+            who => $who,
+        };
+
+        # Register handler in "Master" session, so this child session
+        # can quits before the child process quits.
+        $poe_kernel->call("Master","reap_child", $pid, $cookie);
+
+        $poe_kernel->state("fail_exec_app", \&on_fail_exec_app);
+        $poe_kernel->state("done_exec_app", \&on_done_exec_app);
+
+    } else {
+        my $nullfh = IO::File->new(File::Spec->devnull);
+        untie *STDIN;
+        untie *STDOUT;
+        untie *STDERR;
+
+        open STDIN, '<&', $nullfh->fileno() or
+            die "Can't redirect stdin(pid=$$): $!";
+
+        my $cwd = File::Spec->catdir($g_libexec_path, $app);
+        chdir $cwd or die "Can't chdir to $cwd: $!";
+
+        my $job;
+        if (@args > 0 && ref($args[0]) eq 'HASH') {
+            $job = $args[0]{job} if exists $args[0]{job};
+        }
+
+        $ENV{PLUMBER_COOKIE} = $cookie;
+        $ENV{PLUMBER_APP} = $app;
+        $ENV{PLUMBER_WHO} = $who;
+        $ENV{PLUMBER_JOB} = $job if defined $job;
+
+        my @tokens = ("--app", $app);
+        push @tokens, "--requestor", $who;
+        push @tokens, "--job", $job if defined $job;
+
+        exec { $path } $app, @tokens or
+            print STDERR "Can't execute $path: $!";
+
+        POSIX::_exit(1);
+    }
+
+    # This is an async call
+    return;
+}
+
+
+# In child session who initiates "action_exec"
+#
+sub on_fail_exec_app {
+    my ($kernel, $session, $heap, $pid, $code, $cookie) = @_[KERNEL, SESSION, HEAP, ARG0, ARG1, ARG2];
+    my $sid = $session->ID;
+
+    WARN "fail to exec app for session id $sid";
+
+    $poe_kernel->state("fail_exec_app");
+
+    my $json = encode_json(["bad", "app exit immaturely: pid=$pid, code=$code"]);
+    my $response = compose_http_response(200, $json);
+
+    if (exists $g_cookie_to_appinfo{$cookie} && exists $g_cookie_to_appinfo{$cookie}{sid}) {
+        my $sid2 = $g_cookie_to_appinfo{$cookie}{sid};
+
+        WARN "different sids: got $sid but recorded $sid2" if $sid != $sid2;
+
+        # Not delete $g_cookie_to_appinfo{$cookie}, so that we can keep
+        # this booking information for the app process.
+        delete $g_cookie_to_appinfo{$cookie}{sid};
+    } else {
+        ERROR "can't find session info for pid $pid (sid=$sid, cookie=$cookie)";
+    }
+
+    $heap->{client}->put($response);
+}
+
+
+# In child session who initiates "action_exec"
+#
+sub on_done_exec_app {
+    my ($kernel, $session, $heap, $cookie, @args) = @_[KERNEL, SESSION, HEAP, ARG0, ARG1 .. $#_];
+    my $sid = $session->ID;
+
+    $poe_kernel->state("done_exec_app");
+
+    my $json = encode_json(["ok", @args]);
+    my $response = compose_http_response(200, $json);
+
+    if (exists $g_cookie_to_appinfo{$cookie} && exists $g_cookie_to_appinfo{$cookie}{sid}) {
+        my $sid2 = $g_cookie_to_appinfo{$cookie}{sid};
+
+        WARN "different sids: got $sid but recorded $sid2" if $sid != $sid2;
+
+        # Not delete $g_cookie_to_appinfo{$cookie}, so that we can keep
+        # this booking information for the app process.
+        delete $g_cookie_to_appinfo{$cookie}{sid};
+    } else {
+        ERROR "can't find session info for sid=$sid, cookie=$cookie";
+    }
+
+    $heap->{client}->put($response);
+}
+
+
+# In child session, this session will obtain stored exec args which
+# stored by the child session who initiates "action_exec", the args
+# are send to app process.
+#
+sub action_establish {
+    my $cookie = $_[0];
+
+    if (! exists $g_cookie_to_appinfo{$cookie}) {
+        return ["bad", "non-existed app cookie"];
+    }
+
+    if (! exists $g_cookie_to_appinfo{$cookie}{sid}) {
+        return ["bad", "initiative session has exited."];
+    }
+
+    return ["ok", @{ $g_cookie_to_appinfo{$cookie}{arg} }];
+}
+
+
+# In child session, this session will generate response for the child
+# session who initiates "action_exec".
+#
+sub action_establish2 {
+    my ($cookie, @args) = @_;
+
+    if (! exists $g_cookie_to_appinfo{$cookie}) {
+        return ["bad", "non-existed app cookie"];
+    }
+
+    my $target_session;
+    if (exists $g_cookie_to_appinfo{$cookie}{sid}) {
+        $target_session = $poe_kernel->ID_id_to_session($g_cookie_to_appinfo{$cookie}{sid});
+    }
+
+    if (! defined $target_session) {
+        return ["bad", "initiative session has exited."];
+    }
+
+    $poe_kernel->post($target_session, "done_exec_app", $cookie, @args);
+
+    return ["ok", "done"];
+}
+

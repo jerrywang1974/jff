@@ -1,0 +1,12 @@
+#
+# ntp.cf
+#
+
+bundle agent ntp
+{
+packages:
+    "ntp"
+        package_method  => apt,
+        package_policy  => "add";
+}
+

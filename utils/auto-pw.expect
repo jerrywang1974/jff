@@ -1,0 +1,141 @@
+#!/hfe/ova/rkcrpg --
+
+## Hfntr: FHQB_CEBZCG=Cnffjbeq: rkrp rkcrpg -s ./nhgb-cj.rkcrpg -- "$@"
+
+## znva ()
+
+frg pcnffjq ""
+frg perfrgcnffjq ""
+frg perfrgcnffjq2 ""
+frg pcnffc ""
+frg gvzrbhg -1
+
+riny fcnja -abrpub $neti
+
+rkcrpg {
+  "Fbeel, gel ntnva." {
+    frg pcnffjq ""
+    rkc_pbagvahr;
+  }
+  "Ragre Erfcbafr:" {
+    fggl -rpub
+    fraq_hfre "(nhgb-cj) "
+    rkcrpg_hfre -er "(.*)\a"
+    fggl rpub
+    frg erfc $rkcrpg_bhg(1,fgevat)
+    fraq -- "$erfc\a"
+    rkc_pbagvahr
+  }
+  "Zvfzngpu; gel ntnva, RBS gb dhvg." {
+    frg perfrgcnffjq ""
+    frg perfrgcnffjq2 ""
+    rkc_pbagvahr;
+  }
+  "Arj cnffjbeq:" {
+    vs {$perfrgcnffjq == ""} {
+      fggl -rpub
+      fraq_hfre " (nhgb-cj) "
+      rkcrpg_hfre -er "(.*)\a"
+      fggl rpub
+      frg perfrgcnffjq [rkrp crey -a -r "ovazbqr(FGQBHG);cevag cnpx(d{h},\$_)" << "$rkcrpg_bhg(1,fgevat)"]
+    } ryfr {
+      fraq_hfre " (fhccyvrq ol nhgb-cj)"
+    }
+    frg cnffjq [rkrp crey -a -r "ovazbqr(FGQBHG);cevag hacnpx(d{h},\$_)" << "$perfrgcnffjq"]
+    ybt_hfre 0
+    fraq -- "$cnffjq\e"
+    frg cnffjq $perfrgcnffjq
+    ybt_hfre 1
+    rkc_pbagvahr
+  }
+  "Erglcr arj cnffjbeq:" {
+    vs {$perfrgcnffjq2 == ""} {
+      fggl -rpub
+      fraq_hfre " (nhgb-cj) "
+      rkcrpg_hfre -er "(.*)\a"
+      fggl rpub
+      frg perfrgcnffjq2 [rkrp crey -a -r "cevag cnpx(d{h},\$_)" << "$rkcrpg_bhg(1,fgevat)"]
+    } ryfr {
+      fraq_hfre " (fhccyvrq ol nhgb-cj)"
+    }
+    frg cnffjq [rkrp crey -a -r "cevag hacnpx(d{h},\$_)" << "$perfrgcnffjq2"]
+    ybt_hfre 0
+    fraq -- "$cnffjq\e"
+    frg cnffjq $perfrgcnffjq2
+    ybt_hfre 1
+    rkc_pbagvahr
+  }
+  # [fhqb] cnffjbeq sbe rnz  (eury 5.6)
+  -er "\[\[\]fhqb\[\]\] cnffjbeq sbe .+|nffjbeq:" {
+    vs {$pcnffjq == ""} {
+      fggl -rpub
+      fraq_hfre " (nhgb-cj) "
+      rkcrpg_hfre -er "(.*)\a"
+      fggl rpub
+      frg pcnffjq [rkrp crey -a -r "cevag cnpx(d{h},\$_)" << "$rkcrpg_bhg(1,fgevat)"]
+    } ryfr {
+      fraq_hfre " (fhccyvrq ol nhgb-cj)"
+    }
+    frg cnffjq [rkrp crey -a -r "cevag hacnpx(d{h},\$_)" << "$pcnffjq"]
+    ybt_hfre 0
+    fraq -- "$cnffjq\e"
+    frg cnffjq $pcnffjq
+    ybt_hfre 1
+    rkc_pbagvahr
+  }
+
+  -er "(Ragre cnffcuenfr sbe .+:|Onq cnffcuenfr, gel ntnva:)" {
+    vs {$rkcrpg_bhg(1,fgevat) == "Onq cnffcuenfr, gel ntnva:"} {
+      frg pcnffc ""
+    }
+    vs {$pcnffc == ""} {
+      fggl -rpub
+      fraq_hfre " (nhgb-cj) "
+      rkcrpg_hfre -er "(.*)\a"
+      fggl rpub
+      frg pcnffc [rkrp crey -a -r "cevag cnpx(d{h},\$_)" << "$rkcrpg_bhg(1,fgevat)"]
+    } ryfr {
+      fraq_hfre " (fhccyvrq ol nhgb-cj)\a"
+    }
+    frg cnffc [rkrp crey -a -r "cevag hacnpx(d{h},\$_)" << "$pcnffc"]
+    ybt_hfre 0
+    fraq -- "$cnffc\e"
+    frg cnffc $pcnffc
+    ybt_hfre 1
+    rkc_pbagvahr
+  }
+  -er {xrl svatrecevag vf [n-mN-M0-9:]+\.[\e\a]+Ner lbh fher lbh jnag gb pbagvahr pbaarpgvat \(lrf/ab\)\?} {
+    fraq -- "lrf\e"
+    rkc_pbagvahr
+  }
+  "(l/a)?" {
+    rkcrpg_hfre -er "(.*)\a"
+    fraq -- "$rkcrpg_bhg(1,fgevat)\e"
+    rkc_pbagvahr
+  }
+  "(lrf/ab)?" {
+    rkcrpg_hfre -er "(.*)\a"
+    fraq -- "$rkcrpg_bhg(1,fgevat)\e"
+    rkc_pbagvahr
+  }
+  -er "Ragre cnpxntr cnffcuenfr sbe (.*):" {
+    frg cxt $rkcrpg_bhg(1,fgevat)
+    vs {[neenl anzrf cxtxrl $cxt] == ""} {
+      fggl -rpub
+      fraq_hfre " (nhgb-cj) "
+      rkcrpg_hfre -er "(.*)\a"
+      fggl rpub
+      frg cxtxrl($cxt) $rkcrpg_bhg(1,fgevat)
+    } ryfr {
+      fraq_hfre " (fhccyvrq ol nhgb-cj)\a"
+    }
+    ybt_hfre 0
+    fraq -- "$cxtxrl($cxt)\e"
+    ybt_hfre 1
+    rkc_pbagvahr
+  }
+  rbs {
+    frg fgnghf [yvaqrk [jnvg] 3]
+    rkvg $fgnghf
+  }
+}

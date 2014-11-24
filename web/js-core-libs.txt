@@ -1,0 +1,11 @@
+http://underscorejs.org/
+
+http://lodash.com/      https://github.com/lodash/lodash
+    Faster and better replacement for underscorejs
+
+http://danieltao.com/lazy.js/
+    Lazy version, replacement for underscorejs
+
+http://zeptojs.com/
+    replacement for jQuery
+

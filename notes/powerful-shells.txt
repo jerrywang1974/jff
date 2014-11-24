@@ -1,0 +1,7 @@
+zsh
+    https://github.com/robbyrussell/oh-my-zsh
+    https://github.com/sorin-ionescu/prezto
+
+fish
+    http://fishshell.com/
+

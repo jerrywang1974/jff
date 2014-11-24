@@ -1,0 +1,173 @@
+#+STARTUP: showall align lognotedone
+#+SEQ_TODO: TODO(t!) GOING(g!) PAUSED(p@) | DONE(d@) CANCELED(c@)
+#+TAGS: Programming(p) C CPlusPlus Perl Java Erlang OCaml Lisp
+#+TAGS: Software(p)
+#+TAGS: Linux(l) { LinuxApp LinuxDev LinuxKernel }
+#+TAGS: TeX(t) { LaTeX ConTeXt }
+#+TAGS: Network(n)
+
+Emacs Org-mode 手册阅读笔记
+
+* Document Structure
+
+** Visibility cycling
+
+| 按键              | 作用                   |
+|-------------------+------------------------|
+| <TAB>             | 循环展开光标所在的标题 |
+| S-<TAB>           | 循环展开所有标题       |
+| C-u C-u C-u <TAB> | 显示所有               |
+
+** Motion
+
+| 按键    | 作用                             |
+|---------+----------------------------------|
+| C-c C-n | next heading                     |
+| C-c C-p | previous heading                 |
+| C-c C-f | next heading same level          |
+| C-c C-b | previous heading same level      |
+| C-c C-u | backward to higher level heading |
+| C-c C-j | jump to a different place        |
+
+** Structure editing
+
+| 按键        | 作用                                           |
+|-------------+------------------------------------------------|
+| M-<RET>     | insert new heading with same level as current  |
+| C-<RET>     | adding a new heading below the current heading |
+| M-S-<RET>   | new TODO entry                                 |
+| C-S-<RET>   | new TODO entry                                 |
+| M-<Left>    | promote current heading                        |
+| M-<right>   | demote current heading                         |
+| M-S-<left>  | promote current subtree                        |
+| M-S-<right> | demote current subtree                         |
+| M-S-<up>    | move subtree up                                |
+| M-S-<down>  | move subtree down                              |
+| C-c C-x C-w | cut subtree                                    |
+| C-c C-x M-w | copy subtree                                   |
+| C-c C-x C-y | paste subtree                                  |
+| C-c ^       | sort child headings                            |
+
+** Archiving
+*** The ARCHIVE tag
+
+| 按键      | 作用                          |
+|-----------+-------------------------------|
+| C-c C-x a | toggle ARCHIVE tag            |
+| C-TAB     | cycle a tree even if archived |
+
+*** Moving subtrees
+
+| 按键      | 作用                                  |
+|-----------+---------------------------------------|
+| C-c C-x A | move current entry to Archive Sibling |
+
+** Sparse trees
+| 按键    | 作用                                  |
+|---------+---------------------------------------|
+| C-c /   | select a sparse-tree creating command |
+| C-c / r | select by regexp                      |
+
+** Plain lists
+
+ - Unordered list: 以 - 或者 + 开头
+ - Ordered list: 以 1. 或者 2) 开头
+ - Description list: 以 - 或者 + 开头，用::分隔
+
+** Footnotes
+| 按键      | 作用                                             |
+|-----------+--------------------------------------------------|
+| C-c C-x f | footnote action command                          |
+| C-c C-c   | switch between footnote reference and definition |
+
+* Tables
+
+| 按键        | 作用                      |
+|-------------+---------------------------|
+| M-<Left>    | move current column left  |
+| M-<right>   | move current column right |
+| M-S-<left>  | kill current column       |
+| M-S-<right> | insert new column         |
+| M-<up>      | move current row up       |
+| M-<down>    | move current row down     |
+| M-S-<up>    | kill current row          |
+| M-S-<down>  | insert new row            |
+| C-c -       | insert horizontal line    |
+| C-c ^       | sort                      |
+
+* Tags
+
+| 按键    | 作用        |
+|---------+-------------|
+| C-c C-q | modify tags |
+| C-c \   | search tag  |
+
+* Dates and Times
+** Timestamps, deadlines, and scheduling
+- 时间点 <timestamp>
+- 周期性时间点 <timestamp +n>
+- 时间范围 <timestamp>--<timestamp>
+- 不显示在日历上的时间 [timestamp]
+
+| 按键      | 作用                                 |
+|-----------+--------------------------------------|
+| C-c .     | 插入或者修改日期，连续两次是时间范围 |
+| C-c !     | 插入或者修改日期，不显示在日历上     |
+| C-u C-c . | 时间                                 |
+| C-u C-c ! | 时间                                 |
+| C-c <     | 插入当前日期                         |
+| C-c \>    | 跳到光标处日期所在的日历             |
+| S-<left>  | 减少一天                             |
+| S-<right> | 增加一天                             |
+| S-<up>    | 增加 timestamp 的某个成员            |
+| S-<down>  | 减少 timestamp 的某个成员            |
+| C-c C-y   | 计算时间范围                         |
+
+在输入日期弹出日历时，可以用如下按键切换日期：
+
+| 按键               | 作用           |
+|--------------------+----------------|
+| > / <              | 以月为单位滚动 |
+| S-<right>/<left>   | 以天为单位滚动 |
+| S-<down>/<up>      | 以周为单位滚动 |
+| M-S-<right>/<left> | 以月为单位滚动 |
+| mouse-1            | 选择某天       |
+| <RET>              | 选择高亮日期   |
+
+*** Inserting deadlines or scheduling
+
+| 按键    | 作用        |
+|---------+-------------|
+| C-c C-d | DEADLINE    |
+| C-c C-s | SCHEDULED   |
+| C-c / d | sparse tree |
+| C-c / b | sparse tree |
+| C-c / a | sparse tree |
+
+
+** Clocking work time
+
+| 按键        | 作用                   |
+|-------------+------------------------|
+| C-c C-x C-i | start clock            |
+| C-c C-x C-o | stop clock             |
+| C-c C-x C-x | cancel clock           |
+| C-c C-x C-j | jump to runnning clock |
+| C-c C-x C-d | 显示消耗时间统计       |
+| C-c C-x C-r | 插入消耗时间报告       |
+| C-c C-c     | 更新报告               |
+
+* 常用
+
+- 标题间移动
+- 列表
+- 新建标题，标题级别的修改
+- todo 序列的改变，优先级的改变
+- 日期记法
+- 从日历里选择时间的办法
+
+
+#####################
+
+8.4 Clocking work time，设置持续的记录时间
+设置把 lognote 记录的信息放入 drawer；

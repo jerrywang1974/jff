@@ -1,0 +1,12 @@
+#
+# mta.cf
+#
+
+bundle agent mta
+{
+reports:
+
+    cfengine_3::
+    "Hello from mta!";
+}
+

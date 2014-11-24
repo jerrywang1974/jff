@@ -1,0 +1,56 @@
+* Emacs Keys
+
+** Indentation
+
+| Keys  | Description                      |
+|-------+----------------------------------|
+| TAB   | indent current line              |
+| C-M-q | indent s-exp after current point |
+| C-M-\ | indent region                    |
+
+
+** Movement
+
+|   |   |
+|---+---|
+|   |   |
+|   |   |
+|   |   |
+|   |   |
+
+** Compiling
+
+|   |   |
+|---+---|
+|   |   |
+|   |   |
+|   |   |
+|   |   |
+
+** Evaluation
+
+| Keys    | Description            |
+|---------+------------------------|
+| C-c C-e | slime-interactive-eval |
+| C-M-x   | slime-eval-defun       |
+|         |                        |
+|         |                        |
+
+** Completion
+
+| Keys                  | Description                      |
+|-----------------------+----------------------------------|
+| TAB                   | slime-indent-and-complete-symbol |
+| C-c TAB, M-TAB, C-M-i | slime-complete-symbol            |
+| C-x c TAB             | helm-lisp-completion-at-point    |
+
+** Cross Reference
+
+| Keys                        | Description            |
+|-----------------------------+------------------------|
+| M-.                         | Edit definition        |
+| M-,                         | Return from definition |
+| M-x imenu-add-menubar-index | Insert menu "Index"    |
+| M-x imenu-add-to-menubar    | Insert named menu      |
+| M-x imenu                   | Jump to a symbol       |
+| M-x speedbar                | Show speed bar         |

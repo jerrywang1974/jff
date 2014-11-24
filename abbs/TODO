@@ -1,0 +1,39 @@
+* fallocate(), posix_fallocate(), posix_fadvise()
+
+* memcached, other cached??
+
+* rote.sf.net (librote), 
+  http://repo.or.cz/w/librote.git   add utf-8 support
+
+* http://git.madism.org/?p=apps/madtty.git;a=summary    madtty library
+  support utf-8, get color right, support terminal resizing
+
+* dvtm has switched from librote to madtty
+
+* libncursesw5
+* aewan.sf.net (an ascii editor using librote)
+* anyterm.org (a web based ajax terminal emulator)
+  http://antony.lesuisse.org/qweb/trac/wiki/AjaxTerm    Another ajax term
+* gperf: gnu perfect hash function
+* libevent, epoll, sendfile
+* evhttp, asio
+* LVS + HA -> Lighttpd -> Squid (varnish)
+           -> ningx -> apache -> memcached -> mogilefs
+
+* ncursesw, slang, libcdk, libnewt, libstfl-dev, aptitude's libcwidget
+
+* boardd doesn't require mmap()
+* self auto adaptive second level index for index_t
+
+* write test case with perl's test any protocol.
+
+* libltdl3
+
+* Makefile.am: how to install header files to .../abbs/xxx?
+* Makefile.am: how to always build libjail as shared library?
+
+* Perl implementation:
+    sqlite, slang, ncurses, inotify, mmap all have Perl interfaces,
+    and DBI, cache::*, memcached, Encoding modules, Text::Wrap,
+    Text::Soundex, POE, Catalyst...  but perl consumes more memory.
+

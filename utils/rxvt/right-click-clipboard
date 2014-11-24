@@ -1,0 +1,61 @@
+#!perl
+#
+# Purpose:
+#   Copy to CLIPBOARD selection if some text is being selected,
+#   paste from CLIPBOARD selection if no text is being selected.
+#
+# References:
+#   `man urxvtperl`
+#   http://wiki.archlinux.org/index.php/Rxvt-unicode
+#
+# Try with rxvt --perl-lib . -pe clipboard
+#
+#   Liu Yubao <yubao.liu@gmail.com>, 2010-09-16
+
+sub on_button_release {
+    my ($self, $event) = @_;
+    my $mask = $self->ModLevel3Mask | $self->ModMetaMask | urxvt::ShiftMask | urxvt::ControlMask;
+
+
+    # Only right button clicked
+    return if $event->{state} & $mask;
+
+    if ( $event->{state} & urxvt::Button3Mask ) {
+        my $selection = $self->selection;
+
+        # cancel selection
+        my ($row, $col) = ($event->{row}, $event->{col});
+        $self->selection_beg($row, $col);
+        $self->selection_end($row, $col);
+        $self->selection_make(urxvt::NOW);
+        $self->selection("");
+
+        #$self->tt_write("# selection=[$selection]");
+
+        if ( length($selection) > 0 ) {
+            #$self->tt_write("# copy");
+
+            open my $fh, "| xsel -ib" or return;
+            binmode $fh;
+            print $fh $selection;
+            close $fh;
+
+        } else {
+            #$self->tt_write("# paste");
+
+            open my $fh, "xsel -ob |" or return;
+            binmode $fh;
+            {
+                local $/;
+                my $text = <$fh>;
+                $self->tt_write($text) if defined $text;
+            }
+            close $fh;
+        }
+
+        return 1;
+    }
+
+    return;
+}
+

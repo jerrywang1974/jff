@@ -1,0 +1,288 @@
+分布式文件系统比较：
+
+MooseFS 很不错，已经实用了半月了，易用，稳定，对小文件很高效。
+MogileFS 据说对于 Web 2.0 应用存储图片啥的很好。
+GlusterFS 感觉广告宣传做的比产品本身好。
+OpenAFS/Coda 是很有特色的东西。
+Lustre 复杂，高效，适合大型集群。
+PVFS2 搭配定制应用会很好，据说曙光的并行文件系统就是基于 PVFS。
+
+适合做通用文件系统的有 MooseFS，GlusterFS，Lustre。
+
+Network file system:
+    NFSv3.0
+    CIFS/SMB (SMB 3.0 introduced SMB over RDMA and SMB multichannel)
+    sshfs (for Mac: http://osxfuse.github.io/)
+
+Clustered file system(shared-disk architecture):
+    CXFS    SGI 开发
+    GPFS    IBM 开发，被高性能计算环境大量使用
+    GFS2    RedHat 开发, 性能不行
+    OCFS2   Oracle 开发，自带的o2cb不稳定，需要外挂 cman 或者 corosync + pacemaker
+
+Distributed file system(shared-nothing architecture):
+    Ceph
+    MooseFS
+    GlusterFS
+    HDFS
+
+Remote block device:
+    Sheepdog
+    iSCSI
+    InfiniBand
+    Fibre Channel
+    DRBD (http://www.drbd.org)
+    ATA over Ethernet
+
+
+================================================================
+XtreemFS: http://www.xtreemfs.org/
+    * 服务端是 Java 实现的
+    * 四种角色：directory service(DIR), metadata server(MRC), storage server(OSD), client,
+      DIR 充当 service registry
+    + 支持 Linux、Windows、Mac OS X
+    + replication per file
+    + POSIX compatible
+    + 支持 TLS + X509 认证，可以跨因特网使用
+    + 支持跨数据中心复制，可以指定数据中心之间的距离权重
+    + DIR 支持多个 replicas
+    + 支持条带化存储
+    + 客户端元数据缓存
+    - 写入性能非常差
+    - 用户很少
+
+CloudStore (KosmosFS)
+    + 被 Hadoop 作为分布式文件系统后端之一
+    - 不支持文件元数据
+    - kfs_fuse 太慢，不可用
+    - 编译依赖多，文档落后，脚本简陋
+    - 开发不活跃
+
+MooseFS
+    + 支持文件元数据
+    + mfsmount 很好用
+    + 编译依赖少，文档全，默认配置很好
+    + mfshdd.cfg 加 * 的条目会被转移到其它 chunk server，以便此 chunk server 安全退出
+    + 不要求 chunk server 使用的文件系统格式以及容量一致
+    + 开发很活跃
+    + 可以以非 root 用户身份运行
+    + 可以在线扩容
+    + 支持回收站
+    + 支持快照
+    - master server 存在单点故障
+    - master server 很耗内存
+
+MogileFS
+    - 不适合做通用文件系统，适合存储静态只读小文件，比如图片
+
+GlusterFS (http://gluster.com/community/documentation/index.php/GlusterFS_Features)
+    + 无单点故障问题
+    + 支持回收站
+    + 模块化堆叠式架构
+    + 使用文件名 hash (Elastic Hashing Algorithm)定位文件，没有 metadata server
+    - 对文件系统格式有要求，ext3/ext4/zfs 被正式支持，xfs/jfs 可能可以，reiserfs 经测试可以
+      (http://gluster.com/community/documentation/index.php/Storage_Server_Installation_and_Configuration#Operating_System_Requirements)
+    - 需要以 root 用户身份运行（用了 trusted xattr，mount 时加 user_xattr 选项是没用的，官方说法是
+            glusterfsd 需要创建不同属主的文件，所以必需 root 权限)
+    - 不能在线扩容(不 umount 时增加存储节点)，计划在 3.1 里实现
+    - 分布存储以文件为单位，条带化分布存储不成熟
+    - 不使用 client side cache
+    - replication 通过在两个 devices（可能在不同机器上）间做 RAID1 实现，因此
+      需要的 device 数目是偶数，复制是设备级别，不是文件级别，相当于网络级别的
+      soft RAID1
+
+GFS2
+    http://sourceware.org/cluster/wiki/DRBD_Cookbook
+    http://www.smop.co.uk/blog/index.php/2008/02/11/gfs-goodgrief-wheres-the-documentation-file-system/
+    http://wiki.debian.org/kristian_jerpetjoen
+    http://longvnit.com/blog/?p=941
+    http://blog.chinaunix.net/u1/53728/showart_1073271.html (基于红帽RHEL5U2 GFS2+ISCSI+XEN+Cluster 的高可性解决方案)
+    http://www.yubo.org/blog/?p=27 (iscsi+clvm+gfs2+xen+Cluster)
+    http://linux.chinaunix.net/bbs/thread-777867-1-1.html
+
+    * 并不是 distributed file system, 而是 shared disk cluster file system，需要某种机制在机器
+            之间共享磁盘，以及加锁机制，因此需要 drbd/iscsi/clvm/ddraid/gnbd 做磁盘共享，以及 dlm 做锁管理)
+    - 依赖 Red Hat Cluster Suite (Debian: aptitude install redhat-cluster-suite， 图形配置工具包
+            system-config-cluster, system-config-lvm)
+    - 适合不超过约 30 个节点左右的小型集群，规模越大，dlm 的开销越大，默认配置 8 个节点
+
+OCFS2
+    * GFS 的 Oracle 翻版，据说性能比 GFS2 好 (Debian: aptitude install ocfs2-tools, 图形配置工具包 ocfs2console)
+    - 不支持 ACL、flock，只是为了 Oracle database 设计
+
+OpenAFS
+    + 成熟稳定
+    + 开发活跃，支持 Unix/Linux/MacOS X/Windows
+    * 文件组织结构为 cell -> partition -> volume -> directory -> file,
+      cell 相当于 site，partition 是一块磁盘分区，volume 是一个紧密相关的目录
+      和文件集合，一个 partition 可以包含多个 volume，volume 可以迁移但对客户
+      端透明, volume 是存储管理的最小单元
+    + 多个 cell 可以构成统一 file namespace，互相共享文件
+    - volume 迁移需要管理员手动触发，用于均衡负载，但基于 volume 做负载均衡粒度太粗
+    - 管理员可以复制 volume 到多台机器上作为只读备份以分担压力
+    - volume size 不能超过 partition size
+    - volume replica 只能是只读的，而且 source read-write volume 里的文件修改
+      只能在管理员触发 "vos release" 后才会同步到 read-only replica
+    - 性能不够好
+    - 管理复杂, 服务端有一大堆服务进程: file server 提供文件读写, basic overseer server(BOS
+      server)确保其它服务进程持续运行, protection server做权限控制, volume server 用于移动卷,
+      volume location server 纪录卷的物理为止，update server 负责 AFS 自身程序
+      的更新和分发, backup server 用于备份。
+    - 权限控制粒度只在目录一级
+    - 不支持离线后修改本地版本 （Coda 支持这个特性)
+    - cache manager 的替换策略是最近最少使用，没有考虑长期使用频率，也不考虑文
+      件的打开状态
+    - 目录文件没有用 B+ tree，而是线性索引，查找性能很差
+    - 一个目录只能存放 64000 个文件名长度不超过 16 个字节的文件，文件名越长当
+      个目录能容纳的文件数目越少
+    - 只支持 advisory full file lock，不支持强制锁以及区间锁，当前的 AFS file
+      server 不记录哪些 client 获得过锁，所以可能导致锁的计数不正确
+    - 文件修改后还不支持增量差异复制
+    * AFS database server 作为 AFS server 和 client 的注册服务，通过多机冗余达
+      到高可靠性，但不支持自动迁移
+    * 依赖 Kerberos v5 做认证
+    - server 和 client 需要保持精确的时间一致，一般用 ntp 服务保证
+    - Kerberos realm name 和 OpenAFS cell name 应保持一致，并且设置后不应更改
+
+    http://lxhzju.blog.163.com/blog/static/4500820068297420498/ (CMUCL@newsmth)
+    - 当一个文件保存在多个文件服务器里时，更新文件并不会即时地更新所有文
+      件服务器里。用户必须显示地release一个这样的卷，才会触发卷服务器间
+      的同步操作，因此不会有数据同步对性能的影响。当然这也就说明AFS实际上
+      不能做到数据在服务器之间的高可用性，多个卷服务器只能提高读操作性能。
+
+    - AFS的认证服务器(Authentication Server)只是基于Kerberos 4，并不是真
+      正的Kereberos认证。真正使用Kerberos 5认证的AFS系统里是没有任何认证
+      服务器进程的：认证过程通过访问Kerberos 5的 Admin Server 和 KDC 来完成。
+      实际上现代的AFS网络里也已经不使用更新服务器了，因为AFS二进制文件是由软件
+      包系统来管理的，定期升级软件包即可。AFS在所有节点二进制代码版本一致时效
+      率最好。
+
+    - Arla是AFS的另一种开源实现，它完全兼容AFS协议，可以和OpenAFS的节点
+      通讯。所以把Arla视为一种新的分布式文件系统并说AFS要退出了是不正确
+      的。另外，Arla在客户端部分已经成熟，但服务器端还处于早期测试阶段。至于
+      Coda，确实可以看作是源于AFS的下一代分布式文件系统，但是经过CMU二十多年的
+      开发仍未能达到工业级应用的标准，除非参与开发否则不可能采用。
+
+Coda
+    * 从服务器复制文件到本地，文件读写是本地操作因此很高效
+    * 文件关闭后发送到服务器
+    + 支持离线操作，连线后再同步到服务器上
+    - 缓存基于文件，不是基于数据块，打开文件时需要等待从服务器缓存到本地完毕
+    - 并发写有版本冲突问题
+    - 并发读有极大的延迟，需要等某个 client 关闭文件，比如不适合 tail -f some.log
+    - 研究项目，不够成熟，使用不广
+
+InterMezzo
+    - 源自 Coda 项目，已废弃，开发人员转向 Lustre
+
+PVFS2 / OrangeFS (OrangeFS 是 PVFS2 的新主干版本)
+    http://blog.csdn.net/yfw418/archive/2007/07/06/1680930.aspx
+    * 数据分布到多台机器，不局限底层文件系统
+    * 元数据分布到多台机器，用 BerkeleyDB 存储
+    * parallel file system, 适合科学计算，读写大文件，并发读写不同块
+    - 不适合顺序读写小文件，性能会很差
+    - 没有锁机制，不符合 POSIX 语意，需要应用的配合，不适合做通用文件系统
+      (See pvfs2-guide chaper 5:  PVFS2 User APIs and Semantics)
+    - 静态配置，不能动态扩展
+    - 没有工具迁移一个 file server 上的数据到另一个 file server 上
+    - file server 存在单点故障，需要用类似 DRDB 之类的 shared storage 加上
+      某种心跳机制保证高可用，目前在开发 replicate on immutable
+    - 不支持硬链接
+    - 支持 private read-only mmap, 不支持 shared mmap
+    - 目前还不支持按照 free space 来选择 file server 存储文件
+
+Lustre
+    * 适合大型集群
+    + parallel file system, 被多数 top 500 超级计算机采用
+    + 读写性能很高
+    + 支持动态扩展
+    + 支持 POSIX 标准
+    - 需要对内核打补丁，深度依赖 Linux 内核和 ext3 文件系统
+    - 依赖底层文件系统或者RAID 达到冗余，但依然不能保证高可用，因为没有复制
+      数据到多个 object store targets 上
+    - Lustre 2.4 允许一个 Lustre 文件系统里有多个 metadata targets，但只允许
+      目录子树位于 secondary metadata target 上
+    - 使用 ext4 的增强版本 ldiskfs 存储数据和元数据，也可以用 zfs-on-linux 项
+      目提供的 zfs 文件系统
+    - metadata server 是单点故障，需要 active/passive 模式达到高可用，一般
+      结合不同 lustre fs 的 metadata server 互为备份，因此不会有闲置的metadata server
+    - 多个 object store server 之间互为 active/active 备份
+
+Hadoop HDFS
+    * 本地写缓存，够一定大小 (64 MB) 时传给服务器
+    - 不适合通用文件系统
+
+FastDFS
+    - 只能通过 API 使用，不支持 fuse
+
+NFSv4 Referrals
+    + 简单
+    - 没有负载均衡，容错
+
+NFSv4.1(includes pNFS)
+    + 支持元数据服务跟数据服务分离，多个数据服务分布在多台机器上
+    + 客户端读取元信息后可以直接跟数据服务交互
+    + Linux 内核直接支持 (REHL >= 6.4)
+    - 元数据和数据服务没有副本机制，不能自动迁移
+    - 没有普及，客户端支持不够
+
+dCache (http://www.dcache.org/)
+    * 组合异构的文件系统，模拟出统一的文件系统
+    + 提供 NFSv4.1 和 WebDAV 访问方式
+    - 依赖 PostgreSQL
+
+spNFS
+    * pNFS 在 Linux 上的一个实现
+
+Ceph (http://ceph.newdream.net/)
+    - 开发初期，不稳定
+    - 依赖 btrfs
+
+Tahoe-LAFS (https://tahoe-lafs.org)
+    * Python 实现，文件加密存储
+    - 读写性能很差
+    - 对 FUSE 支持不好
+    - 由于加密，修改文件需要重写整个文件或者整个分块
+
+FhGFS/BeeGFS
+    * 数据和元数据分开存储
+    * 底层可以用任意 POSIX 兼容的文件系统
+    * 四个服务角色：ManagementServer, ObjectStorageServer, MetaDataServer, FS client
+    * 单实例 ManagementServer 充当 server 和 client 的注册服务，ManagementServer 实效
+      会导致无法增加 server 和 client
+    * MetaDataServer 把数据写入 MetaDataTargets, target 指实际的底层存储
+    * ObjectStorageServer 把数据写入 StorageTargets
+    * FS client 需要运行一个 helper-daemon
+    * 可选的 Admon daemon 方便管理员了解存储集群的运行状态
+    * 每一个目录（不含子目录）随机选取一个 MetaDataServer 负责，根目录例外，它
+      总是在预先指定的 MetaDataServer 上
+    * 元数据建议用 EXT4 on SSD，可以用 RAID1 或者 RAID10，不要用 RAID5 和RAID6，
+      因为元数据需要大量随机的小批量读写操作
+    * 数据文件建议用 XFS or EXT4, 并使用 RAID5 or RAID6
+    * 每个目录有两个重要参数 numtargets 和 chunksize 来配置条带化存储，写文件时
+      每写满 chunksize 大小就会切换 target，切换到最后一个 target 之后再回到第
+      一个 target
+    + 易用性是一个主要的设计目标
+    - server 部分不开源但可以免费使用，client 部分 GPL 授权
+    - server 和 client 都只支持 Linux
+    - MetaDataTargets 和 StorageTargets 依赖 RAID 达到可靠性
+    - 元数据以及数据分片存在单点故障, 从 2012.10 版本开始引入元数据和数据复制
+      以达到高可用，但仍然在开发阶段
+    - 文件定位需要逐层遍历 MetaDataServer，顶层目录所在 MetaDataServer 容易
+      成为瓶颈，而如果引入缓存的话又可能在 server、client 之间引入不一致
+    - 目录的 numtargets 需要显式指定
+    - BeeGFS client 包含一个 Linux 内核模块
+    - 依赖于时间同步
+
+GFarm (http://datafarm.apgrid.org/software/)
+OBFS
+
+heartbeat, keepalived, openais, corosync, pacemaker, cman, libfence4
+ipvsadm, ldirectord, lvs, oscar, rocks cluster, mosix/openmosix, openssi,
+beowulf, hadoop, globus.org
+torque (http://www.clusterresources.com/products/torque-resource-manager.php)
+openpbs (http://www.mcs.anl.gov/research/projects/openpbs/)
+maui (http://www.clusterresources.com/products/maui-cluster-scheduler.php/)
+
+<<High Performance Linux Clusters>>
+

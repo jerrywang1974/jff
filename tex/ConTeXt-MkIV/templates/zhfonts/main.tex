@@ -1,0 +1,31 @@
+\startproduct main
+\project ctx-prj
+
+\component cover
+
+\startfrontmatter
+    \setuppagenumbering[conversion=romannumerals]
+    \setuppagenumber[number=1]
+
+    \completecontent
+    \completelistoffigures
+    \completelistoftables
+\stopfrontmatter
+
+\startbodymatter
+    \setuppagenumbering[conversion=numbers]
+    \setuppagenumber[number=1]
+
+    \component ch1
+\stopbodymatter
+
+%\startappendices
+%\stopappendices
+
+\startbackmatter
+    \completepublications
+    \completeindex
+\stopbackmatter
+
+\stopproduct
+

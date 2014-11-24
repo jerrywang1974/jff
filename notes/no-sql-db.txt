@@ -1,0 +1,37 @@
+Redis
+MemcacheDB
+MongoDB
+CouchDB
+HBase
+TokyoTyrant
+HyperTable
+OrientDB
+VoltDB
+BlinkDB         http://blinkdb.org/
+
+hypergraphdb    http://www.hypergraphdb.org/
+infogrid        http://infogrid.org/
+Titan           http://thinkaurelius.github.com/titan/
+flockdb
+Spark
+Haloop
+Twister         http://www.iterativemapreduce.org/
+
+Memory-based graphs:
+    iGraph          http://igraph.sourceforge.net/
+    NetworkX        http://networkx.lanl.org/
+    JUNG            http://jung.sourceforge.net/
+Disk-based graphs:
+    Neo4J           http://www.neo4j.org/
+    OrientDB        http://orientdb.org/
+    InfiniteGraph   http://objectivity.com/
+    dex             http://www.sparsity-technologies.com/dex
+Cluster-based graphs(Bulk Synchronous Parallel Processing)
+    Google Pregel
+    Hama            http://hama.apache.org/
+    giraph          http://giraph.apache.org/
+    GoldenOrb       http://goldenorbos.org/
+    GraphLab        http://graphlab.org/
+
+Affinity (http://affinity.cloudfoundry.com/ by VMware Inc.)
+

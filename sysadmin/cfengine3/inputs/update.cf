@@ -1,0 +1,81 @@
+#
+# update.cf
+#
+
+bundle common g_update
+{
+vars:
+
+    "master_location" string    => "$(sys.workdir)/masterfiles";
+    "policy_servers"  slist     => { "localhost" };
+    "cf_bin_dir"      string    => "/usr/sbin";
+}
+
+######################################################################
+
+bundle agent update
+{
+files:
+
+    "$(sys.workdir)/inputs"
+        comment         => "Update the policy files from the master",
+        action          => u_immediate,
+        copy_from       => u_cp("$(g_update.master_location)", "@(g_update.policy_servers)"),
+        depth_search    => u_recurse("inf"),
+        perms           => u_mog("600", "root", "root");
+
+    "$(sys.workdir)/bin"
+        comment         => "Update the cached binaries from installation",
+        copy_from       => u_cp("$(g_update.cf_bin_dir)", "@(g_update.policy_servers)"),
+        depth_search    => u_recurse("1"),
+        file_select     => u_select_cf_binaries,
+        perms           => u_mog("700", "root", "root");
+}
+
+######################################################################
+
+body perms u_mog(mode, user, group)
+{
+    owners  => { "$(user)" };
+    groups  => { "$(group)" };
+    mode    => "$(mode)";
+}
+
+######################################################################
+
+body depth_search u_recurse(d)
+{
+    depth   => "$(d)";
+}
+
+######################################################################
+
+body copy_from u_cp(from, servers)
+{
+    compare     => "digest";
+    copy_backup => "timestamp";
+    encrypt     => "true";
+    preserve    => "true";
+    purge       => "true";
+    servers     => { @(servers) };
+    source      => "$(from)";
+    stealth     => "true";
+    trustkey    => "true";
+    verify      => "true";
+}
+
+######################################################################
+
+body action u_immediate
+{
+    ifelapsed   => "1";
+}
+
+######################################################################
+
+body file_select u_select_cf_binaries
+{
+    leaf_name   => { "cf-.*" };
+    file_result => "leaf_name";
+}
+

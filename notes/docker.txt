@@ -1,0 +1,209 @@
+docker usage
+
+-----------------------------------------------
+Three roles, all have web service API:
+    https://docs.docker.com/reference/api/hub_registry_spec/
+
+Docker Hub: managed by dotCloud company
+    https://docs.docker.com/reference/api/docker-io_api/
+        manage user accounts, authentication & authorization, web ui, comments/stars
+        manage docker repositories to link to docker registries
+
+Docker Registry: managed by external parties
+    https://docs.docker.com/reference/api/registry_api/
+        store images
+
+Docker: run on local box
+    https://docs.docker.com/reference/api/docker_remote_api/
+        manage containers
+
+-----------------------------------------------
+Install docker on RHEL-6
+    https://docs.docker.com/installation/rhel/
+    https://fedoraproject.org/wiki/EPEL#How_can_I_use_these_extra_packages.3F
+    https://fedoraproject.org/wiki/EPEL/FAQ#Using_EPEL
+
+    $ sudo rpm -Uvh http://download.fedoraproject.org/pub/epel/6/x86_64/epel-release-6-8.noarch.rpm
+    or
+    $ sudo curl http://repo.linux.corp.yahoo.com/ylinux_devel/epel6.repo -o /etc/yum.repos.d/epel6.repo
+
+    $ sudo yum -y install docker-io
+    $ sudo service docker start
+    $ sudo chkconfig docker on
+
+-----------------------------------------------
+Search repositories:
+    https://docs.docker.com/reference/api/docker-io_api/#search
+
+    http://docker-registry.ops.yahoo.com:4080/v1/search
+
+Show tags for a repository:
+    http://docker-registry.ops.yahoo.com:4080/v1/repositories/ylinux/ylinux6/tags
+        (use tag "latest", recommended minimum image, 400MB uncompressed and 130MB compressed, may need extra rpm packages)
+
+    http://docker-registry.ops.yahoo.com:4080/v1/repositories/ylinux6/base/tags
+        (use tag "current", created for Manhattan, slimmed down full yLinux image, 1.78GB uncompressed and 600MB compressed)
+
+-----------------------------------------------
+Pull an docker image from docker registry:
+
+    $ sudo docker pull docker-registry.ops.yahoo.com:4080/ylinux/ylinux6:latest
+
+-----------------------------------------------
+Show meta info of local docker service:
+
+    $ sudo docker info
+
+-----------------------------------------------
+Show local images:
+
+    $ sudo docker images
+
+-----------------------------------------------
+Create and run a container:
+
+Non-interactive container:
+    $ sudo docker run IMAGE [COMMAND] [ARG...]
+
+Interactive container:
+    $ sudo docker run -i -t IMAGE [COMMAND] [ARG...]
+
+Daemonized container:
+    $ sudo docker run -d IMAGE [COMMAND] [ARG...]
+    $ sudo docker logs CONTAINER
+
+-----------------------------------------------
+Show containers:
+
+    $ sudo docker ps        # show running containers
+    $ sudo docker ps -a     # show all containers
+
+-----------------------------------------------
+Other commands:
+    $ sudo docker attach CONTAINER          # attach to a running container
+
+    $ sudo docker top CONTAINER             # show running processes in a container
+
+    $ sudo docker rm            # remove container
+    $ sudo docker rmi           # remove image
+
+    $ sudo docker build         # create image from dockerfile
+    $ sudo docker commit        # create image from container
+
+    $ sudo docker cp            # copy files from container to host
+
+    $ sudo docker diff CONTAINER        # check changes in a container's filesystem
+
+    $ sudo docker export        # container -> tar ball
+    $ sudo docker import        # tar ball -> image
+    $ sudo docker load          # tar ball on stdin -> image
+    $ sudo docker save IMAGE    # image -> tar ball on stdout
+
+    $ sudo docker history IMAGE     # show image history
+    $ sudo docker logs CONTAINER    # show container log
+    $ sudo docker inspect IMAGE | CONTAINER     # check image or container
+    $ sudo docker port CONTAINER PRIVATE_PORT
+
+    $ sudo docker kill/pause/unpause/restart/start/stop/wait
+
+    $ sudo docker search
+    $ sudo docker login
+    $ sudo docker push
+
+    $ sudo docker events
+
+In docker-1.2:
+    $ sudo docker run --restart=no|on-failure|always
+                      --cap-add, --cap-drop
+                      --device
+
+In docker-1.3:
+    $ sudo docker create ...    # create a container but don't start it
+    $ sudo docker exec ...      # run an extra process in a container
+
+-----------------------------------------------
+Underlying technologies
+
+Namespaces:
+    pid, net, ipc, mnt, uts(allows different hostname)
+
+control groups:
+
+union file systems:
+    aufs, btrfs, vfs, device mapper
+
+container format:
+    native(libcontainer), lxc, BSD jail, Solaris zone
+
+-----------------------------------------------
+Docker container linking
+
+    use to expose source container to recipient containers without port
+    mapping to expose container ports to the host.
+
+    $ sudo docker run --link SOURCE_CONTAINER:alias IMAGE [COMMAND] [ARG...]
+
+-----------------------------------------------
+Manage data volumes in containers
+
+    Create a data volume in a container:
+    $ sudo docker run -v /SOME_VOLUME ....
+
+    Use volumes in other container:
+    $ sudo docker run  --volumes-from CONTAINER
+
+    Use volumes in host:
+    $ sudo docker run -v /host:/container ....
+    $ sudo docker run -v /host:/container:ro ....
+
+-----------------------------------------------
+https://phusion.github.io/baseimage-docker/
+
+docker on Mac OS X and Windows
+    http://boot2docker.io/
+
+https://github.com/GoogleCloudPlatform/kubernetes
+
+https://github.com/coreos
+https://github.com/coreos/etcd
+https://github.com/coreos/fleet
+https://github.com/coreos/flannel   (old name: Rudder)
+
+http://www.projectatomic.io/
+
+https://github.com/zettio/weave
+    Weave creates a virtual network that connects Docker containers deployed
+    across multiple hosts.
+
+https://github.com/progrium/ambassadord
+    containerized TCP reverse proxy / forwarder
+
+https://github.com/docker/libswarm
+
+http://panamax.io/
+
+https://github.com/google/lmctfy
+https://github.com/google/cadvisor/
+
+https://quay.io
+
+https://github.com/mesosphere/marathon
+https://github.com/mesosphere/deimos        Mesos containerizer hooks for Docker
+
+https://flynn.io                        open source Heroku clone
+https://github.com/deis/deis            open source Heroku clone
+https://github.com/progrium/dokku       open source Heroku clone
+
+https://github.com/Yelp/dockersh
+    A shell which places users into individual docker containers
+
+https://github.com/kitematic/kitematic
+    Simple Docker App management for Mac OS X
+
+http://www.fig.sh/
+https://github.com/docker/fig
+    Fast, isolated development environments using Docker.
+
+https://github.com/drone/drone
+    Drone is a Continuous Integration platform built on Docker, written in Go
+
