@@ -1,0 +1,68 @@
+Install GlusterFS on RHEL-6.5
+
+on all servers
+==============
+
+    wget http://download.gluster.org/pub/gluster/glusterfs/LATEST/RHEL/glusterfs-epel.repo
+    sudo mv glusterfs-epel.repo /etc/yum.repos.d/
+
+    sudo yum install glusterfs-{cli,extra-xlators,geo-replication,fuse,server}
+
+    # required by NFS
+    sudo service rpcbind start
+
+    sudo service glusterd start
+    sudo service glusterfsd start
+
+    sudo mkdir -p /srv/glusterfs/gv0/brick0/
+    sudo touch /srv/glusterfs/gv0/brick0/THIS-IS-NOT-BRICK
+
+    sudo dd if=/dev/zero of=/srv/glusterfs/gv0/brick0/brick.img bs=5M count=10240
+
+    sudo mkfs -t xfs -i size=512 /srv/glusterfs/gv0/brick0/brick.img
+
+    sudo mount -o loop /srv/glusterfs/gv0/brick0/brick.img /srv/glusterfs/gv0/brick0
+
+    # avoid using by mistake underlying /srv/glusterfs/gv0/brick0 as brick
+    sudo mkdir /srv/glusterfs/gv0/brick0/brick
+
+
+on one of all servers
+=====================
+    sudo gluster
+        gluster> peer probe other-node2
+        gluster> peer probe other-node3
+        gluster> peer status
+        gluster> pool list
+
+    sudo gluster volume create gv0 replica 2 transport tcp \
+        server{1..6}.example.com:/srv/glusterfs/gv0/brick0/brick
+
+    sudo gluster volume start gv0
+
+    #sudo gluster volume set gv0 nfs.disable on
+
+
+on all servers
+==============
+    sudo mkdir /media/gv0
+    sudo mount -t glusterfs  localhost:/gv0 /media/gv0
+
+
+client
+======
+    Linux:
+        sudo mount -t glusterfs -o backup-volfile-servers=server2:server3:…:serverN server1:/VOLNAME MOUNTDIR
+
+        /etc/fstab
+        server1:/VOLNAME        MOUNTDIR    glusterfs       defaults,_netdev,....        0   0
+
+    Mac OS X:
+        sudo mount -t nfs -o intr,tcp,nolock,vers=3 HOSTNAME-OR-IPADDRESS:/VOLNAME   MOUNTDIR
+
+    Linux:
+        sudo mount -t nfs -o mountproto=tcp,vers=3  HOSTNAME-OR-IPADDRESS:/VOLNAME   MOUNTDIR
+
+    Solaris:
+        sudo mount -t nfs -o proto=tcp,vers=3 nfs://HOSTNAME-OR-IPADDRESS:38467/VOLNAME   MOUNTDIR
+

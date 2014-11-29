@@ -21,7 +21,7 @@ Clustered file system(shared-disk architecture):
     OCFS2   Oracle 开发，自带的o2cb不稳定，需要外挂 cman 或者 corosync + pacemaker
 
 Distributed file system(shared-nothing architecture):
-    Ceph
+    CephFS
     MooseFS
     GlusterFS
     HDFS
@@ -105,11 +105,16 @@ MogileFS
     - 不适合做通用文件系统，适合存储静态只读小文件，比如图片
 
 GlusterFS (http://gluster.com/community/documentation/index.php/GlusterFS_Features)
+    * glusterd - elastic volume management daemon
+    * glusterfsd - GlusterFS brick daemon, one per brick, managed by glusterd
+    * glusterfs - NFS server daemon, FUSE client daemon
+    * mount.glusterfs - FUSE native mount tool
+    * gluster - Gluster Console Manager(CLI)
     + 无单点故障问题
     + 支持回收站
     + 模块化堆叠式架构
     + 使用文件名 hash (Elastic Hashing Algorithm)定位文件，没有 metadata server，因此对文件个数没有限制
-    - 对文件系统格式有要求，ext3/ext4/zfs 被正式支持，xfs/jfs 可能可以，reiserfs 经测试可以
+    - 对文件系统格式有要求，需要 xattr 支持，ext3/ext4/xfs/btrfs/zfs 被正式支持，jfs 可能可以，reiserfs 经测试可以
       (http://gluster.com/community/documentation/index.php/Storage_Server_Installation_and_Configuration#Operating_System_Requirements)
     - 需要以 root 用户身份运行（用了 trusted xattr，mount 时加 user_xattr 选项是没用的，官方说法是
             glusterfsd 需要创建不同属主的文件，所以必需 root 权限)
@@ -119,6 +124,7 @@ GlusterFS (http://gluster.com/community/documentation/index.php/GlusterFS_Featur
     + 从 3.3 版本开始支持自动恢复 replication level，http://www.gluster.org/community/documentation/index.php/About33
     + 从 3.5 版本开始支持 file snapshot
     + 从 3.6 版本开始支持 volume snapshot，并且 client 端可以无需管理员参与即可访问 snapshot
+    * 以文件为单位做 placement，不是按块，实现简单但容易导致数据分布不均匀
     - 分布存储以文件为单位，条带化分布存储不成熟
     - 不使用 client side cache (可能在 4.0 版本支持: http://www.gluster.org/community/documentation/index.php/Planning40)
     - 放置数据时不考虑 rack (可能在 3.7 版本支持: http://www.gluster.org/community/documentation/index.php/Planning37)
