@@ -1,0 +1,38 @@
+http://www.coker.com.au/bonnie++/
+    bonnie++ -d /bench -s 50G -n 4 -m TEST-NAME -u USER-NAME -f -b >bonnie.log
+    tail -1 bonnie.log | bon_csv2html > bonnie.html
+
+http://www.iozone.org/
+    cd /bench
+    iozone -a -b iozone.xls >iozone.log
+
+https://packages.debian.org/sid/postmark
+    cd /bench
+
+    cat <<END > postmark-config
+set size 1000 20000
+set number 50000
+set transactions 100000
+set subdirectories 100
+set report verbose
+run
+quit
+END
+
+    postmark postmark-config | tee postmark.log
+
+
+http://samba.org/ftp/tridge/dbench/
+
+    dbench -D /bench -t 600 10 >dbench.log
+
+http://sourceforge.net/projects/sysbench
+    cd /bench
+    sysbench --num-threads=16 --test=fileio --file-total-size=50G prepare
+    sysbench --num-threads=16 --test=fileio --file-total-size=50G --file-test-mode=rndrw --max-time=300 --max-requests=0 run >sysbench-fileio.log
+    sysbench --num-threads=16 --test=fileio --file-total-size=50G cleanup
+
+http://freecode.com/projects/fio
+
+http://filebench.sourceforge.net/wiki/index.php/Main_Page
+
