@@ -1,10 +1,15 @@
 gdb
 gstack
+
 perf
 oprofile
 dtrace
 strace
 ltrace
+
+systemtap
+LTTng
+
 
 sysstat
     sar, iostat, mpstat, pidstat, sadf, nfsiostat, cifsiostat
@@ -19,4 +24,6 @@ perf-tools
 
 ftrace perf_events
 eBPF
+
+sysdig  http://www.sysdig.org/
 
