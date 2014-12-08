@@ -47,7 +47,7 @@ alias c=clear
 export ACK_PAGER="less -R"
 which ack-grep >/dev/null 2>&1 && alias ack=ack-grep
 
-alias locallib='eval `perl -I$HOME/perl5/lib/perl5 -Mlocal::lib`'
+alias locallib='eval "$(perl -I$HOME/perl5/lib/perl5 -Mlocal::lib)"'
 
 alias initfink='which fink >/dev/null 2>&1 || { export PROMPT_COMMAND="echo -n \(fink\)\ "; . /sw/bin/init.sh; check_color_support; }'
 alias initpkgsrc='which bmake >/dev/null 2>&1 || { export PROMPT_COMMAND="echo -n \(pkgsrc\)\ "; export PATH=$HOME/pkg/gnu/bin:$HOME/pkg/bin:$HOME/pkg/sbin:$PATH; check_color_support; }'
@@ -56,6 +56,9 @@ alias inithomebrew='which brew >/dev/null 2>&1 || { export PROMPT_COMMAND="echo 
 alias initgentoo=~/gentoo/startprefix
 # ~/gentoo/etc/bash/bashrc sets PROMPT_COMMAND, so I have to set it again here:
 which emerge >/dev/null 2>&1 && export PROMPT_COMMAND="echo -n \(gentoo\)\ ";
+
+alias initboot2docker='eval "$(boot2docker shellinit)"'
+alias initchef='eval "$(chef shell-init bash)"'
 
 alias gb='git branch'
 alias gd='git diff'
