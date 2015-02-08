@@ -1,0 +1,207 @@
+http://www.zwbk.org/MyLemmaShow.aspx?lid=117222
+
+中华人民共和国学科分类与代码国家标准（GB/T 13745-2009）
+
+110　数学
+
+　110.11　数学史
+　110.14　数理逻辑与数学基础
+　　110.1410　演绎逻辑学(亦称符号逻辑学)
+　　110.1420　证明论(亦称元数学)
+　　110.1430　递归论
+　　110.1440　模型论
+　　110.1450　公理集合论
+　　110.1460　数学基础
+　　110.1499　数理逻辑与数学基础其他学科
+　110.17　数论
+　　110.1710　初等数论
+　　110.1720　解析数论
+　　110.1730　代数数论
+　　110.1740　超越数论
+　　110.1750　丢番图逼近
+　　110.1760　数的几何
+　　110.1770　概率数论
+　　110.1780　计算数论
+　　110.1799　数论其他学科
+　110.21　代数学
+　　110.2110　线性代数
+　　110.2115　群论
+　　110.2120　域论
+　　110.2125　李群
+　　110.2130　李代数
+　　110.2135　Kac-Moody代数
+　　110.2140　环论
+　　110.2145　模论
+　　110.2150　格论
+　　110.2155　泛代数理论
+　　110.2160　范畴论
+　　110.2165　同调代数
+　　110.2170　代数K理论
+　　110.2175　微分代数
+　　110.2180　代数编码理论
+　　110.2199　代数学其他学科
+　110.24　代数几何学
+　110.27　几何学
+　　110.2710　几何学基础
+　　110.2715　欧氏几何学
+　　110.2720　非欧几何学(包括黎曼几何学等)
+　　110.2725　球面几何学
+　　110.2730　向量和张量分析
+　　110.2735　仿射几何学
+　　110.2740　射影几何学
+　　110.2745　微分几何学
+　　110.2750　分数维几何
+　　110.2755　计算几何学
+　　110.2799　几何学其他学科
+　110.31　拓扑学
+　　110.3110　点集拓扑学
+　　110.3115　代数拓扑学
+　　110.3120　同伦论
+　　110.3125　低维拓扑学
+　　110.3130　同调论
+　　110.3135　维数论
+　　110.3140　格上拓扑学
+　　110.3145　纤维丛论
+　　110.3150　几何拓扑学
+　　110.3155　奇点理论
+　　110.3160　微分拓扑学
+　　110.3199　拓扑学其他学科
+　110.34　数学分析
+　　110.3410　微分学
+　　110.3420　积分学
+　　110.3430　级数论
+　　110.3499　数学分析其他学科
+　110.37　非标准分析
+　110.41　函数论
+　　110.4110　实变函数论
+　　110.4120　单复变函数论
+　　110.4130　多复变函数论
+　　110.4140　函数逼近论
+　　110.4150　调和分析
+　　110.4160　复流形
+　　110.4170　特殊函数论
+　　110.4199　函数论其他学科
+　110.44　常微分方程
+　　110.4410　定性理论
+　　110.4420　稳定性理论
+　　110.4430　解析理论
+　　110.4499　常微分方程其他学科
+　110.47　偏微分方程
+　　110.4710　椭圆型偏微分方程
+　　110.4720　双曲型偏微分方程
+　　110.4730　抛物型偏微分方程
+　　110.4740　非线性偏微分方程
+　　110.4799　偏微分方程其他学科
+　110.51　动力系统
+　　110.5110　微分动力系统
+　　110.5120　拓扑动力系统
+　　110.5130　复动力系统
+　　110.5199　动力系统其他学科
+　110.54　积分方程
+　110.57　泛函分析
+　　110.5710　线性算子理论
+　　110.5715　变分法
+　　110.5720　拓扑线性空间
+　　110.5725　希尔伯特空间
+　　110.5730　函数空间
+　　110.5735　巴拿赫空间
+　　110.5740　算子代数
+　　110.5745　测度与积分
+　　110.5750　广义函数论
+　　110.5755　非线性泛函分析
+　　110.5799　泛函分析其他学科
+　110.61　计算数学
+　　110.6110　插值法与逼近论
+　　110.6120　常微分方程数值解
+　　110.6130　偏微分方程数值解
+　　110.6140　积分方程数值解
+　　110.6150　数值代数
+　　110.6160　连续问题离散化方法
+　　110.6170　随机数值实验
+　　110.6180　误差分析
+　　110.6199　计算数学其他学科
+　110.64　概率论
+　　110.6410　几何概率
+　　110.6420　概率分布
+　　110.6430　极限理论
+　　110.6440　随机过程
+　　110.6450　马尔可夫过程
+　　110.6460　随机分析
+　　110.6470　鞅论
+　　110.6480　应用概率论
+　　110.6499　概率论其他学科
+　110.67　数理统计学
+　　110.6710　抽样理论
+　　110.6715　假设检验
+　　110.6720　非参数统计
+　　110.6725　方差分析
+　　110.6730　相关回归分析
+　　110.6735　统计推断
+　　110.6740　贝叶斯统计
+　　110.6745　试验设计
+　　110.6750　多元分析
+　　110.6755　统计判决理论
+　　110.6760　时间序列分析
+　　110.6799　数理统计学其他学科
+　110.71　应用统计数学
+　　110.7110　统计质量控制
+　　110.7120　可靠性数学
+　　110.7130　保险数学
+　　110.7140　统计模拟
+　　110.7199　应用统计数学其他学科
+　110.74　运筹学
+　　110.7410　线性规划
+　　110.7415　非线性规划
+　　110.7420　动态规划
+　　110.7425　组合最优化
+　　110.7430　参数规划
+　　110.7435　整数规划
+　　110.7440　随机规划
+　　110.7445　排队论
+　　110.7450　对策论(亦称博奕论)
+　　110.7455　库存论
+　　110.7460　决策论
+　　110.7465　搜索论
+　　110.7470　图论
+　　110.7475　统筹论
+　　110.7480　最优化
+　　110.7499　运筹学其他学科
+　110.77　组合数学
+　110.81　离散数学
+　110.84　模糊数学
+　110.87　应用数学
+　110.99　数学其他学科
+
+
+http://en.wikipedia.org/wiki/Mathematics_Subject_Classification
+http://www.math-atlas.org/welcome.html      Tour of The Subfields of Mathematics
+
+* Foundations: study of foundations of mathematics and logic,
+  including model theory, computability theory, set theory, proof theory
+  and algebraic logic
+
+* Algebra: study of structure of mathematical abstractions,
+  including combinatorics, number theory, field theory, linear algebras,
+  category theory, K-theory, group theory, Lie groups
+
+* Geometry: study of space
+  including geometry, convex gemotry, discrete geometry, differential
+  geometry, general topology, algebraic topology, manifolds
+
+* Analysis: study of change and quantity
+  including real functions(derivatives, integrals), complex functions,
+  special functions, ordinary differential equations, partial differential equations,
+  series, harmonic analysis(fourier analysis, fourier transforms),
+  integral transforms, integral equations, functional analysis
+
+* Applied mathematics: study of applications of mathematical abstractions
+  including probability theory, stochastic processes, statistics,
+  numerical analysis, computer science, mechanics, fluid mechanics,
+  optics, classical thermodynamics, quantum theory, statistical
+  mechanics, relativity and gravitational theory, astronomy and
+  astrophysics, geophysics, game theory, biology
+
+http://en.wikipedia.org/wiki/ACM_Computing_Classification_System
+
+http://en.wikipedia.org/wiki/Physics_and_Astronomy_Classification_Scheme
+

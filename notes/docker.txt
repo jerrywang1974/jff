@@ -207,3 +207,12 @@ https://github.com/docker/fig
 https://github.com/drone/drone
     Drone is a Continuous Integration platform built on Docker, written in Go
 
+=======================
+Kubernetes
+Swarm
+Flannel
+Weave
+Pipework
+open-vswitch
+VXLAN
+

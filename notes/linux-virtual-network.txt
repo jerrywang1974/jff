@@ -1,0 +1,24 @@
+TUN/TAP
+
+MAC VLAN
+
+MacVTap
+
+virtual ethernet device (veth)
+
+bridge
+
+vhost
+
+Open vSwitch
+
+GRE
+VXLAN
+LISP (Locator/ID Separation Protocol)
+
+
+Docker flannel
+Docker weave
+Kubernetes
+Docker Swarm
+

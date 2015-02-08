@@ -291,6 +291,7 @@ IPC
     App::cpanminus
     App::pmuninstall
     Perlbrew: http://www.perlbrew.pl/
+    plenv: https://github.com/tokuhirom/plenv
 
     Devel::Cover
     Devel::DumpSizes
