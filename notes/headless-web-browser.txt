@@ -1,0 +1,20 @@
+https://github.com/dhamaniasad/HeadlessBrowsers
+
+ihttp://seleniumhq.org/
+    multiple native drivers for different web browsers
+
+http://phantomjs.org/
+    headless WebKit scriptable with NodeJS API
+
+http://slimerjs.org/
+    headless Gecko
+
+http://triflejs.org/
+    headless IE
+
+https://github.com/bard/mozrepl
+    REPL for Firefox
+
+https://github.com/ui4j/ui4j
+    a Java wrapper library around the JavaFX WebKit engine
+
