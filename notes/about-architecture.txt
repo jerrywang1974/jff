@@ -1,0 +1,48 @@
+Online Serving Architecture
+============================
+
+    DNS based Load Balancing
+        PowerDNS
+
+    Layer 3 or 4 proxy for load balancing, fail-over, caching
+        LVS, HAProxy, Nginx, Apache, Squid, Varnish, Apache TrafficServer
+
+    Stateless serving
+        Apache, Nginx, Lighttpd, Jetty, Tomcat
+
+    Storage
+        distributed memory:         http://tachyon-project.org
+        distributed block device:   ceph, sheepdog
+        distributed file system:    CephFS, MooseFS, GlusterFS, HDFS, Lustre, PVFS2
+        NoSQL/NewSQL:               HBase, Cassandra, Riak, Redis Cluster, HyperDex, AeroSpike, LevelDB, RocksDB, WiredTiger
+        SQL:                        PostgreSQL, MySQL(WebScaleSQL)
+
+Offline Processing
+==================
+    Streaming: Storm, Spark
+    Batch:  Hadoop, Spark
+
+
+Basic Services
+==============
+    Authentication & Authorization, Roles
+    Backup Service
+    Message bus
+        Kafka, RabbitMQ
+    Log collector
+        Flume, Fluentd, ElasticSearch's Kibana
+    Monitoring
+        Graphite, Ganglia
+
+
+Strata of Container Ecosystem
+=============================
+Layer 7:  Workflow          (PaaS) Deis, Flynn, Dokku
+Layer 6:  Orchestration     --+             Kubernetes, CoreOS's fleet, Mesos + Marathon + Chronos + Myriad + HubSpot's Singularity
+                              |--> Cluster Management       Corosync, Pacemaker, Heartbeat, cman, ZooKeeper, CoreOS's Etcd, http://www.consul.io, http://www.serfdom.io
+Layer 5:  Scheduling        --+             Mesos, YARN
+Layer 4:  Container Engine  Docker, CoreOS's Rocket, Solaris' Zone, BSD's jail
+Layer 3:  Operating System  Ubuntu, RHEL, CoreOS, RedHat's Atomic, Solaris, BSD, OSv.io, Mirage OS, Galois' HaLVM
+Layer 2:  Virtual Infrastructure    ESXi, Xen, KVM, FreeBSD's bhyve
+Layer 1:  Physical Infrastructure
+
