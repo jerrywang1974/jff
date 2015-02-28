@@ -1,22 +1,26 @@
+http://blog.oddbit.com/2014/08/11/four-ways-to-connect-a-docker/
+http://140.120.15.179/Presentation/20150203/index.html
+    Virtual networking: TUN/TAP, MacVLAN, and MacVTap
+http://www.linux-kvm.org/wiki/images/2/27/2010-forum-arnd-network-virt.pdf
+http://www.pocketnix.org/posts/Linux%20Networking:%20MAC%20VLANs%20and%20Virtual%20Ethernets
+
 TUN/TAP
 
-MAC VLAN
+legacy linux bridge / Open vSwitch
 
-MacVTap
+virtual ethernet device (veth): a pair of virtual ethernet device
 
-virtual ethernet device (veth)
+MacVLAN, MacVTap: base on MacVLAN, http://virt.kernelnewbies.org/MacVTap
 
-bridge
+virtio-net + vhost-net: http://blog.vmsplice.net/2011/09/qemu-internals-vhost-architecture.html
 
-vhost
-
-Open vSwitch
 
 GRE
 VXLAN
 LISP (Locator/ID Separation Protocol)
 
 
+Docker Pipework: https://github.com/jpetazzo/pipework
 Docker flannel
 Docker weave
 Kubernetes

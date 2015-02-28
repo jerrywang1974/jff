@@ -12,7 +12,7 @@ on all servers
     sudo service rpcbind start
 
     sudo service glusterd start
-    sudo service glusterfsd start
+    sudo service glusterfsd start   # seems unnecessary, glusterfsd is automatically started by glusterd service
 
     sudo mkdir -p /srv/glusterfs/gv0/brick0/
     sudo touch /srv/glusterfs/gv0/brick0/THIS-IS-NOT-BRICK
