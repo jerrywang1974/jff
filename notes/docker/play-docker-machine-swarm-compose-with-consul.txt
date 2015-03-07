@@ -1,0 +1,21 @@
+http://www.consul.io/intro/getting-started/agent.html
+https://docs.docker.com/machine/#using-docker-machine-with-docker-swarm
+
+./consul agent -server -bootstrap-expect 1 -data-dir data -ui-dir dist -client 0.0.0.0
+
+HOST_IP=192.168.1.111
+SWARM_OPTIONS="--swarm --swarm-discovery consul://$HOST_IP:8500/test-swarm"
+docker-machine create -d virtualbox $SWARM_OPTIONS --swarm-master swarm-master
+docker-machine create -d virtualbox $SWARM_OPTIONS swarm-01
+docker-machine create -d virtualbox $SWARM_OPTIONS swarm-02
+
+curl 'http://$HOST_IP:8500/v1/kv/test-swarm?pretty&recurse'
+
+docker-machine inspect swarm-master
+docker-machine inspect swarm-01
+docker-machine inspect swarm-02
+
+$(docker-machine env --swarm swarm-master)
+docker ps -a
+docker info
+

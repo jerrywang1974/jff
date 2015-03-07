@@ -207,6 +207,52 @@ https://github.com/docker/fig
 https://github.com/drone/drone
     Drone is a Continuous Integration platform built on Docker, written in Go
 
+-----------------------------------------------
+docker-machine  https://docs.docker.com/machine/
+
+    * setup docker daemon on kinds of IaaS providers, VirtualBox and VMWare
+    * can provision Swarm clusters
+    * node information includes TLS certs are stored locally, NO central management
+
+-----------------------------------------------
+docker-swarm    http://docs.docker.com/swarm/
+                https://github.com/docker/swarm/tree/master/discovery
+
+
+              http:3375, https:3376                   http:2375, https:2376
+docket client ---------------------> {swarm manager}+ --------------------> {docker daemon, swarm agent}+
+                                         |                                                     |
+                                         |                                                     |
+                                         +-------------------------+---------------------------+
+                                                                   |
+                                                                   |
+                                                                   v
+                                                hosted discovery service(token://...), alpha stage, at http://discovery-stage.hub.docker.com
+                                                static file(file://...), no swarm agent
+                                                static list of IPs(nodes://...), no swarm agent
+                                                etcd(etcd://.../...)
+                                                consul(consul://.../...)
+                                                zookeeper(zk://.../...)
+
+    * swarm manager has same(slightly different) web service API with docker daemon
+    * "swarm join": an agent to keep registrying service
+    * "swarm manage": a smart proxy to docker daemons, the proxy contains scheduler
+    * supported scheduler filters:
+        * constraint: static labels are given on command line of docker daemon, NOT auto discover
+        * affinity
+        * port
+        * dependency
+        * health
+    * supported scheduler strategies:
+        * BinPacking: rank by CPU and RAM allocation, choose heaviest allocated to avoid resource fragmentation
+        * Random
+    * NOT configure network
+    * NOT auto deploy
+
+-----------------------------------------------
+docker-compose  http://docs.docker.com/compose/
+
+
 =======================
 Kubernetes
 Swarm
