@@ -19,3 +19,27 @@ $(docker-machine env --swarm swarm-master)
 docker ps -a
 docker info
 
+
+########################################################################
+
+https://gist.github.com/jtyberg/f6a9215c5d4ca35cac15
+    fix network routing issues caused by Cisco AnyConnect with VirtualBox and boot2docker on Mac OS X
+
+    # because cisco vpn doesn't allow changes to route table
+    /opt/cisco/anyconnect/bin/vpn disconnect
+
+    # check host-only NIC
+    VBoxManage showvminfo boot2docker-vm | grep -o -E 'vboxnet\d\d?'
+
+    # check route table
+    netstat -rn | grep 192.168.59           # docker-machine uses 192.168.99
+    # no route
+    route -nv add -net 192.168.59 -interface vboxnet0
+    # else
+    route -nv change -net 192.168.59 -interface vboxnet0
+
+    #.... connect VPN ....
+
+    sudo ipfw -a list | grep "deny ip from any to any"
+    sudo ipfw delete ID     # id is the first column in the output
+

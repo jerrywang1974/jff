@@ -15,14 +15,10 @@ MacVLAN, MacVTap: base on MacVLAN, http://virt.kernelnewbies.org/MacVTap
 virtio-net + vhost-net: http://blog.vmsplice.net/2011/09/qemu-internals-vhost-architecture.html
 
 
+IPoIP(IPIP)
+sit
 GRE
+GUP
 VXLAN
 LISP (Locator/ID Separation Protocol)
-
-
-Docker Pipework: https://github.com/jpetazzo/pipework
-Docker flannel
-Docker weave
-Kubernetes
-Docker Swarm
 

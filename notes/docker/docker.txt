@@ -252,14 +252,76 @@ docket client ---------------------> {swarm manager}+ --------------------> {doc
 -----------------------------------------------
 docker-compose  http://docs.docker.com/compose/
 
+    like a batch script interpreter for Docker command
+
+-----------------------------------------------
+pipework        https://github.com/jpetazzo/pipework
+
+    a shell script to create bridge and veth interfaces on host OS
+    and then use it in Docker container.
+
+    Deprecated, Docker supports host network now.
+
+-----------------------------------------------
+weave           http://zettio.github.io/weave/
+
+    * a solution for software defined network
+    * weave routers work in a gossip way, maintain routing table
+    * use subnet to isolate applications, not isolate real hosts, that
+      means a host can have multiple subnets, thus less efficient on routing
+    * use TCP to exchange routing table
+    * use UDP to encapsulate and transmit ethernet packets
+    * use PCAP and promiscuous mode to sniffer ethernet packets from
+      virtual network bridge, may drop packets under high traffic
+    * support encryption with NaCl library: http://nacl.cr.yp.to/
+      (notice it has a new fork: https://github.com/jedisct1/libsodium)
+    * builtin DNS
+    * no dynamic IP configuration, need external support to choose available unique IP
+    * need use weave command to run container
+
+-----------------------------------------------
+flannel     https://github.com/coreos/flannel
+
+    * a solution for software defined network
+    * imitate Google Compute Engine, assign a subnet to each host
+    * use etcd to maintain mapping between allocated subnets and real host IP addresses
+    * use UDP to encapsulate and transmit IP packets
+    * support in-kernel VXLAN to encapsulate the packets
+    * dynamic allocate subnets, acquire a subnet lease from etcd for 24 hours
+    * use TAP/TUN device
+    * integrate well with docker daemon, can directly use docker command to run container
+
+-----------------------------------------------
+socketplane https://github.com/socketplane/socketplane
+
+    * a solution for software defined network
+    * prefer openvswitch
+    * early stage, probably will integrate into Docker
+
+-----------------------------------------------
+fleet       https://github.com/coreos/fleet
+
+    * a scheduler to run Docker containers on multiple hosts
+    * daemon process "fleetd" has two roles, use etcd to coordinate:
+        * engine: makes scheduling decisions
+        * agent: executes actions
+    * engine uses a lease model to enforce only one engine is scheduling
+    * engine chooses agent running the smallest number of units
+    * agent uses D-Bus to communicate with systemd
+    * a unit is treated as service, will be rescheduled if its host is down
+    * no authentication and authorization, depends on authentication of etcd
+    * scheduling policy:
+        * MachineID: schedule to specified machine
+        * MachineOf and MachineMetadata: affinity
+            * if the target unit is rescheduled, its follower units will be rescheduled too
+        * Conflicts: anti-affinity
+        * Global: on all machines
+    * support unit file template and launch multiple instances
+
 
 =======================
 Kubernetes
-Swarm
 fleet
-Flannel
-Weave
-Pipework
 open-vswitch
-VXLAN
+FOU(Foo-over-UDP): IPIP, sit, GRE, VXLAN + DOVE, GUE(Generic UDP Encapsulation, linux kernel >= 3.18)
 
