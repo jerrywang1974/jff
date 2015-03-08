@@ -34,9 +34,9 @@ https://gist.github.com/jtyberg/f6a9215c5d4ca35cac15
     # check route table
     netstat -rn | grep 192.168.59           # docker-machine uses 192.168.99
     # no route
-    route -nv add -net 192.168.59 -interface vboxnet0
+    sudo route -nv add -net 192.168.59 -interface vboxnet0
     # else
-    route -nv change -net 192.168.59 -interface vboxnet0
+    sudo route -nv change -net 192.168.59 -interface vboxnet0
 
     #.... connect VPN ....
 
