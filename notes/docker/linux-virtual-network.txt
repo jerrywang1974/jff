@@ -12,13 +12,42 @@ virtual ethernet device (veth): a pair of virtual ethernet device
 
 MacVLAN, MacVTap: base on MacVLAN, http://virt.kernelnewbies.org/MacVTap
 
+IPVLAN: http://kernelnewbies.org/Linux_3.19#head-e1397cd703dde28f199acad3632093686fb51ea9
+        https://github.com/torvalds/linux/blob/master/Documentation/networking/ipvlan.txt
+
 virtio-net + vhost-net: http://blog.vmsplice.net/2011/09/qemu-internals-vhost-architecture.html
 
 
-IPoIP(IPIP)
-sit
+IPIP
+    the simplest tunneling, http://en.wikipedia.org/wiki/IP_in_IP, encapsulate only IPv4 unicast
 GRE
-GUP
+    point-to-point tunnel, base on IP, encapsulate any L3 protocol
+SIT
+    Simple Internet Transition, main purpose is to interconnect isolated IPv6 networks, located in global IPv4 Internet.
+    http://www.linuxfoundation.org/collaborate/workgroups/networking/tunneling#SIT_tunnels
+Foo over UDP(FOU)
+    http://lwn.net/Articles/614348/, linux >= 3.18
+    GUP (Generic UDP Encapsulation, linux kernel >= 3.18)
+
+
+NVGRE
+    extension to GRE, by Microsoft
 VXLAN
-LISP (Locator/ID Separation Protocol)
+    base on UDP, by VMWare
+    used as the tunnel encapsulation to external entities like gateways
+    use multicast
+    http://www.plexxi.com/2014/01/overlay-entropy/
+STT
+    Stateless Transport Tunneling Protocol, by VMWare, optimize for large packet(64KB), high overhead to smaller packet,
+    used as the tunnel encapsulation between vSwitch based VXLAN Tunnel End Points (VTEP)
+    http://www.plexxi.com/2014/01/stateless-transport-tunneling-stt-meets-network/
+    http://tools.ietf.org/html/draft-davie-stt-01
+
+DOVE
+    Distributed Overlay Virtual Ethernet, by IBM
+    not use multicast
+GENEVE
+    base on UDP
+    http://tools.ietf.org/html/draft-gross-geneve-01
+    http://blogs.vmware.com/cto/geneve-vxlan-network-virtualization-encapsulations/
 

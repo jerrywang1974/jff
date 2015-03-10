@@ -292,12 +292,12 @@ FhGFS/BeeGFS
     * 数据和元数据分开存储
     * 底层可以用任意 POSIX 兼容的文件系统
     * 四个服务角色：ManagementServer, ObjectStorageServer, MetaDataServer, FS client
-    * 单实例 ManagementServer 充当 server 和 client 的注册服务，ManagementServer 实效
+    * 单实例 ManagementServer 充当 server 和 client 的注册服务，ManagementServer 失效
       会导致无法增加 server 和 client
     * MetaDataServer 把数据写入 MetaDataTargets, target 指实际的底层存储
     * ObjectStorageServer 把数据写入 StorageTargets
     * FS client 需要运行一个 helper-daemon
-    * 可选的 Admon daemon 方便管理员了解存储集群的运行状态
+    * 可选的 Admin daemon 方便管理员了解存储集群的运行状态
     * 每一个目录（不含子目录）随机选取一个 MetaDataServer 负责，根目录例外，它
       总是在预先指定的 MetaDataServer 上
     * 元数据建议用 EXT4 on SSD，可以用 RAID1 或者 RAID10，不要用 RAID5 和RAID6，
