@@ -319,9 +319,20 @@ fleet       https://github.com/coreos/fleet
     * support unit file template and launch multiple instances
 
 
-=======================
-Kubernetes
-fleet
-open-vswitch
-FOU(Foo-over-UDP): IPIP, sit, GRE, VXLAN + DOVE, GUE(Generic UDP Encapsulation, linux kernel >= 3.18)
+-----------------------------------------------
+container: docker
+storage: devicemapper
+network:  flannel
+
+dns: consul
+label discovery: puppet facter, chef ohai, facebook oquery(https://github.com/facebook/osquery)
+
+shared volume: glusterfs or moosefs
+scheduler: swarm + compose, kubernetes, fleet, mesos + marathon + ...
+
+CI/CD: drone.io? jenkins?
+
+deployment: rex? ansible? salt? chef? puppet?
+
+authn & authz?
 
