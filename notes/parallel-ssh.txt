@@ -3,6 +3,7 @@ Parallel SSH
 http://code.google.com/p/csshx/
     Mac OS app, tiling windows for many servers
 http://code.google.com/p/parallel-ssh/
+https://packages.debian.org/sid/pssh
     pssh, pscp, prsync, pnuke, and pslurp
 https://code.google.com/p/pdsh/
     pdsh, pdcp, rpdcp, dshbak
