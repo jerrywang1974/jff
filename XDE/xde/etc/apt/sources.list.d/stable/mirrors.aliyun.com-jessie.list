@@ -1,0 +1,21 @@
+deb http://mirrors.aliyun.com/debian-security/ jessie/updates main non-free contrib
+deb-src http://mirrors.aliyun.com/debian-security/ jessie/updates main non-free contrib
+
+deb http://mirrors.aliyun.com/debian/ jessie main non-free contrib
+deb-src http://mirrors.aliyun.com/debian/ jessie main non-free contrib
+
+# See http://backports.debian.org/Instructions/
+#
+deb http://mirrors.aliyun.com/debian/ jessie-backports main non-free contrib
+deb-src http://mirrors.aliyun.com/debian/ jessie-backports main non-free contrib
+
+# See https://wiki.debian.org/StableUpdates
+#
+deb http://mirrors.aliyun.com/debian/ jessie-updates main non-free contrib
+deb-src http://mirrors.aliyun.com/debian/ jessie-updates main non-free contrib
+
+
+# See https://wiki.debian.org/StableProposedUpdates
+#
+#deb http://mirrors.aliyun.com/debian/ jessie-proposed-updates main non-free contrib
+#deb-src http://mirrors.aliyun.com/debian/ jessie-proposed-updates main non-free contrib

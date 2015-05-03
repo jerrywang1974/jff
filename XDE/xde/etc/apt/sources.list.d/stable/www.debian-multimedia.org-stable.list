@@ -1,3 +1,0 @@
-deb http://www.debian-multimedia.org stable main contrib non-free
-
-deb-src http://www.debian-multimedia.org sid main contrib non-free
