@@ -84,7 +84,7 @@ CloudStore (KosmosFS)
     - 编译依赖多，文档落后，脚本简陋
     - 开发不活跃
 
-MooseFS
+MooseFS   (派生版本：LizardFS http://lizardfs.com/)
     + 支持文件元数据
     + mfsmount 很好用
     + 编译依赖少，文档全，默认配置很好
