@@ -1,0 +1,164 @@
+InfluxDB + Grafana
+	分布式存储，专为时间序列设计，无需事先指定schema
+	数据点按照时间戳切片，然后按照 metric name + tag key-value pairs 切分
+	主键是时间戳，fields 列不索引，tags 列做索引
+	支持数据点覆盖以及删除
+	tag value 总是被当作字符串
+	tag values 组合应该小于 10w，组合个数越大性能越差
+	安装配置使用方便
+	支持类 SQL 查询，时间窗口以及精度采样
+	支持持续 SQL 语句增量执行（历史数据被修改怎么处理？）
+	良好的 dashboard 支持
+	InfluxDB 0.9.1 的集群支持尚不完善：只支持三节点集群，每个节点包含全量数据
+	高频写入性能很差，retention policy enforcement 对性能影响很大
+
+Druid				*
+	专为时间序列设计，不支持 join
+	列存储，每列做索引，一个 segment 包含 5~10 million rows
+	segment加载到内存中才能被查询，默认使用内存映射，如果 work set 大于物理内存，会因为OS的内存页换出换入而性能下降
+	架构上模仿搜索引擎
+	数据不能修改
+	real-time nodes: ingest, index, persist, merge, upload to deep storage(hdfs, s3, ...)
+		persist 过程把行存储转换成列存储，然后把segment加载到 off-heap 内存
+		建议让实时节点从 Kafka 读取数据，利用 consumer group 达到 parallel 和 replication
+		实时注入时数据可能会被重复，不保证 only once 语义
+	historical nodes: 从 deep storage 下载 segments 并缓存到本地，segments 被加载到内存中才能提供服务
+		支持分层，一部分高性能历史节点服务热数据，另一部分历史节点服务冷数据
+	coordinator nodes: 调度 segment
+
+ElasticSearch + Kibana		**
+	支持 Groovy 等脚本语言
+	查询语法是 JSON
+	支持持续查询
+
+https://crate.io/		**
+	SQL on ElasticSearch
+
+Apache Solr
+	查询语法是 HTTP query parameters
+
+Apache Cassandra
+	CQL 语言
+	不支持 GROUP BY，没有聚合函数
+
+Apache SparkSQL
+	数据载入内存再做过滤
+	可以在内存中把数据转成列存储
+	不适合做即席SQL查询以及BI，查询数据规模较小，性能较差
+	适合做小规模数据分析以及机器学习
+
+http://blinkdb.org/
+	2014-02 之后没有更新
+
+Apache Drill			*
+	支持多种数据源，不需要导入数据
+	搭配 parquet 性能最好
+	支持 data locality
+	对称架构，易于部署
+	支持ANSI SQL 而不是SQL like，所以支持商业 BI 工具 (使用 http://calcite.incubator.apache.org/ 解析 SQL)
+	查询会尽可能下推到数据源本身
+	支持的存储插件：cp, dfs, hbase, hive, mongo
+
+Apache Phoenix			**
+	SQL on HBase
+
+Apache Tajo
+	开发不活跃
+
+Apache Kylin			*
+	MOLAP 型（预先计算data cube)，而非ROLAP 型（并发查询，不预先计算 data cube)
+
+	Kylin vs Druid:
+	1. Druid is more suitable for realtime analysis. Kylin is more focus on OLAP case. 
+	2. Druid has good integration with Kafka as realtime streaming. The realtime capability of
+	Kylin is still under development. 
+	3. Druid use bitmap index as internal data structure. Kylin use bitmap index for realtime
+	data and molap cube for historical data. 
+	4. Kylin provide ANSI SQL. Druid provide specific query language.
+	5. Druid has limitation on table join. Kylin support star schema.
+	6. Kylin has good intergration with BI tools, such as Tableau or Excel. Druid can't integrate
+	with existed BI tools.
+	7. Since Kylin support molap cube, it has very good performance for complex query on billion
+	level data set. Since Druid need to scan the full index, the performance may be hurt if the
+	data set and query range is too big.
+
+Hive
+
+http://impala.io/		*
+	数据要事先批量准备好，Parquet 格式效率最好
+	需要在Impala中创建表
+
+https://prestodb.io/		*
+http://airbnb.io/airpal/
+	不需要导入数据，可以查询 Hive, Cassandra, RDBMS 等
+
+https://wiki.trafodion.org/wiki/index.php/Main_Page	*
+	Transactional SQL on HBase
+	HBase 的列存储没有 Parquet 高效，做 OLAP 时会受I/O性能影响
+	其它 HBase 上的事务实现：
+		Cask Tephra: http://tephra.io/
+		Yahoo omid(据说开源实现有点问题，修正版本商业化成 LeanXScale了）: https://github.com/yahoo/omid
+		小米 Themis: https://github.com/XiaoMi/themis/
+		https://github.com/VCNC/haeinsa
+
+http://community.pentaho.com/projects/mondrian/
+http://www.spagobi.org/
+
+H-Store -> VoltDB
+C-Store -> Vertica
+Greenplum + MADlib
+
+TokuDB
+	数据高度压缩，虽然 I/O 少点，但查询性能可能会因为解压缩有所下降
+	跟 InnoDB 比优势在于数据集大于内存时性能依然平稳，不会急剧下降
+
+TokuMX
+	还没有出对应 MongoDB 3.0 的版本
+
+MongoDB >= 3.0			**
+
+CitusDB				*
+	基于 PostgreSQL 的 OLAP 型数据库（不提供传统PostgreSQL 的full transactional semantics)
+	使用列存储扩展 cstore_fdw(columnar store foreign data wrapper)提供对文本文件、MongoDB等外部数据源的SQL查询支持
+	适合时间序列分析
+
+postgres-xc
+	Postgres-XC (eXtensible Cluster) is a multi-master write-scalable PostgreSQL cluster based on shared-nothing architecture.
+	偏向 OLTP
+
+http://www.postgres-xl.org/	**
+	基于 postgres-xc 改进，偏向 OLAP，引入了 MPP 支持
+
+InfoBright
+	http://www.infobright.org/index.php/Learn-More/ICE_IEE_Comparison/
+	社区版不支持 update/insert/delete, 执行 load/dml 时会锁住不能查询, 查询只能利用单核
+
+HadoopDB
+	2013 年后停止开发，重写了商业产品 Hadapt
+
+
+Akka Streams
+Samza
+Flink
+Storm
+	https://github.com/epfldata/squall		*
+	http://www.sqlstream.com/storm/
+	http://www.sqlstream.com/stream-processing-with-sql/
+Spark Streaming
+http://gopulsar.io/
+
+SQL Parser
+	https://github.com/JSQLParser/JSqlParser
+	http://calcite.incubator.apache.org/
+	SQL parser in http://prestodb.io/
+
+加速的办法：
+   计算挪到数据所在地方，而非挪动数据
+   预计算
+   增量运算
+   减少磁盘 I/O: 列存储，分块索引
+   基于代价的执行计划
+   并行计算(massively parallel processing)，在运算节点间stream result，而不是运算完把结果批量传递出去，流式的好处是快速，坏处是错误恢复只能整个查询重做
+   近似计算，采样
+   避免 join
+
