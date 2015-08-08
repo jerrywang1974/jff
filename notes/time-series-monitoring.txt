@@ -12,3 +12,27 @@ https://github.com/Ticketmaster/metrilyx-2.0
 http://grafana.org/
     Web UI for Graphite, InfluxDB & OpenTSDB
 
+http://giovannitorres.me/enabling-almost-all-collectd-plugins-on-centos-6.html
+	yum install epel-release
+	yum install gcc bison byacc flex libtool-ltdl-devel tar
+	./build.sh && ./configure && make && make install
+
+	or follow: https://github.com/collectd/collectd/blob/master/contrib/redhat/collectd.spec
+		docker run -it --privileged --name collectd_build centos:6 bash
+			# yum install epel-release
+			# yum install mock bzip2 sudo
+			# adduser builder
+			# usermod -a -G mock builder
+			# usermod -a -G wheel builder
+			# sed -i -e 's/^\s*#\s*\(%wheel.*NOPASSWD:\)/\1/' /etc/sudoers
+			# su builder
+			$ cd && mkdir -p rpmbuild/{SOURCES,SPECS}
+			$ curl -O https://collectd.org/files/collectd-5.5.0.tar.bz2
+			$ tar xf collectd-5.5.0.tar.bz2 collectd-5.5.0/contrib/redhat/collectd.spec
+			$ mv collectd-5.5.0/contrib/redhat/collectd.spec rpmbuild/SPECS
+			$ mv collectd-5.5.0.tar.bz2 rpmbuild/SOURCES
+			$ rm -rf collectd-5.5.0
+			$ sudo mock -r epel-6-x86_64 --enablerepo=epel --buildsrpm --spec ~/rpmbuild/SPECS/collectd.spec --sources ~/rpmbuild/SOURCES/
+			$ sudo mock -r epel-6-x86_64 --enablerepo=epel --no-clean --rebuild /var/lib/mock/epel-6-x86_64/result/collectd-5.5.0-1.el6.src.rpm
+			$ ls /var/lib/mock/epel-6-x86_64/result/
+
