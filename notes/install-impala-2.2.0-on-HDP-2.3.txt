@@ -1,0 +1,154 @@
+在 Hortonworks HDP-2.3 Sandbox VM 上安装 Impala-2.2.0
+                                                2015-8-16
+
+1. 背景
+
+Hortonworks Data Platform 2.3  (2015.7.22 发布)
+        http://hortonworks.com/hdp/whats-new/
+        Hadoop          2.7.1   (最新版，2015.7.6 发布)
+        HBase           1.1.1   (最新版，2015.6.29 发布)
+        Hive            1.2.1   (最新版，2015.6.27 发布)
+        Tez             0.7.0   (最新版，2015.5.18 发布)
+        ZooKeeper       3.4.6   (最新稳定版，2014.3.10 发布)
+
+Cloudera CDH 5.4.4  (2015.7.10 发布)
+
+        http://www.cloudera.com/content/cloudera/en/downloads/cdh/cdh-5-4-4.html#SystemRequirements
+        认证的 JDK 版本：1.7.0_75, 1.8.0_40
+
+        http://www.cloudera.com/content/cloudera/en/documentation/core/latest/topics/cdh_vd_cdh_package_tarball.html#topic_3_unique_2
+        Apache Hadoop           hadoop-2.6.0+cdh5.4.4+597       (在 2.6.0 基础打了 597 个补丁)
+        Apache                  hbase-1.0.0+cdh5.4.4+160        (在 1.0.0 基础打了 160 个补丁)
+        Apache Hive             hive-1.1.0+cdh5.4.4+152         (在 1.1.0 基础打了 152 个补丁)
+        Cloudera Impala         impala-2.2.0+cdh5.4.4+0         (2015.4 发布)
+        Llama                   llama-1.0.0+cdh5.4.4+0
+        Parquet                 parquet-1.5.0+cdh5.4.4+96       (Parquet-1.5.0 是 Parquet 项目转到 apache.org 之前的最后一个版本)
+        Parquet-format          parquet-format-2.1.0+cdh5.4.4+12
+        Apache ZooKeeper        zookeeper-3.4.5+cdh5.4.4+91
+
+Impala-2.2.0 不支持 HDFS federated namespace：http://www.cloudera.com/content/cloudera/en/documentation/core/latest/topics/impala_known_issues.html#IMPALA-77_unique_2
+Impala on YARN 依赖 Llama: http://www.cloudera.com/content/cloudera/en/documentation/cloudera-impala/latest/topics/impala_resource_management.html
+
+2. 安装
+
+(1) 在 http://hortonworks.com/hdp/downloads/ 下载 HDP-2.3 Sandbox 虚拟机镜像，导入 VirtualBox 并启动；
+
+(2) 访问 http://localhost:8888/ (Sandbox 虚拟机镜像已经做好端口映射到宿主机）可以看到 Ambari Web UI 的访问指示，进入 http://localhost:8080/，用户名 admin，密码 admin；
+
+(3) 在 Ambari Web UI 上使用 HDFS -> Configs -> Advanced -> Custom hdfs-site 里添加两个配置：
+        http://docs.hortonworks.com/HDPDocuments/HDP2/HDP-2.3.0/bk_hdfs_admin_tools/content/short_circuit_local_reads_properties_hdfs_site.html
+
+        dfs.datanode.hdfs-blocks-metadata.enabled       true
+        dfs.client.file-block-storage-locations.timeout.millis  10000   # 在 HDP-2.3 中默认是 60s
+
+(4) 保存 HDFS 配置，在 Ambari Web UI 上重启 HDFS、YARN、MapReduce2、Hive 服务；
+
+(5) 安装 CDH 5 的 CentOS-6.x 软件源：
+        http://www.cloudera.com/content/cloudera/en/documentation/core/latest/topics/cdh_ig_cdh5_install.html#concept_gp2_q32_24_unique_1
+
+        # curl -o /etc/yum.repos.d/cloudera-cdh5.repo http://archive.cloudera.com/cdh5/redhat/6/x86_64/cdh/cloudera-cdh5.repo
+        # rpm --import http://archive.cloudera.com/cdh5/redhat/6/x86_64/cdh/RPM-GPG-KEY-cloudera
+
+(6) 安装 Impala
+        # yum install impala impala-state-store impala-catalog impala-server impala-shell llama-master llama
+
+(7) 在 Ambari Web UI 上下载 HDFS client 配置: HDFS -> Service Actions 下拉按钮，然后将其中的
+    log4j.properties, core-site.xml, hdfs-site.xml 上传: scp -P 2222 .... root@localhost:/etc/impala/conf，
+    密码是 hadoop （这个信息在 http://localhost:8888/ 页面点击 View Advanced Options 按钮能看到)
+
+(8) 在 Ambari Web UI 上下载 Hive client 配置：Hive -> Service Actions 下拉按钮，然后将其中的
+    hive-site.xml 上传到 /etc/impala/conf
+
+(9) 为 Impala 重用 HDP 的 hadoop native library:
+
+ln -sf /usr/hdp/2.3.0.0-2557/hadoop/lib/native/libhadoop.so /usr/lib/impala/lib/libhadoop.so
+ln -sf /usr/hdp/2.3.0.0-2557/hadoop/lib/native/libhadoop.so.1.0.0 /usr/lib/impala/lib/libhadoop.so.1.0.0
+
+## Impala-2.2.0 跟 HDFS-2.7 不兼容, Impala 依赖 libhdfs-2.6.0 中的 getJNIEnv:
+##      https://issues.apache.org/jira/browse/HDFS-8474
+##      https://issues.cloudera.org/browse/IMPALA-2029
+##ln -sf /usr/hdp/2.3.0.0-2557/usr/lib/libhdfs.so /usr/lib/impala/lib/libhdfs.so
+##ln -sf /usr/hdp/2.3.0.0-2557/usr/lib/libhdfs.so.0.0.0 /usr/lib/impala/lib/libhdfs.so.0.0.0
+
+cd /tmp
+wget http://archive.cloudera.com/cdh5/redhat/6/x86_64/cdh/5/RPMS/x86_64/hadoop-libhdfs-2.6.0+cdh5.4.4+597-1.cdh5.4.4.p0.6.el6.x86_64.rpm
+rpm2cpio hadoop-libhdfs-2.6.0+cdh5.4.4+597-1.cdh5.4.4.p0.6.el6.x86_64.rpm  | cpio -idmv
+mv -i ./usr/lib64/libhdfs.so* /usr/lib/impala/lib/
+
+(10) 为 Impala 重用 HDP 的 jars:
+
+mv /usr/lib/hive /usr/lib/hive-cloudera
+mv /usr/lib/hadoop /usr/lib/hadoop-cloudera
+for d in hadoop hadoop-hdfs hadoop-mapreduce hadoop-yarn hive zookeeper; do
+        [ -e /usr/lib/$d ] && echo $d exists || ln -s /usr/hdp/2.3.0.0-2557/$d /usr/lib/$d;
+done
+ln -s /usr/lib/hadoop-cloudera/* /usr/lib/hadoop/
+ln -s /usr/lib/hive-cloudera/* /usr/lib/hive/
+
+## Impala-2.2.0 跟 HBase-1.1.1 不兼容:
+        diff --git a/be/src/exec/hbase-table-scanner.cc b/be/src/exec/hbase-table-scanner.cc
+        index 8a8fde8..ce2dad1 100644
+        --- a/be/src/exec/hbase-table-scanner.cc
+        +++ b/be/src/exec/hbase-table-scanner.cc
+        @@ -170,7 +170,7 @@ Status HBaseTableScanner::Init() {
+           scan_set_max_versions_id_ = env->GetMethodID(scan_cl_, "setMaxVersions",
+               "(I)Lorg/apache/hadoop/hbase/client/Scan;");
+           RETURN_ERROR_IF_EXC(env);
+        -  scan_set_caching_id_ = env->GetMethodID(scan_cl_, "setCaching", "(I)V");
+        +  scan_set_caching_id_ = env->GetMethodID(scan_cl_, "setCaching", "(I)Lorg/apache/hadoop/hbase/client/Scan;");
+           RETURN_ERROR_IF_EXC(env);
+           scan_set_cache_blocks_id_ = env->GetMethodID(scan_cl_, "setCacheBlocks", "(Z)V");
+           RETURN_ERROR_IF_EXC(env);
+
+cd /tmp
+wget http://archive.cloudera.com/cdh5/redhat/6/x86_64/cdh/5/RPMS/x86_64/hbase-1.0.0+cdh5.4.4+160-1.cdh5.4.4.p0.6.el6.x86_64.rpm
+rpm2cpio hbase-1.0.0+cdh5.4.4+160-1.cdh5.4.4.p0.6.el6.x86_64.rpm | cpio -idmv
+mv -iT ./usr/lib/hbase /usr/lib/hbase
+
+(11) 启动 Impala，注意 impala-server 默认用端口 21000，这跟 HDP 自带的 Atlas 监听端口冲突，因此需要确保 Atlas 停掉或者换端口
+
+service impala-state-store restart	# 每个 Hadoop 集群运行一份，通常运行在 HDFS namenode 上
+service impala-state-store status
+service impala-catalog restart		# 每个 Hadoop 集群运行一份，通常运行在 HDFS namenode 上
+service impala-catalog status
+service impala-server restart		# 每个 datanode 都运行一份
+service impala-server status
+
+(12) 运行 impala-shell
+
+$ impala-shell
+[sandbox.hortonworks.com:21000] > show databases;
+Query: show databases
++------------------+
+| name             |
++------------------+
+| _impala_builtins |
+| default          |
+| xademo           |
++------------------+
+Fetched 3 row(s) in 0.01s
+
+
+(13) Impala on YARN: http://www.cloudera.com/content/cloudera/en/documentation/core/latest/topics/impala_resource_management.html
+
+llama 服务在一个 Hadoop 集群中只运行一份(支持 HA 部署）。
+
+	!!! llama 要求 Fair Scheduler，但 HDP 2.x 默认用的 Capacity Scheduler，不支持 Fair Scheduler，Cloudera 默认用的 Fair Scheduler。
+
+...place fair-scheduler.xml in /etc/llama/conf
+service llama restart
+service llama status
+
+vi /etc/default/impala
+MPALA_SERVER_ARGS=" \
+    -llama_host=127.0.0.1 \
+    -enable_rm=true \
+    -rm_always_use_defaults=true \
+    -rm_default_cpu_vcores=2 \
+    -rm_default_memory=4G \
+    -fair_scheduler_allocation_path=... \
+    ...
+
+service impala-server restart
+service impala-server status
+
