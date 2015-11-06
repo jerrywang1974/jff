@@ -1,0 +1,48 @@
+Torque + Maui/Moab
+==============================================
+Torque needs canonical hostname that can be reverse resolved by DNS,
+it uses munge for authentication, this requires all hosts have same
+uid/gid for a user.
+
+CentOS 6:
+
+    yum install torque-server torque-mom torque-client
+
+    service pbs_server stop
+    service pbs_mom stop
+
+    rm /var/lib/torque/server_priv/serverdb       # make sure "service pbs_server create" or "service pbs_server start" to initialize serverdb
+
+    create-munge-key  # generate /etc/munge/munge.key, must be shared by all servers
+    service munge start
+
+    service trqauthd start
+    service pbs_server start
+    service pbs_mom start
+
+    PBS_DEFAULT=`hostname -f` qstat     # qstat use /var/lib/torque/server_name by default, that's "localhost", this seems to break munge authentication due to inconsist IP
+
+    # better to not use "localhost"
+    hostname -f > /etc/torque/server_name
+    echo `hostname -f` np=`grep ^processor | wc -l` > /var/lib/torque/server_priv/nodes
+    sed -e 's/\$pbsserver\s*localhost/\$pbsserver '`hostname -f`/ -i /var/lib/torque/mom_priv/config
+    echo '$logevent 225' >> /var/lib/torque/mom_priv/config
+
+
+SLURM   http://slurm.schedmd.com/
+==============================================
+
+HTCondor
+==============================================
+
+SGE/SoG/OGS
+==============================================
+Sun Grid Engine -> Oracle Grid Engine -> Univa Grid Engine: commercial product
+SoG: Son of Grid Engine     https://arc.liv.ac.uk/trac/SGE
+OGS: Open Grid Scheduler    http://gridscheduler.sourceforget.net/
+
+OAR     http://oar.imag.fr/start
+==============================================
+
+OpenLava    http://www.openlava.org/
+==============================================

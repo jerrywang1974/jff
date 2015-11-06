@@ -7,18 +7,6 @@
     email = yubao.liu@gmail.com
     name = Yubao Liu
 
-[rerere]
-    enabled = true
-
-[color]
-    ui = auto
-
-[diff]
-    renames = copy
-
-[status]
-    relativePath = true
-
 [alias]
     b  = branch
     #l  = log --graph --pretty=format:'%Cred%h%Creset %C(yellow)%d%Creset %s %Cgreen(%cr)%Creset' --abbrev-commit
@@ -29,7 +17,22 @@
     desc = describe
     wtf = whatchanged
 
+[color]
+    ui = auto
+
+[diff]
+    renames = copy
+
+[status]
+    relativePath = true
+
 [i18n]
     commitEncoding = utf-8
     #logOutputEncoding = utf-8
+
+[push]
+    default = simple
+
+[rerere]
+    enabled = true
 
