@@ -1,4 +1,7 @@
 #!/usr/bin/perl
+#
+# Another solution is to pipe JSON text to 'python -m json.tool'
+#
 use JSON;
 use strict;
 use warnings;
