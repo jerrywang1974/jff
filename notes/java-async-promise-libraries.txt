@@ -1,0 +1,11 @@
+http://docs.oracle.com/javase/8/docs/api/java/util/concurrent/CompletableFuture.html
+
+http://google.github.io/guava/releases/18.0/api/docs/com/google/common/util/concurrent/SettableFuture.html
+http://google.github.io/guava/releases/18.0/api/docs/com/google/common/util/concurrent/Futures.html
+
+http://tsunanet.net/~tsuna/async/api/com/stumbleupon/async/Deferred.html
+
+http://twitter.github.io/finagle/guide/Futures.html
+
+http://jdeferred.org/
+
