@@ -1,0 +1,12 @@
+OpenWrt     https://en.wikipedia.org/wiki/OpenWrt
+Tomato      https://en.wikipedia.org/wiki/Tomato_%28firmware%29
+DDWrt       https://en.wikipedia.org/wiki/DD-WRT
+
+
+NAS4Free    NAS based on FreeBSD and FreeNAS v0.7
+FreeNAS     NAS based on FreeBSD, rewrite since v8.0
+OpenMediaVault  NAS based on Debian
+
+pfSense     firewall based on FreeBSD
+opnSense    firewall based on FreeBSD
+
