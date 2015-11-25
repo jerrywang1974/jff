@@ -17,7 +17,7 @@ git branch -a | fgrep remotes/$upstream/ |
         b=${branch#remotes/$upstream/}
         [ "$b" ] && {
             echo "Sync $branch to remotes/$my/$b..."
-            git push $my $branch:$b
+            git push $my $branch:refs/heads/$b
         }
     done
 
