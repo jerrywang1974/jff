@@ -1,0 +1,13 @@
+https://vaultproject.io/docs/index.html
+
+$ sudo setcap cap_ipc_lock=+ep $(readlink -f $(which vault))
+$ vault server -config vault.hcl
+
+$ export VAULT_ADDR=....
+$ vault init
+$ vault status
+$ vault unseal
+
+$ export VAULT_TOKEN=...
+    # or use "vault auth YOUR-TOKEN", the token is written to $HOME/.vault-token.
+
