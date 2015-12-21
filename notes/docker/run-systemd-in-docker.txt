@@ -1,0 +1,102 @@
+Run Systemd in docker
+
+(1) docker-1.8:
+
+    docker run --cap-add SYS_ADMIN -e container=docker -dt centos /usr/sbin/init
+
+(2) docker-1.9: it makes /sys/fs/cgroup readonly, then systemd failed to create directory /sys/fs/cgroup/systemd
+    see: https://github.com/docker/docker/issues/18796
+
+    docker run --cap-add SYS_ADMIN -e container=docker -dt centos bash -c 'mount -oremount,rw /sys/fs/cgroup; exec /usr/sbin/init'
+
+(3) docker-1.8 with SELinux on CentOS Atomic Host image (CentOS-7.1.1503): docker mounts a bad readonly /sys/fs/cgroup/systemd which misses some files and directories.
+    see: https://wiki.centos.org/HowTos/SELinux
+         https://github.com/fedora-cloud/docker-selinux
+         https://github.com/docker/docker/issues/18796
+
+    cd /root
+    journalctl | grep -w avc | audit2allow -M dockerlocal
+    sed -i.bak -e 's/^}/\n\ttype tmpfs_t;\n\ttype cgroup_t;\n\tclass filesystem unmount;\n\tclass sock_file getattr;\n\tclass file getattr;\n}\n\nallow svirt_lxc_net_t cgroup_t:filesystem unmount;\nallow svirt_lxc_net_t tmpfs_t:sock_file getattr;\nallow svirt_lxc_net_t tmpfs_t:file getattr;/' dockerlocal.te
+    cat dockerlocal.te
+    checkmodule -M -m -o dockerlocal.mod dockerlocal.te
+    semodule_package -o dockerlocal.pp -m dockerlocal.mod
+    semodule -i dockerlocal.pp
+
+    docker stop -t 0 systemd
+    docker rm systemd
+    docker run --name systemd --cap-add SYS_ADMIN -e container=docker -dt centos bash -c 'umount /sys/fs/cgroup/systemd; exec /usr/sbin/init'
+
+Repeat the commands above until no "avc" warnings in output of "journalctl" in the host OS.
+notice this is very rude, just for your reference.
+
+It still has a few errors that don't matter, you may disable SELinux "dontaudit" policy to check them,
+see https://wiki.gentoo.org/wiki/SELinux/Logging#Disabling_dontaudit_statements.
+
+    semodule -DB
+    ...run the commands above...
+    semodule -B
+
+
+(4) debug Systemd
+
+Edit /etc/systemd/{system,user}.conf:
+
+    LogLevel=debug
+    LogTarget=console
+    LogColor=yes
+    LogLocation=yes
+
+(5) the generated dockerlocal.te:
+
+$ cat dockerlocal.te | grep -v '^#!!!!'
+
+module dockerlocal 1.0;
+
+require {
+        type svirt_sandbox_file_t;
+        type tmpfs_t;
+        type hugetlbfs_t;
+        type svirt_lxc_net_t;
+        class fifo_file { read write create open };
+        class capability sys_admin;
+        class file { rename setattr lock create unlink open };
+        class filesystem { mount remount };
+        class sock_file { write create };
+        class lnk_file create;
+        class dir { write rmdir setattr remove_name create add_name };
+
+        type tmpfs_t;
+        type cgroup_t;
+        class filesystem unmount;
+        class sock_file getattr;
+        class file getattr;
+}
+
+allow svirt_lxc_net_t cgroup_t:filesystem unmount;
+allow svirt_lxc_net_t tmpfs_t:sock_file getattr;
+allow svirt_lxc_net_t tmpfs_t:file getattr;
+
+#============= svirt_lxc_net_t ==============
+
+allow svirt_lxc_net_t hugetlbfs_t:dir { write setattr };
+
+allow svirt_lxc_net_t hugetlbfs_t:filesystem mount;
+
+allow svirt_lxc_net_t self:capability sys_admin;
+
+allow svirt_lxc_net_t svirt_sandbox_file_t:filesystem remount;
+
+allow svirt_lxc_net_t tmpfs_t:dir { write rmdir setattr remove_name create add_name };
+allow svirt_lxc_net_t tmpfs_t:fifo_file open;
+
+allow svirt_lxc_net_t tmpfs_t:fifo_file { read write create };
+
+allow svirt_lxc_net_t tmpfs_t:file { create open setattr };
+allow svirt_lxc_net_t tmpfs_t:file { rename lock unlink };
+
+allow svirt_lxc_net_t tmpfs_t:filesystem mount;
+
+allow svirt_lxc_net_t tmpfs_t:lnk_file create;
+
+allow svirt_lxc_net_t tmpfs_t:sock_file { write create };
+
