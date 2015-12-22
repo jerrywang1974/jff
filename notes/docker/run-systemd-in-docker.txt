@@ -10,7 +10,8 @@ Run Systemd in docker
     docker run --cap-add SYS_ADMIN -e container=docker -dt centos bash -c 'mount -oremount,rw /sys/fs/cgroup; exec /usr/sbin/init'
 
 (3) docker-1.8 with SELinux on CentOS Atomic Host image (CentOS-7.1.1503): docker mounts a bad readonly /sys/fs/cgroup/systemd which misses some files and directories.
-    see: https://wiki.centos.org/HowTos/SELinux
+    see: https://fedorapeople.org/~dwalsh/SELinux/Presentations/DockerSecurity/
+         https://wiki.centos.org/HowTos/SELinux
          https://github.com/fedora-cloud/docker-selinux
          https://github.com/docker/docker/issues/18796
 
@@ -26,10 +27,10 @@ Run Systemd in docker
     docker rm systemd
     docker run --name systemd --cap-add SYS_ADMIN -e container=docker -dt centos bash -c 'umount /sys/fs/cgroup/systemd; exec /usr/sbin/init'
 
-Repeat the commands above until no "avc" warnings in output of "journalctl" in the host OS.
+Repeat the commands above until no new "avc" warnings in output of "journalctl" in the host OS.
 notice this is very rude, just for your reference.
 
-It still has a few errors that don't matter, you may disable SELinux "dontaudit" policy to check them,
+It still has a few errors that seems harmless, you may disable SELinux "dontaudit" policy to check them,
 see https://wiki.gentoo.org/wiki/SELinux/Logging#Disabling_dontaudit_statements.
 
     semodule -DB
