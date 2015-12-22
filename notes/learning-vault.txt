@@ -1,5 +1,8 @@
 https://vaultproject.io/docs/index.html
 
+start and init Vault server
+===========================
+
 $ sudo setcap cap_ipc_lock=+ep $(readlink -f $(which vault))
 $ vault server -config vault.hcl
 
@@ -10,4 +13,37 @@ $ vault unseal
 
 $ export VAULT_TOKEN=...
     # or use "vault auth YOUR-TOKEN", the token is written to $HOME/.vault-token.
+$ vault mounts
+
+
+token authentication
+====================
+
+$ vault token-create -policy=xxx
+$ vault auth <token>     # or export VAULT_TOKEN=xxxx
+$ vault revoke-token <token>
+
+
+ACL
+===
+
+Deny by default.
+
+$ vault policies
+$ vault policies xxx
+$ vault policy-write <name> <path.hcl>
+
+
+rekey and rotate
+================
+
+$ vault rekey       # generate new master key and new unseal keys
+$ vault rotate      # generate new encryption key
+
+
+authentication backend
+======================
+
+$ vaule auth-enable xxx
+$ vault path-help auth/xxx
 
