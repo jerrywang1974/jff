@@ -1,0 +1,66 @@
+https://access.redhat.com/documentation/en-US/Red_Hat_Enterprise_Linux/7/html-single/7.0_Release_Notes/index.html
+
+* LIO kernel target subsystem
+
+* LVM Cache as a Technology Preview
+    Note that the following commands are not currently allowed on cache logical volumes:
+        * pvmove: will skip over any cache logical volume;
+        * lvresize, lvreduce, lvextend: cache logical volumes cannot be resized currently;
+        * vgsplit: splitting a volume group is not allowed when cache logical volumes exist in it.
+
+* Support for Parallel NFS
+    Support file, object, block layouts, but object and block layouts are supported as a Technology Preview.
+
+* XFS file system
+    * metadata journaling
+    * defragemented and expaned while mounted and active,  NOT possible to shrink
+
+* Hardware Error Reporting Mechanism
+    user space daemon: rasdaemon, to collect Reliability, Availability and Serviceability error events
+
+* Pacemaker cluster manager
+
+* Keepalived + LVS + HAProxy as load balancer
+
+* Performance Co-Pilot (PCP: http://www.pcp.io/)
+
+* Networking team driver to replace the old bonding driver
+
+* Chrony suite to replace ntpd for mobile and virtual systems
+
+* Dynamic firewall daemon: firewalld
+
+* DDoS Protection: SYNPROYX
+    http://rhelblog.redhat.com/2014/04/11/mitigate-tcp-syn-flood-attacks-with-red-hat-enterprise-linux-7-beta/
+    https://github.com/netoptimizer/network-testing/blob/master/iptables/iptables_synproxy.sh
+
+* Red Hat Software Collections: https://access.redhat.com/documentation/en-US/Red_Hat_Software_Collections
+
+* Changing locale and keyboard layout settings: localectl
+
+* configure default fonts per language: fonts-tweak-tool
+
+
+================================================
+https://access.redhat.com/documentation/en-US/Red_Hat_Enterprise_Linux/7/html-single/7.1_Release_Notes/index.html
+
+* OverlayFS as technology preview.
+    * recommended to use ext4 as the lower file system,  xfs and gfs2 are not supported
+    * SELinux is not supported
+
+* Since 7.1, the block and object layout are fully supported
+
+* libceph.ko and rbd.ko for Ceph block device is added, but ceph.ko for CephFS is not supported
+
+* token_coefficient option allows Corosync to handle dynamic addition and removal of nodes.
+
+* java-1.8.0-openjdk is now fully supported
+
+
+================================================
+https://access.redhat.com/documentation/en-US/Red_Hat_Enterprise_Linux/7/html-single/7.2_Release_Notes/index.html
+
+* adjust sys/net/netfilter/nf_conntrack_buckets to maximum 65536.
+
+* LVM cache fully supported
+
