@@ -1,0 +1,44 @@
+Install Mesos/Marathon/Chronos on CentOS 7
+
+https://open.mesosphere.com/getting-started/install/
+
+docker run --name mesos-master1 -e container=docker --cap-add SYS_ADMIN -dt centos:7 /usr/sbin/init
+docker exec -it mesos-master1  bash
+
+On Mesos master nodes:
+
+    # rpm -Uvh http://repos.mesosphere.com/el/7/noarch/RPMS/mesosphere-el-repo-7-1.noarch.rpm
+    # yum install mesos marathon mesosphere-zookeeper
+    # systemctl stop mesos-slave; systemctl disable mesos-slave
+
+    # ... edit /var/lib/zookeeper/myid, unique integer between 1 and 255
+    # ... edit /etc/zookeeper/conf/zoo.cfg
+            server.1=SRV-1:2888:3888
+            server.2=SRV-2:2888:3888
+            server.3=SRV-3:2888:3888
+    # ... edit /etc/mesos/zk
+            zk://SRV-1:2181,SRV-2:2181,SRV-3:2181/mesos
+    # ... edit /etc/mesos-master/quorum, set to number > (num_mesos_masters / 2)
+    # ... optionally edit /etc/mesos-master/hostname
+    # ... optionally edit /etc/marathon/conf/hostname
+
+    # systemctl restart zookeeper
+    # systemctl restart mesos-master
+    # sysemctl restart marathon
+
+On Mesos slave nodes:
+    # rpm -Uvh http://repos.mesosphere.com/el/7/noarch/RPMS/mesosphere-el-repo-7-1.noarch.rpm
+    # yum install mesos
+    # systemctl stop mesos-master; systemctl disable mesos-master
+    # systemctl stop zookeeper; systemctl disable zookeeper
+
+    # ... edit /etc/mesos/zk
+            zk://SRV-1:2181,SRV-2:2181,SRV-3:2181/mesos
+    # ... optionally edit /etc/mesos-slave/hostname
+
+    # systemctl restart mesos-slave
+
+Verify:
+    http://MESOS-MASTER-IP:5050/
+    http://MARATHON-IP:8080/
+
