@@ -12,9 +12,19 @@ adduser mesos
 ./bootstrap
 mkdir build
 cd build
-../configure
+../configure --prefix=/usr
 
 make -j4
 make -j4 check
 make -j4 install
+
+# build rpm:
+if false; then
+    git clone git@github.com:mesosphere/mesos-deb-packaging.git
+    cd mesos-deb-packaging
+    yum install -y ruby ruby-devel
+    gem sources --add https://ruby.taobao.org/ --remove https://rubygems.org/
+    gem install fpm
+    ./build_mesos --src-dir `pwd`/.. --build-dir `pwd`/../build --prebuilt
+fi
 
