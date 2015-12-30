@@ -1,0 +1,29 @@
+https://en.wikipedia.org/wiki/Microcontroller
+https://en.wikipedia.org/wiki/List_of_common_microcontrollers
+
+Intel: 
+    8bit: MCS-48, MCS-51(8051 famly), MCS-151(high performance 8051 compatible family)
+    8/16/32-bit: MCS-251
+    16-bit: MCS-96, MCS-296
+
+STC(宏晶科技): STC89C51 (8051 family)       **
+
+Microchip Technology: PIC                   *****
+
+Atmel: AT89 series (8051 architecture)      **
+       AVR(8bit), AVR32(32bit)              **
+       AT91SAM(32bit ARM)
+
+Freescale Semiconductor:
+    ColdFire(32bit), S08(8bit), M68HC11 (8bit), M68HC16
+
+Texas Instruments:
+    MSP430(16 bit, for low power system)    **
+    C2000(32-bit) 
+
+NXP Semiconductors: LPC series
+
+STMicroelectronics: STM8, ST10, STM32       *****
+
+Analog Devices: Blackfin, SHARC
+
