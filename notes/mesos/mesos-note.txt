@@ -1,0 +1,47 @@
+Multi-tenant Mesos:
+
+    * masters authenticate against ZooKeeper
+    * frameworks and slaves must authenticate against master
+    * resource allocation to different frameworks
+    * resource isolation, limitation, QoS for different frameworks
+    * request rate limit from frameworks
+    * tasks run as their own user
+
+    * persistent volume
+    * rolling upgrade, resize cluster
+    * maintenance window, drain mode
+    * slave recovery to recover tasks
+    * how to centrally and dynamically manage authentication, authorization, resource reservation
+    * cross data center
+
+http://mesos.apache.org/documentation/latest/configuration/
+
+Common:
+
+    --firewall_rules        endpoints firewall
+    --ip=VALUE
+    --port=VALUE
+
+Master:
+
+    --quorum=VALUE
+    --work_dir=VALUE
+    --zk=VALUE
+
+    --acls=VALUE
+    --authenticate          authenticate mesos frameworks
+    --authenticate_slaves   authenticate mesos slaves
+    --authenticators=VALUE
+    --authorizers=VALUE     conflict with --acls=VALUE, default is "local"
+    --credentials=VALUE     store principal and secret pairs
+    --rate_limits=VALUE
+    --roles=VALUE
+    --[no-]root_submissions
+
+Slave:
+
+    --master=VALUE
+    --attributes=VALUE      eg. "rack:2;u:1"
+    --authenticatee=VALUE
+    --credential=VALUE
+
