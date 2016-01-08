@@ -1,0 +1,36 @@
+Run slurm:
+
+    docker run --name slurm -h slurm -e container=docker --cap-add SYS_ADMIN \
+        -dt debian:sid bash -c 'mount | grep /sys/fs/cgroup/ | awk "{print \$3}" | xargs -n 1 umount; find /etc/systemd/system /lib/systemd/system -name "*tty*" -delete; exec /sbin/init'
+
+    # in container
+    apt install slurm-wlm   # depends on slurmctld, slurmd, slurm-client, slurm-wlm-basic-plugins
+                            # may also install slurmdbd
+
+    # on desktop
+    apt install sview slurm-client
+
+
+http://www.open-mpi.org/video/slurm/Slurm_EMC_Dec2012.pdf
+
+    * resource: node -> NUMA board -> { memory, socket -> core -> hyperthread }
+    * jobs: resource allocation requests
+    * job steps: set of (typically parallel) tasks
+    * partitions: job queues with limits and access controls
+    * commands:
+        * sbatch
+        * salloc
+        * srun -n8 a.out
+        * sattach
+        * sinfo
+        * squeue
+        * smap, sview
+        * scontrol update NodeName=X State=[drain | resume] Reason=X
+        * sacct,sstat, sreport
+        * sacctmgr
+        * sprio, sshare, sdiag
+        * scancel, sbcast, srun_cr, strigger
+        * slurmctld -Dcvvv  # run in foreground, purge state, verbose message
+        * slurmd -Dcvvv
+        * slurmd -C         # show node configuration
+
