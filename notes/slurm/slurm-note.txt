@@ -1,13 +1,45 @@
 Run slurm:
 
+    ### on host
     docker run --name slurm -h slurm -e container=docker --cap-add SYS_ADMIN \
-        -dt debian:sid bash -c 'mount | grep /sys/fs/cgroup/ | awk "{print \$3}" | xargs -n 1 umount; find /etc/systemd/system /lib/systemd/system -name "*tty*" -delete; exec /sbin/init'
+        -dt debian:sid bash -c 'mount | grep /sys/fs/cgroup/ | awk "{print \$3}" | xargs -n 1 umount; mount -oremount,rw /sys/fs/cgroup; mkdir /sys/fs/cgroup/systemd; find /etc/systemd/system /lib/systemd/system -name "*tty*" -delete; exec /sbin/init'
 
-    # in container
-    apt install slurm-wlm   # depends on slurmctld, slurmd, slurm-client, slurm-wlm-basic-plugins
-                            # may also install slurmdbd
+    ### in container
+    apt install -y procps
+    apt install -y postfix bsd-mailx
+    apt install -y cgroup-tools logrotate slurm-wlm   # depends on slurmctld, slurmd, slurm-client, slurm-wlm-basic-plugins
+    apt install -y slurmdbd mysql-server mysql-client mysql-utilities  # optional
 
-    # on desktop
+    cp slurm.conf cgroup.conf slurmdbd.conf /etc/slurm-llnl/
+    chgrp 644 /etc/slurm-llnl/{cgroup,slurm}.conf
+    chgrp slurm /etc/slurm-llnl/slurmdbd.conf
+    chmod 640 /etc/slurm-llnl/slurmdbd.conf
+
+    mkdir /etc/slurm-llnl/cgroup
+    cp /usr/share/doc/slurmd/examples/cgroup.release_common /etc/slurm-llnl/cgroup/release_common
+    chmod 755 /etc/slurm-llnl/cgroup/release_common
+    for s in `lssubsys`; do ln -s release_common /etc/slurm-llnl/cgroup/release_$s; done
+
+    systemctl start cron
+    systemctl start postfix
+    systemctl start munge
+    systemctl start mysql
+
+    ## in mysql>
+    #   CREATE USER slurm@localhost IDENTIFIED BY 'MYSQL_SLURM_PASSWORD';
+    #   GRANT ALL ON slurm.* TO slurm@localhost;
+    #   CREATE DATABASE slurm;
+
+    systemctl start slurmdbd
+
+    sacctmgr add cluster my_cluster     # ClusterName set in /etc/slurm-llnl/slurm.conf
+    sacctmgr add account none,test Cluster=my_cluster Description="none" Organization="none"
+    sacctmgr add user dieken DefaultAccount=test
+
+    systemctl start slurmctld
+    systemctl start slurmd
+
+    ### on desktop
     apt install sview slurm-client
 
 
