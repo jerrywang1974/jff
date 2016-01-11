@@ -1,43 +1,12 @@
 Run slurm:
 
     ### on host
-    docker run --name slurm -h slurm -e container=docker --cap-add SYS_ADMIN \
+    docker run -v `pwd`:/root/slurm --name slurm -h slurm -e container=docker --cap-add SYS_ADMIN \
         -dt debian:sid bash -c 'mount | grep /sys/fs/cgroup/ | awk "{print \$3}" | xargs -n 1 umount; mount -oremount,rw /sys/fs/cgroup; mkdir /sys/fs/cgroup/systemd; find /etc/systemd/system /lib/systemd/system -name "*tty*" -delete; exec /sbin/init'
 
     ### in container
-    apt install -y procps
-    apt install -y postfix bsd-mailx
-    apt install -y cgroup-tools logrotate slurm-wlm   # depends on slurmctld, slurmd, slurm-client, slurm-wlm-basic-plugins
-    apt install -y slurmdbd mysql-server mysql-client mysql-utilities  # optional
-
-    cp slurm.conf cgroup.conf slurmdbd.conf /etc/slurm-llnl/
-    chgrp 644 /etc/slurm-llnl/{cgroup,slurm}.conf
-    chgrp slurm /etc/slurm-llnl/slurmdbd.conf
-    chmod 640 /etc/slurm-llnl/slurmdbd.conf
-
-    mkdir /etc/slurm-llnl/cgroup
-    cp /usr/share/doc/slurmd/examples/cgroup.release_common /etc/slurm-llnl/cgroup/release_common
-    chmod 755 /etc/slurm-llnl/cgroup/release_common
-    for s in `lssubsys`; do ln -s release_common /etc/slurm-llnl/cgroup/release_$s; done
-
-    systemctl start cron
-    systemctl start postfix
-    systemctl start munge
-    systemctl start mysql
-
-    ## in mysql>
-    #   CREATE USER slurm@localhost IDENTIFIED BY 'MYSQL_SLURM_PASSWORD';
-    #   GRANT ALL ON slurm.* TO slurm@localhost;
-    #   CREATE DATABASE slurm;
-
-    systemctl start slurmdbd
-
-    sacctmgr add cluster my_cluster     # ClusterName set in /etc/slurm-llnl/slurm.conf
-    sacctmgr add account none,test Cluster=my_cluster Description="none" Organization="none"
-    sacctmgr add user dieken DefaultAccount=test
-
-    systemctl start slurmctld
-    systemctl start slurmd
+    cd /root/slurm
+    ./bootstrap-in-docker.sh
 
     ### on desktop
     apt install sview slurm-client
@@ -65,4 +34,77 @@ http://www.open-mpi.org/video/slurm/Slurm_EMC_Dec2012.pdf
         * slurmctld -Dcvvv  # run in foreground, purge state, verbose message
         * slurmd -Dcvvv
         * slurmd -C         # show node configuration
+
+http://slurm.schedmd.com/cpu_management.html
+
+    slurm.conf:
+        NodeName
+        PartitionMame
+        FastSchedule
+            0   configured processors == actual processors
+            1   drain if configured processors > actual processors (default)
+            2   NOT drain if configured processors > actual processors (for test)
+        SelectType
+            select/linear:      allocate whole node
+            select/cons_res:    allocate CPU
+        SelectTypeParameters
+
+    srun/salloc/sbatch command line options:
+        step 1: selection of nodes
+
+            -p, --partition         ARG
+            -F, --nodefile          ARG
+            -w, --nodelist          ARG
+            -x, --exclude           ARG
+
+            -B, --extra-node-info   ARG
+            -C, --constraint        ARG
+            --contiguous
+            --sockets-per-node      ARG
+            --cores-per-socket      ARG
+            --threads-per-core      ARG
+
+            --exclusive             [=user] notice partition's "Shared" optiion takes precedence over the job's option
+            -s, --share
+
+            -N, --nodes             ARG     min and max number of nodes
+            -n, --ntasks            ARG     number of tasks
+            --ntasks-per-node       ARG     max
+            --ntasks-per-socket     ARG     max
+            --ntasks-per-core       ARG     max
+            -c, --cpus-per-task     ARG
+            --mincpus               ARG     min cpus per node
+
+            --hint                  ARG
+
+            -O, --overcommit
+                for job allocation, allocate one CPU per node and --ntasks-per-* are ignored;
+                for job step allocation, allow more than one task per CPU
+
+            -Z, --no-allocate       bypass resource allocation, only for user slurm and root
+
+        step 2: allocation of CPUs from the selected Nodes
+
+            ...options in step 1...
+            -m, --distribution      ARG
+
+        step 3: distribution of tasks to the selected Nodes
+
+            MaxTasksPerNode in slurm.conf
+
+            -m, --distribution      ARG
+            --ntasks-per-node       ARG
+            --ntasks-per-core       ARG
+            --ntasks-per-socket     ARG
+            -r, --relative          ARG
+
+        step 4: optional distribution and binding of tasks to CPUs within a node
+
+            TaskPlugin, TaskPluginParam in slurm.conf
+
+            ConstrainCores, TaskAffinity in cgroup.conf
+
+            --cpu_bind              ARG
+            --ntasks-per-core       ARG
+            -m, --distribution      ARG
 
