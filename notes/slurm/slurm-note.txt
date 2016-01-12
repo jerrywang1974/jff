@@ -108,3 +108,22 @@ http://slurm.schedmd.com/cpu_management.html
             --ntasks-per-core       ARG
             -m, --distribution      ARG
 
+http://slurm.schedmd.com/quickstart_admin.html
+
+    * same user/group/uid/grid across all nodes;
+    * copy /etc/munge/munge.key to all nodes;
+    * !!! slurmctld flushes state to disk every 5 seconds, state may lose;
+    * !!! master and backup slurmctld require to share storage for "StateSaveLocation".
+    * !!! Slurm daemons will support RPCs and state files from the two
+      previous minor releases (e.g. a version 15.08.x SlurmDBD will
+      support slurmctld daemons and commands with a version of 14.03.x
+      or 14.11.x). This means that upgrading at least once each year is
+      recommended. Otherwise, intermediate upgrades will be required to
+      preserve state information.
+    * !!! If the SlurmDBD daemon is used, it must be at the same or higher
+      minor release number as the Slurmctld daemons. In other words, when
+      changing the version to a higher release number (e.g from 14.11.x to
+      15.08.x) always upgrade the SlurmDBD daemon first.
+    * upgrade order: upgrade slurmdbd -> shutdown slurmctld -> upgrade slurmd -> upgrade slurmctld
+    * rolling upgrade: upgrade slurmdbd -> upgrade slurmctld -> rolling upgrade slurmd, notice "SlurmdTimeout".
+
