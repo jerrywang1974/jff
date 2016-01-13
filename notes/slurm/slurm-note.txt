@@ -135,3 +135,6 @@ http://slurm.schedmd.com/quickstart_admin.html
     * upgrade order: upgrade slurmdbd -> shutdown slurmctld -> upgrade slurmd -> upgrade slurmctld
     * rolling upgrade: upgrade slurmdbd -> upgrade slurmctld -> rolling upgrade slurmd, notice "SlurmdTimeout".
 
+http://slurm.schedmd.com/accounting.html
+
+    * Only lowercase usernames are supported.
