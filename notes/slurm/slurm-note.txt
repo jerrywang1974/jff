@@ -57,25 +57,33 @@ http://slurm.schedmd.com/cpu_management.html
             -w, --nodelist          ARG
             -x, --exclude           ARG
 
-            -B, --extra-node-info   ARG
             -C, --constraint        ARG
             --contiguous
+            -B, --extra-node-info   ARG     combined shortcut for --sockets-per-node, --cores-per-socket, --threads-per-core
             --sockets-per-node      ARG
             --cores-per-socket      ARG
             --threads-per-core      ARG
 
             --exclusive             [=user] notice partition's "Shared" optiion takes precedence over the job's option
-            -s, --share
+            -s, --share                     used with partition option "Shared=YES"
 
             -N, --nodes             ARG     min and max number of nodes
             -n, --ntasks            ARG     number of tasks
+            -c, --cpus-per-task     ARG
             --ntasks-per-node       ARG     max
             --ntasks-per-socket     ARG     max
             --ntasks-per-core       ARG     max
-            -c, --cpus-per-task     ARG
             --mincpus               ARG     min cpus per node
 
-            --hint                  ARG
+            --mem                   ARG
+            --mem-per-cpu           ARG
+
+            --hint  compute_bound           use all cores in each socket
+                    memory_bound            use only one socket in each socket
+                    [no]multithread         [don't] use extra threads with in-core multi-threading
+
+            --core-spec             ARG     count of cores to reserve for system use
+            --thread-spec           ARG     count of threads to reserve for system use (future)
 
             -O, --overcommit
                 for job allocation, allocate one CPU per node and --ntasks-per-* are ignored;
