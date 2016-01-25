@@ -1,0 +1,114 @@
+https://www.elastic.co/guide/en/elasticsearch/reference/2.1/index.html
+
+Getting Started
+===============
+
+Cluster health:     curl -s "$ES/_cat/health?v"
+Node status:        curl -s "$ES/_cat/nodes?v"
+List all indices:   curl -s "$ES/_cat/indices?v"
+
+Create an index:    curl -s -XPUT "$ES/customer?pretty"
+        // how to specify shard and replica?
+        // how to close index? how to automatically close index?
+Delete an index:    curl -s -XDELETE "$ES/customer?pretty"
+
+Index a document:   curl -s -XPUT "$ES/customer/external/1?pretty" -d '{ "name": "John Doe" }'
+                    curl -s -XPOST "$ES/customer/external?pretty"  -d '{ "name": "Jane Doe" }'
+        // how to disable version?
+        // how to drop not update duplicate document by id?
+Get a document:     curl -s "$ES/customer/external/1?pretty"
+Delete a document:  curl -s -XDELETE "$ES/customer/external/1?pretty"
+
+Batch Processing:   curl -s -XPOST "$ES/customer/external/_bulk?pretty" -d '
+                    {"index": {"_id": "1"}}
+                    {"name": "John Doe"}
+                    {"index": {"_id": "2"}}
+                    {"name": "Jane Doe"}
+                    '
+        Supported directives: index, update, delete
+        NOTICE: must be line by line with LF.
+        // how to dismiss verbose reponse??
+
+Search API:         curl -s "$ES/customer/_search?q=*&pretty"
+                    curl -s -XPOST "$ES/customer/_search?pretty" -d '
+                    {
+                        "query": { "match_all": {} }
+                    }'
+
+
+Setup
+=====
+
+Run:    bin/elasticsearch -d -p path/to/pid -Des.index.refresh_interval=5s --node-name=my-node
+
+        ES_JAVA_OPTS=...
+        ES_HEAP_SIZE=31g        # set both -Xms and -Xmx
+
+        mlockall
+
+        increase open file limit:
+            ulimit -n: 32k or even 64k
+
+            -Des.max-open-files=true    # print max file descriptors
+            or: curl -s "$ES/_nodes/stats/process?pretty" | grep file_desc
+
+        increase VMA count:
+            sysctl -w vm.max_map_count=262144   # or set in /etc/sysctl.conf
+
+        turn off swap, three options:
+            * sudo swapoff -a     # or set in /etc/fstab
+            * sysctl -w vm.swappiness=1     # since linux kernel >3.5-rc set to
+                                            # 0 will cause the OOM killer kill
+                                            # the process instead of allowing swapping.
+            * bootstrap.mlockall: true in config/elasticsearch.yml
+                curl -s "$ES/_nodes/process?pretty" | grep mlockall
+                ulimit -l unlimited;
+                bin/elasticsearch -Djna.tmpdir=/path/to/new/dir if default /tmp is mounted with "noexec" option.
+
+Backup:
+
+    ES >= 1.0: use snapshots
+    ES < 1.0:
+      * disalbe index flushing:
+        curl -s -XPUT "$ES/_all/_settings" -d '{"index": {"translog.disable_flush": "true"}}'
+      * disable reallocation:
+        curl -s -XPUT "$ES/_cluster/settings" -d '{"transient": {"cluster.routing.allocation.enable": "none"}}'
+      * backup data path
+      * enable index flushing:
+        curl .... "false"
+      * enable allocation:
+        curl ...  "all"
+
+Rolling upgrade:
+
+    * disable shard allocation:
+        curl -s -XPUT "$ES/_cluster/settings" -d '{"transient": {"cluster.routing.allocation.enable": "none"}}'
+    * stop non-essential indexing and perform a synced flush:
+        curl -s -XPOST"$ES/_flush/synced"
+    * stop the node
+    * start the upgraded node, check "$ES/_cat/nodes?v"
+    * reenable shard allocation:
+        curl -s -XPUT "$ES/_cluster/settings" -d '{"transient": {"cluster.routing.allocation.enable": "all"}}'
+    * wait for the node to recover:
+        curl -s "$ES/_cat/health"       # "status" changes from yellow to green if there are more upgraded nodes for replica
+                                        # else check "init" and "relo" columns, should be zero
+        curl -s "$ES/_cat/recovery?v"   # check the recovery process
+    * go to next node
+
+Full restart upgrade:
+
+    * disable shard allocation, notice its "persistent", not "transient"!!!
+        curl -s -XPUT "$ES/_cluster/settings" -d '{"persistent": {"cluster.routing.allocation.enable": "none"}}'
+    * perform a synced flush:
+        curl -s -XPOST "$ES/_flush/synced"
+    * shutdown and upgrade all nodes
+    * start dedicated master nodes first, check "/_cat/health" and "/_cat/nodes"
+      to make sure election is done and all nodes join the cluster
+            dedicated master:   node.master=true node.data=false
+            data node:          node.master=false node.data=true
+            gateway node:       node.master=false node.data=false
+    * wait until all nodes join the cluster
+    * reenable allocation:
+        curl -s -XPUT "$ES/_cluster/settings" -d '{"persistent": {"cluster.routing.allocation.enable": "all"}}'
+    * monitor progress with "/_cat/health" and "/_cat/recovery", until "status" in "/_cat/health" becomes green
+
