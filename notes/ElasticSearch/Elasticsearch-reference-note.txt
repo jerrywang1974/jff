@@ -25,9 +25,10 @@ Batch Processing:   curl -s -XPOST "$ES/customer/external/_bulk?pretty" -d '
                     {"index": {"_id": "2"}}
                     {"name": "Jane Doe"}
                     '
-        Supported directives: index, update, delete
+        Endpoints: /_bulk, /{index}/_bulk, /{index}/{type}/_bulk
+        Supported directives: index, create, update, delete
         NOTICE: must be line by line with LF.
-        // how to dismiss verbose reponse??
+        // how to dismiss verbose reponse??: use response filtering
 
 Search API:         curl -s "$ES/customer/_search?q=*&pretty"
                     curl -s -XPOST "$ES/customer/_search?pretty" -d '
@@ -43,8 +44,6 @@ Run:    bin/elasticsearch -d -p path/to/pid -Des.index.refresh_interval=5s --nod
 
         ES_JAVA_OPTS=...
         ES_HEAP_SIZE=31g        # set both -Xms and -Xmx
-
-        mlockall
 
         increase open file limit:
             ulimit -n: 32k or even 64k
@@ -111,4 +110,51 @@ Full restart upgrade:
     * reenable allocation:
         curl -s -XPUT "$ES/_cluster/settings" -d '{"persistent": {"cluster.routing.allocation.enable": "all"}}'
     * monitor progress with "/_cat/health" and "/_cat/recovery", until "status" in "/_cat/health" becomes green
+
+
+Breaking changes
+================
+
+v2.1:
+    * updates now detect_noop=true by default
+    * the Optimiize API deprecated, use the new Force Merge API
+v2.0:
+    * merge scheduler is no longer pluggable
+    * multiple path.data stripping is no longer supported
+    * async replication for CRUD operations is removed, it's now synchronous
+      only, so you need more client processes to send more requests in parallel
+
+
+API Conventions
+===============
+
+Multiple indices:
+    * index1,index2,index3
+    * _all
+    * index*,+test*,-test3
+
+    query string parameters: ignore_unavailable, allow_no_indices, expand_wildcards
+
+    date math support in index names:  <static_name{date_math_expr{date_format|time_zone}}>
+
+Response filtering:
+    * &filter_path=path1,path2,...
+
+URL-based access control:
+    * config.yml:  rest.action.multi.allow_explicit_index: alse
+
+
+Document APIs
+=============
+
+Automatic Index Creation:
+    * action.auto_create_index: [true] | false, +aaa*,-bbb*
+    * index.mapper.dynamic: [true] | false
+
+Operation Type:
+    * curl -s -XPUT "$ES/twitter/tweet/1?op_type=create' -d '...'
+    * curl -s -XPUT "$ES/twitter/tweet/1/_create" -d '...'
+
+Routing:
+    * curl -s -XPOST "$ES/twitter/tweet?routing=some_value" -d '...'
 
