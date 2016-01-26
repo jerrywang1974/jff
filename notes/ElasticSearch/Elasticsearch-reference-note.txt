@@ -7,9 +7,24 @@ Cluster health:     curl -s "$ES/_cat/health?v"
 Node status:        curl -s "$ES/_cat/nodes?v"
 List all indices:   curl -s "$ES/_cat/indices?v"
 
-Create an index:    curl -s -XPUT "$ES/customer?pretty"
-        // how to specify shard and replica?
-        // how to close index? how to automatically close index?
+Create an index:    curl -s -XPUT "$ES/customer?pretty" -d '{
+                        "settings": {
+                            "number_of_shards": 5,
+                            "number_of_replicas": 1
+                        },
+                        "mappings": {
+                            "type1" : {
+                                ...
+                            }
+                        },
+                        "warmers": {
+                            ...
+                        },
+                        "aliases": {
+                        }
+                    }'
+Get index info:     curl -s "$ES/customer?pretty"
+Indices exists:     curl -s -XHEAD -i "$ES/customer"
 Delete an index:    curl -s -XDELETE "$ES/customer?pretty"
 
 Index a document:   curl -s -XPUT "$ES/customer/external/1?pretty" -d '{ "name": "John Doe" }'
@@ -25,8 +40,9 @@ Batch Processing:   curl -s -XPOST "$ES/customer/external/_bulk?pretty" -d '
                     {"index": {"_id": "2"}}
                     {"name": "Jane Doe"}
                     '
-        Endpoints: /_bulk, /{index}/_bulk, /{index}/{type}/_bulk
-        Supported directives: index, create, update, delete
+        Endpoints: /_bulk, /{index}/_bulk, /{index}/{type}/_bulk;
+        Make sure the HTTP client doesn't send HTTP chunks, as this will slow things down;
+        Supported directives: index, create, update, delete;
         NOTICE: must be line by line with LF.
         // how to dismiss verbose reponse??: use response filtering
 
@@ -157,4 +173,77 @@ Operation Type:
 
 Routing:
     * curl -s -XPOST "$ES/twitter/tweet?routing=some_value" -d '...'
+
+
+Indices APIs
+============
+
+Bulk indexing optimization:
+
+    * curl -XPUT "$ES/test/_settings" -d '{ "index": { "refresh_interval":  "-1" }}'
+      then set "refresh_interval": "1s" after bulk indexing.
+      then: curl -XPOST "$ES/test/_forcemerge?max_num_segments=5"
+    * or start the index without any replicas, and increase replica later.
+
+
+Index Templates:
+
+    * curl -s -XPUT "$ES/_template/template_1" -d '
+      {
+          "template": "te*",
+          "order": 0,
+          "settings": {
+              ...
+          },
+          "mappings": {
+              ...
+          }
+      }'
+
+Indices stats:
+    * curl -s "$ES/_stats?pretty"
+    * curl -s "$ES/index1,index2/_stats?pretty"
+
+Indices segements:
+    * curl -s "$ES/_segments?pretty&verbose=true"
+    * curl -s "$ES/index1,index2/_segments?pretty&verbose=true"
+
+Indices recovery:
+    * curl -s "$ES/_recovery?pretty&human&detailed=true"
+    * curl -s "$ES/index1,index2/_recovery?pretty&human&detailed=true"
+
+Indices shard stores:
+    * curl -s "$ES/_shard_stores?pretty"        # &status=green,yellow,red, default is "yellow,red"
+    * curl -s "$ES/index1,index2/_shard_stores?pretty"
+
+Clear cache:
+    * curl -s "$ES/_cache/clear"        # query=true&fielddata=true&request=true, fields=xxx,yyy
+    * curl -s "$ES/index1,index2/_cache/clear"
+
+Flush indices to disk: flush data, clear transaction log, free memory
+    * Elasticsearch uses memory heuristics to automatically trigger flush operations
+    * curl -s -XPOST "$ES/index1,index2/_flush"
+
+Synced flush:
+    * if a shard hasn't received any indexing operation for 5min, a "synced flush" is triggered
+    * performs a normal flush, then adds a generated unique marker(sync_id) to all shards
+    * to check whether a shard has a marker: curl -s "$ES/index1/_stats/commit?level=shards"
+    * perform synced flush: curl -s "$ES/index1/_flush/synced"
+
+Refresh: make all operations performed since last refresh available for search
+    * by default a refresh is scheduled periodically
+    * curl -s -XPOST "$ES/index1/_refresh"
+
+Force merge:
+    * curl -s -XPOST "$ES/index1/_forcemerge"   # max_num_segments=N, only_expunge_deletes=true
+    * old name is "/_optimize"
+
+Index upgrade:
+    * upgrade to new Lucene index format
+    * perform upgrade: curl -s -XPOST "$ES/index1/_upgrade"
+    * check upgrade status: curl -s "$ES/index1/_upgrade"   # level=[index]|shard|cluster
+
+
+cat APIs
+========
 
