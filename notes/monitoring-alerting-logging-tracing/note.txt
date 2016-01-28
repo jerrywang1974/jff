@@ -1,0 +1,46 @@
+Monitoring
+    OpenTSDB
+    Graphite
+    InfluxDB
+    Ganglia
+    http://prometheus.io/
+    Open-Falcon
+    Zabbix
+    Zenoss
+    PandoraFMS
+    NetXMS
+
+Alerting
+    Icinga 2
+    Naemon
+    Shinken
+
+    Bosun (bosun.org)
+    Sensu (sensuapp.org)
+
+    Web UI:
+        * Icinga web 2
+        * Thruk
+        * Check-MK multisite
+        * Centreon
+        * Ninja
+        * NagVis
+
+    Remote check:
+        * check_by_ssh
+        * NRPE
+        * nsclient
+        * check_snmp
+        * nrdp: replacement of nsca
+        * nsca
+        * check-mk
+        * nagios-statd-server
+
+Logging
+    ELK
+    Graylog
+
+Tracing
+    https://github.com/naver/pinpoint
+    http://zipkin.io/
+

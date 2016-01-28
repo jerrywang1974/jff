@@ -247,3 +247,51 @@ Index upgrade:
 cat APIs
 ========
 
+curl -s "$ES/_cat"      # list all cat commands
+
+common parameters:
+    v               verbose
+    help            show command help
+    h=head1,head2   show only those columns
+    bytes=b         turn off human mode
+
+curl -s $ES/_cat/aliases                # show index alias
+curl -s $ES/_cat/aliases/{alias}
+curl -s $ES/_cat/allocation             # show shard allocation, disk usage
+curl -s $ES/_cat/count                  # count document of the entire cluster
+curl -s $ES/_cat/count/{index}
+curl -s $ES/_cat/fielddata              # how much heap memory is currently being used by fielddata
+curl -s $ES/_cat/fielddata/{fields}
+curl -s $ES/_cat/health
+curl -s $ES/_cat/indices
+curl -s $ES/_cat/indices/{index}
+curl -s $ES/_cat/master
+curl -s $ES/_cat/nodeattrs
+curl -s $ES/_cat/nodes                  # !!! explicitly specified columns, by default it shows a few
+                                        # https://www.elastic.co/guide/en/elasticsearch/reference/current/cat-nodes.html
+curl -s $ES/_cat/pending_tasks
+curl -s $ES/_cat/plugins
+curl -s $ES/_cat/recovery
+curl -s $ES/_cat/recovery/{index}
+curl -s $ES/_cat/repositories
+curl -s $ES/_cat/segments
+curl -s $ES/_cat/segments/{index}
+curl -s $ES/_cat/shards
+curl -s $ES/_cat/shards/{index}
+curl -s $ES/_cat/snapshots
+curl -s $ES/_cat/thread_pool            # !!! more thread pools specified by h=xxx
+
+
+Cluster APIs
+============
+
+Node configuration:
+    * curl -s "$ES/_nodes"
+    * curl -s "$ES/_nodes/nodeA"
+
+Cluster health:
+    * curl -s "$ES/_cluster/health?pretty"      # level=[cluster] | indices | shards
+    * more parameters: https://www.elastic.co/guide/en/elasticsearch/reference/current/cluster-health.html
+
+Cluster state:
+
