@@ -204,7 +204,7 @@ Indices stats:
     * curl -s "$ES/_stats?pretty"
     * curl -s "$ES/index1,index2/_stats?pretty"
 
-Indices segements:
+Indices segments:
     * curl -s "$ES/_segments?pretty&verbose=true"
     * curl -s "$ES/index1,index2/_segments?pretty&verbose=true"
 
@@ -220,7 +220,7 @@ Clear cache:
     * curl -s "$ES/_cache/clear"        # query=true&fielddata=true&request=true, fields=xxx,yyy
     * curl -s "$ES/index1,index2/_cache/clear"
 
-Flush indices to disk: flush data, clear transaction log, free memory
+Flush indices to disk: fsync segments to disk, clear transaction log, free memory
     * Elasticsearch uses memory heuristics to automatically trigger flush operations
     * curl -s -XPOST "$ES/index1,index2/_flush"
 
@@ -230,7 +230,9 @@ Synced flush:
     * to check whether a shard has a marker: curl -s "$ES/index1/_stats/commit?level=shards"
     * perform synced flush: curl -s "$ES/index1/_flush/synced"
 
-Refresh: make all operations performed since last refresh available for search
+Refresh: make all operations performed since last refresh available for search,
+         actually create a segment from indexing buffer and write to OS fs cache,
+         then reopen lucence index reader, not fsync to disk
     * by default a refresh is scheduled periodically
     * curl -s -XPOST "$ES/index1/_refresh"
 
@@ -285,13 +287,317 @@ curl -s $ES/_cat/thread_pool            # !!! more thread pools specified by h=x
 Cluster APIs
 ============
 
-Node configuration:
+Node info/configuration:
     * curl -s "$ES/_nodes"
-    * curl -s "$ES/_nodes/nodeA"
+    * curl -s "$ES/_nodes/{sections}"
+    * curl -s "$ES/_nodes/{nodes}/{sections}"
+        sections: _all, settings, os, process, jvm, thread_pool, transport, http, plugins
 
 Cluster health:
     * curl -s "$ES/_cluster/health?pretty"      # level=[cluster] | indices | shards
     * more parameters: https://www.elastic.co/guide/en/elasticsearch/reference/current/cluster-health.html
 
 Cluster state:
+    * curl -s "$ES/_cluster/state"              # indices, shards, nodes
+    * curl -s "$ES/_cluster/state?local=true"   # local copy, maybe stale
+    * curl -s "$ES/_cluster/state/{metrics}/{indices}"
+            metric: version, master_node, nodes, routing_table, metadata, blocks
+                    maybe multiple metrics: "master_node,nodes,version"
+
+Pending cluster tasks:
+    * curl -s "$ES/_cluster/pending_tasks"
+
+Cluster Reroute:
+    * explicitly move shard, cancel shard allocation, allocate unassigned shard etc.
+    * curl -s -XPOST "$ES/_cluster/reroute" -d '{ ...commands...}'
+
+Cluster update settings:
+    * curl -s "$ES/_cluster/settings"
+    * curl -s -XPUT "$ES/_cluster/settings" -d '{ ...settings...}'
+
+Nodes stats:
+    * https://www.elastic.co/guide/en/elasticsearch/reference/2.1/cluster-nodes-stats.html
+    * curl -s "$ES/_nodes/stats"
+    * curl -s "$ES/_nodes/node1,node2/stats"
+    * curl -s "$ES/_nodes/node1,node2/stats/jvm,os"
+        stats: indices, fs, http, jvm, os, process, thread_pool, transport, breaker
+
+Nodes hot_threads:
+    * curl -s "$ES/_nodes/{nodes}/hot_threads"
+    * parameters:
+        * threads=3         number of hot threads
+        * interval=500ms    sampling interval
+        * type=cpu          type to sample: cpu/wait/block
+        * ignore_idle_threads=true  filter out known idle threads
+
+Mapping
+=======
+
+* Fields with the same name in different mapping types in the same index map
+  to same field internally, and must have the same mapping.
+
+* Existing type and field mappings cannot be updated
+
+* Field data types
+    * date
+        * doc_values: can sort or aggregate, default to true
+        * format: default to "strict_date_optional_time || epoch_millis"
+        * include_in_all: default to true
+        * index: default to not_analyzed
+        * store: default to false, only in "_source", not store separately
+    * ip
+        * doc_values: can sort or aggregate, default to true
+        * include_in_all: default to true
+        * index: default to not_analyzed
+        * store: default to false
+    * string
+        * analyzer
+        * fielddata
+            * format: disabled or paged_bytes(default)
+            * two settings: indices.fielddata.cache.{size,expire}
+            * circuit breaker: indices.breaker.{total,fielddata,request}.limit
+        * fields
+        * include_in_all
+        * index: analyzed(default), not_analyzed, no
+        * index_options: docs(default), freqs(default for analyzed string), positions, offsets
+        * norms: whether take field length into account for scoring, require about an extra byte per document per field
+                 by default enabled for analyzed field, disabled for not_analyzed field
+        * store: default to false
+        * search_analyzer
+        * search_quote_analyzer
+
+* Meta-Fields
+    * disable "_all" field for a type
+        curl -s -XPUT "$ES/indexA" -d '
+            {
+                "settings": {
+                    "index.query.default_field": "msg"
+                },
+                "mappings": {
+                    "type_1": {
+                        "_all": { "enabled": false },
+                        "properties": { ...}
+                    }
+                }
+            }'
+
+
+Modules
+=======
+
+* Cluster
+    * Cluster level shard allocation
+        * Shard allocation settings
+            * cluster.routing.allocation.enable: [all] | primaries | new_primaries | none  !!!
+            * cluster.routing.allocation.node_concurrent_recoveries: [2]
+            * cluster.routing.allocation.node_initial_primaries_recoveries: [4]
+            * cluster.routing.allocation.same_shard.host: [false] !!!should change to true if multiple nodes on same host
+            * indices.recovery.concurrent_streams: [3]
+            * indices.recovery.concurrent_small_files: [2]
+        * Shard rebalancing settings
+            * cluster.routing.rebalance.enable: [all] | primaries | replicas | none  !!!
+            * cluster.routing.allocation.allow_rebalance: [always] | indices_primaries_active | indices_all_active,
+                    !!! default to "indices_all_active" in 1.7 to reduce chatter during initial recovery.
+            * cluster.routing.allocation.cluster_concurrent_rebalance: [2]
+        * Shard balancing heuristics
+            * cluster.routing.allocation.balance.shard: [0.45f]  !!! raising this raises the tendency to equalize the
+                    number of shards across all nodes
+            * cluster.routing.allocation.balance.index: [0.55f]  !!! raising this raises the tendency to equalize the
+                    number of shards per index across all nodes
+            * cluster.routing.allocation.balance.threshold: [1.0f] !!! raising this will cause the cluster to be less
+                    aggressive about optimizing the shard balance
+
+    * Disk-based shard allocation
+        * cluster.routing.allocation.disk.threshold_enabled: [true]
+        * cluster.routing.allocation.disk.watermark.low: [85%], or an absolute byte value like 10gb to prevent ES from allocating shards if less free space
+        * cluster.routing.allocation.disk.watermark.high: [95%], or an absolute byte value like 5gb to relocate shards to other nodes if less free space
+        * cluster.info.update.interval: [30s]
+        * cluster.routing.allocaton.disk.include_relocations: [true]
+        * !!! Notice ES <2.0 only considers total free space over total disk space for multiple data paths,
+          since 2.0 the minimum and maximum disk usage per data path are tracked separately.
+
+    * Shard allocation awareness
+        * node.rack_id: some_rack_id        # "rack_id" can be aribitrary attribute name
+          node.zone_id: some_zone_id
+        * cluster.routing.allocation.awareness.attributes: rack_id
+          cluster.routing.allocation.awareness.attributes: rack_id,zone_id
+                set on *all master-eligible* nodes, to make sure primary shards and replica shards to spread across different physical servers, racks, zones
+        * !!! when using awareness attributes, shards will not be allocated to nodes without those attributes.
+        * Forced awareness
+            * cluster.routing.allocation.awareness.force.zone.values: zone1, zone2
+            * Forced awareness NEVER allows copies of the same shard to be allocated to the same zone.
+    * Shard allocation filtering
+        * typical use case is to mark nodes to decomission
+        * cluster.routing.allocation.include.{attribute}: attr1,attr2       # has any of attributes
+        * cluster.routing.allocation.require.{attribute}: attr1,attr2       # has all attributes
+        * cluster.routing.allocation.exclude.{attribute}: attr1,attr2       # has none of attributes
+        * special attributes: _name (node name), _ip, _host (host name)
+        * attributes support wildcards, such as 192.168.2.*
+    * Miscellaneous cluster settings
+        * cluster.blocks.read_only: set whole cluster read only, notice this can be changed by API /_cluster/settings.
+        * logger.{module}: dynamically change log level, such as:
+            curl -s -XPUT "$ES/_cluster/settings" -d '{ "transient": { "logger.indices.recovery": "DEBUG" }}'
+
+* Discovery
+    * cluster.name: [elasticsearch]
+    * Zen Discovery
+        * discovery.zen.ping.unicast.hosts: host1:port1,host2:port2
+        * discovery.zen.ping_timeout: [3s]  election time
+        * discovery.zen.join_timeout: [20 * ping_timeout]
+        * discovery.zen.master_election.filter_client: [true] whether ignore ping from client nodes (node.client=true or both node.{data,master} are false)
+        * discovery.zen.master_election.filter_data: [false] whether ignore ping from data nodes
+        * discovery.zen.minimum_master_nodes: >= num_eligible_master_nodes / 2 + 1     !!!
+        * discovery.zen.fd.ping_interval: [1s]
+        * discovery.zen.fd.ping_timeout: [30s]
+        * discovery.zen.fd.ping.retries: [3]    !!!
+        * discovery.zen.publish_timeout: [30s]  the master processes one cluster state update at a time, publish to all nodes and wait for all reponses,
+                                                then process next change.
+        * discovery.zen.no_master_block: all | [write]
+
+* Local gateway
+    * static settings, must be set on every data nodes, control hong long nodes should wait
+      before they try to recover any shards which are stored locally
+    * gateway.expected_nodes: [0]   number of data or master nodes      !!!
+    * gateway.expected_master_nodes: [0]    !!!
+    * gateway.expected_data_nodes: [0]      !!!
+    * gateway.recover_after_time: [5m if any expected_* set]    !!! if expected number of nodes isn't achieved, how long to wait before recovering if gateway.recover_after* meet.
+    * gateway.recover_after_nodes: !!!
+    * gateway.recover_after_master_nodes: !!!
+    * gateway.recover_after_data_nodes: !!!
+
+* HTTP
+    * use HTTP keep-alive and not use HTTP chunking !!!
+    * static settings
+    * http.enabled: [true]
+    * http.port: [9200-9300]        !!!
+    * http.publish_port: for case that cluster node is behind a proxy or firewall
+    * http.bind_host
+    * http.publish_host
+    * http.host
+    * http.max_content_length: [100mb]
+    * http.max_initial_line_length: [4kb]
+    * http.max_header_size: [8kb]
+    * http.compression: [false]
+    * http.compression_level: [6]
+    * http.cors.enabled: [false]
+    * http.cors.allow-origin:
+    * http.cors.max-age: [1728000] (20 days)
+    * http.cors.allow-methods: [OPTIONS,HEAD,GET,POST,PUT,DELETE]
+    * http.cors.allow-headers: [X-Requested-With,Content-Type,Content-Length]
+    * http.cors.allow-credentials: [false]
+    * http.detailed_errors.enabled: [true]
+    * http.pipeling: [true]
+    * http.pipeling.max_events: [10000]
+
+* Indices
+    * Circuit breaker
+        * indices.breaker.total.limit: [70%] of JVM heap        !!!
+        * indices.breaker.fielddata.limit: [60%] of JVM heap    !!!
+        * indices.breaker.fielddata.overhead: [1.03]
+        * indices.breaker.request.limit: [40%] of JVM heap      !!!
+        * indices.breaker.request.overhead: [1]
+    * Fielddata cache
+        * indices.fielddata.cache.size: [unbounded]  !!! static setting, can be percent of JVM heap space or an absolute vaule like 12GB
+        * use API /_nodes/stats to monitoring memory usage for field data as well as the field data circuit breaker.
+    * Node query cache
+        * LRU cache, used only for queries in filtering context
+        * indices.queries.cache.size: [10%]          !!! static setting, can be percent of JVM heap space or an absolute valu elike 512mb
+    * Indexing buffer
+        * store newly indexed documents, divided between all shards on the node, when the buffer is filled up, documents are written to a segment on disk.
+        * indices.memory.index_buffer_size: [10%]    !!! either a percentage or a byte value
+        * indices.memory.min_index_buffer_size: [48mb]  !!! if index_buffer_size is a percentage
+        * indices.memory.max_index_buffer_size: [unbounded] !!! if index_buffer_size is a percentage
+        * indices.memory.min_shard_index_buffer_size: [4mb] !!!
+    * Shard request cache
+        * LRU cache for local results on each shard, only cache hits.total, aggregations, suggestions, not hits.
+        * cache is invalidated if an index refresh actually changes data in a shard
+        * index.request.cache.enable: [false]
+        * indices.requests.cache.size: [1%]
+        * indices.requests.cache.expire: generally unnecessary
+        * can be enabled or disabled per request: /my_index/_search?request_cache=true
+        * cache key is the whole JSON request body, so make sure the client uses canonical mode in JSON library
+        * monitoring cache usge:
+            * by index: curl -s "$ES/_stats/request_cache?pretty&human"
+            * by node: curl -s "$ES/_nodes/stats/indices/request_cache?pretty&human"
+    * Recovery
+        * indices.recovery.concurrent_streams: [3]
+        * indices.recovery.concurrent_small_file_streams: [2]
+        * indices.recovery.file_chunk_size: [512kb]
+        * indices.recovery.translog_ops: [1000]
+        * indices.recovery.translog_size: [512kb]
+        * indices.recovery.compress: [true]
+        * indices.recovery.max_bytes_per_sec: [40mb]
+    * TTL interval
+        * indices.ttl.interval: [60s]
+        * indices.ttl.bulk_size: [10000]
+
+* Network settings
+    * common basic settings for HTTP and transport modules
+    * network.host: [_local_]   !!!
+    * network.bind_host: [_local_]
+    * network.publish_host: [_local_]
+    * network.tcp.no_delay: [true]
+    * network.tcp.keep_alive: [true]
+    * network.tcp.reuse_address: [true]
+    * network.tcp.send_buffer_size: unset       !!!
+    * network.tcp.receive_buffer_size: unsset   !!!
+
+* Node
+    * node.data: [true]         !!!
+    * node.master: [true]       !!!
+    * node.client: [false] true means node.data=false and node.master=false
+
+* Snapshot and Restore
+
+* Thread Pool
+    * https://www.elastic.co/guide/en/elasticsearch/reference/2.1/modules-threadpool.html
+    * threadpool.POOL.size          !!!
+      threadpool.POOL.queue_size    !!!
+        POOL: generic, index, search, suggest, get, bulk, percolate, snapshot, warmer, refresh, listener
+
+* Transport
+    * for internal communication between nodes
+    * transport.tcp.port: [9300-9400]   !!!
+    * transport.publish_port
+    * transport.bind_host
+    * transport.publish_host
+    * transport.host
+    * transport.tcp.connect_timeout: [30s]
+    * transport.tcp.compress: [false]
+    * transport.ping_schedule: default to 5s in the transport client and -1(disabled) elsewhere.
+    * Transport tracer:
+        curl -s -XPUT "$ES/_cluster/settings" -d '{ "transient": { "logger.transport.tracer": "TRACE" }}'
+        curl -s -XPUT "$ES/_cluster/settings" -d '{
+            "transient" : {
+                "transport.tracer.include" : "*"
+                "transport.tracer.exclude" : "internal:discovery/zen/fd*"
+            }
+        }'
+
+* Tribe node
+    * allos a tribe node to act as a federated client across multiple clusters
+
+
+Index Modules
+=============
+
+* static index level settings: set at index creation time or on a closed index
+  dynamic index level settings: can be changed on a live index using API /_settings or {index}/_settings
+
+* static index settings
+    * index.number_of_shards: [5]       !!!
+    * index.shard.check_on_startup: [false] | checksum | true | fix, experimental feature
+    * index.codec: [default] | best_compression, experimental feature
+
+* dynamic index settings
+    * index.number_of_replicas: [1]     !!!
+    * index.auto_expand_replicas: [false]
+    * index.refresh_interval: [1s]      !!!  -1 to disable refresh
+    * index.max_result_window: [10000]
+    * index.blocks.read_only: [false]
+    * index.blocks.read: [false]
+    * index.blocks.write: [false]
+    * index.blocks.metadata: [false]
+    * index.ttl.disable_purge: [false]  experimental feature
+    * index.recovery.initial_shards: [quorum] | quorum-1 | half | full | full-1 | <N>
 
