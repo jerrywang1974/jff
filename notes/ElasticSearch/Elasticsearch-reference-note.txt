@@ -1,5 +1,9 @@
 https://www.elastic.co/guide/en/elasticsearch/reference/2.1/index.html
 
+https://www.elastic.co/blog/found-elasticsearch-from-the-bottom-up/
+https://www.elastic.co/blog/found-elasticsearch-top-down
+
+
 Getting Started
 ===============
 
@@ -220,7 +224,9 @@ Clear cache:
     * curl -s "$ES/_cache/clear"        # query=true&fielddata=true&request=true, fields=xxx,yyy
     * curl -s "$ES/index1,index2/_cache/clear"
 
-Flush indices to disk: fsync segments to disk, clear transaction log, free memory
+Flush indices to disk:
+        corresponds to Lucene index commit
+        fsync segments to disk, clear transaction log, free memory
     * Elasticsearch uses memory heuristics to automatically trigger flush operations
     * curl -s -XPOST "$ES/index1,index2/_flush"
 
@@ -230,7 +236,9 @@ Synced flush:
     * to check whether a shard has a marker: curl -s "$ES/index1/_stats/commit?level=shards"
     * perform synced flush: curl -s "$ES/index1/_flush/synced"
 
-Refresh: make all operations performed since last refresh available for search,
+Refresh:
+        corresponds to Lucene index flush
+         make all operations performed since last refresh available for search,
          actually create a segment from indexing buffer and write to OS fs cache,
          then reopen lucence index reader, not fsync to disk
     * by default a refresh is scheduled periodically
@@ -600,4 +608,55 @@ Index Modules
     * index.blocks.metadata: [false]
     * index.ttl.disable_purge: [false]  experimental feature
     * index.recovery.initial_shards: [quorum] | quorum-1 | half | full | full-1 | <N>
+
+* Index Shard Allocation
+    * per-index settings to control the allocation of shards to nodes
+    * Shard allocation filtering
+        * node.[attr_name]: xxx     # assign attributes to a node
+        * index.routing.allocation.include.[attr_name]: val1,val2       # any of
+        * index.routing.allocation.exclude.[attr_name]: val1,val2       # none of
+        * index.routing.allocation.require.[attr_name]: val1,val2       # all of
+        * special attributes: _name (node name), _host_ip, _publish_ip, _ip, _host (host name)
+        * all attribute values can contain wildcards, eg: 192.168.2.*
+    * Delaying allocation when a node leaves
+        * when a node leaves the cluster, the master reacts by:
+            * promoting a replica shard to primary to replace any primaries on the left node
+            * allocating replica shards to replace the missing replicas
+            * rebalancing shards evenly across the remaining nodes
+        * index.unassigned.node_left.delayed_timeout: [1m]      !!!
+                default is 1m, because after the missing node rejoins the cluster,
+                if its shards still have the same sync-ids as the primary, shard
+                relocation will be cancelled.
+            curl -s -XPUT "$ES/_all/_settings" -d '
+            {
+                "settings": {
+                    "index.unassigned.node_left.delayed_timeout": "5m"
+                }
+            }
+        * view delayed_unassigned_shards: curl -s "$ES/_cluster/health?pretty"
+    * Total shards per node
+        * index.routing.allocation.total_shards_per_node: [-1 (unbounded]   !!!
+        * cluster.routing.allocation.total_shards_per_node: [-1 (unbounded)]
+
+* Slow log
+    * Search slow log:  for execution of a search request within a specific shard.
+        * index.search.slowlog.threshold.{query | fetch}.{warn | info | debug | trace}: [-1]    !!!
+    * Index slow log
+        * index.indexing.slowlog.threshold.index.{warn | info | debug | trace}: [-1]    !!!
+        * index.indexing.slowlog.level: info
+        * index.indexing.slowlog.source: 1000   # how many characters in _source to log
+
+* Store
+    * index.store.type: [mmapfs on win64 | simplefs on win32 | default(hybrid niofs and mmapfs) for the rest]
+    * default_fs: mmapfs for Lucene term dictionary and doc values files, others use niofs
+
+* Translog
+    * Flush settings
+        * index.translog.flush_threshold_size: [512mb]
+        * index.translog.flush_threshold_ops: [unlimited]
+        * index.translog.flush_threshold_period: [30m]  # how long to wait before triggering a flush regardless of translog size.
+        * index.translog.interval: [5s]     how often to check if a flush is needed, random(interval, 2*interval)
+    * index.translog.sync_interval: [5s]
+    * index.translog.durability: [request] | async      !!! by default fsync translog after every index, delete, update, bulk request
+    * index.translog.fs.type: [buffered] | simple
 
