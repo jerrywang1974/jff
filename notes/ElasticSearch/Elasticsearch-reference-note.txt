@@ -33,8 +33,7 @@ Delete an index:    curl -s -XDELETE "$ES/customer?pretty"
 
 Index a document:   curl -s -XPUT "$ES/customer/external/1?pretty" -d '{ "name": "John Doe" }'
                     curl -s -XPOST "$ES/customer/external?pretty"  -d '{ "name": "Jane Doe" }'
-        // how to disable version?
-        // how to drop not update duplicate document by id?
+        // how to drop document by id?  use "op_type=create" to achieve "put-if-absent" behavior
 Get a document:     curl -s "$ES/customer/external/1?pretty"
 Delete a document:  curl -s -XDELETE "$ES/customer/external/1?pretty"
 
