@@ -1,0 +1,10 @@
+These two scripts are used to estimate hourly or daily log size, considering
+log file rotation.
+
+Usage:
+    perl sample-log-size.pl < file-list > sample-log-size.log &
+
+    # ... wait some hours ...
+
+    perl stat-log-size.pl sample-log-size.log
+
