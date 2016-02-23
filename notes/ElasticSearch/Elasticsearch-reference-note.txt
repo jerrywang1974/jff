@@ -102,7 +102,7 @@ Rolling upgrade:
     * disable shard allocation:
         curl -s -XPUT "$ES/_cluster/settings" -d '{"transient": {"cluster.routing.allocation.enable": "none"}}'
     * stop non-essential indexing and perform a synced flush:
-        curl -s -XPOST"$ES/_flush/synced"
+        curl -s -XPOST "$ES/_flush/synced"
     * stop the node
     * start the upgraded node, check "$ES/_cat/nodes?v"
     * reenable shard allocation:
@@ -160,7 +160,7 @@ Response filtering:
     * &filter_path=path1,path2,...
 
 URL-based access control:
-    * config.yml:  rest.action.multi.allow_explicit_index: alse
+    * config.yml:  rest.action.multi.allow_explicit_index: false
 
 
 Document APIs
@@ -168,7 +168,7 @@ Document APIs
 
 Automatic Index Creation:
     * action.auto_create_index: [true] | false, +aaa*,-bbb*
-    * index.mapper.dynamic: [true] | false
+    * index.mapper.dynamic: [true] | false | strict
 
 Operation Type:
     * curl -s -XPUT "$ES/twitter/tweet/1?op_type=create' -d '...'
@@ -236,7 +236,7 @@ Synced flush:
     * perform synced flush: curl -s "$ES/index1/_flush/synced"
 
 Refresh:
-        corresponds to Lucene index flush
+         corresponds to Lucene index flush
          make all operations performed since last refresh available for search,
          actually create a segment from indexing buffer and write to OS fs cache,
          then reopen lucence index reader, not fsync to disk
