@@ -1,0 +1,16 @@
+NOR flash: small capacity, fast on read but slow on write, execute code in place
+           usually used for root fs.
+NAD flash: big capacity, fast on write but slow on read, can't execute code in place
+           usually used for data storage.
+
+On raw flash storage:
+
+    YAFFS -> YAFFS 2:  not in mainline kernel tree
+    JFFS -> JFFS 2 -> UBIFS (JFFS 3)
+
+On raw flash storage or block device(flash storage with Flash Translation Layer):
+
+    LogFS: intend to replace JFFS 2
+    F2FS(Flash-Friendly File System): for high-throughput
+    NILFS 2: for low-latency and continuous snapshot
+
