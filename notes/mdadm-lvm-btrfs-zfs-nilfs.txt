@@ -1,0 +1,24 @@
+mdadm, LVM, BTRFS, ZFS and NILFS
+
+NILFS 2
+-------
+
+$ sudo apt install nilfs-tools
+$ cat /etc/nilfs_cleanerd.conf
+
+$ mkfs -t nilfs2 -L some-label fs.img
+$ sudo mount fs.img /mnt
+$ grep nilfs /proc/mounts
+$ nilfs-tune -l /dev/loop0
+
+$ sudo cp -r /etc /mnt
+$ sudo cp -r /etc /mnt/a
+$ lscp
+$ sudo chcp ss /dev/loop0 2
+$ mkdir snapshot-2
+$ sudo mount -r -o cp=2 /dev/loop0 snapshot-2
+
+$ sudo rmcp 1
+
+Use "sudo nilfs-clean -p <TIME>" to reclaim space if space is ran out.
+
