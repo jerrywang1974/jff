@@ -1,0 +1,26 @@
+Tools for ElasticSearch Management
+
+https://github.com/mobz/elasticsearch-head          *
+    very primitive, almost some quick links to ES web API
+
+http://karmi.github.io/elasticsearch-paramedic/
+    even less features, not useful
+
+https://github.com/node/bigdesk                     **
+    has some useful monitoring diagrams, but not enough
+
+https://github.com/lmenezes/elasticsearch-kopf      **
+    pretty and somewhat useful
+
+https://www.elastic.co/downloads/marvel             *****
+    the best tool
+
+https://github.com/bleskes/sense                    *****
+https://www.elastic.co/guide/en/sense/current/index.html
+    A JSON aware developer's interface to Elasticsearch. Comes with
+    handy machinery such as syntax highlighting, autocomplete,
+    formatting and code folding.
+
+https://www.elastic.co/guide/en/elasticsearch/client/curator/current/index.html
+    A command line tool to manage ES indices
+

@@ -1,5 +1,33 @@
 mdadm, LVM, BTRFS, ZFS and NILFS
 
+mdadm
+-----
+
+$ sudo apt install mdadm
+
+configuration:
+    /etc/mdadm/{mdadm.conf,mdadm.conf.d}
+    or /etc/{mdadm.conf,mdadm.conf.d} if the above doesn't exist.
+
+modes of operation:
+
+    assemble
+        -A, --assemble
+    build
+        -B, --build
+    create
+        -C, --create
+    follow or monitor
+        -F, --folow, --monitor
+    grow or shrink
+        -G, --grow
+    incremental assembly
+        -I, --incremental
+    manage
+    misc
+    auto-detect (in-kernel auto-detect isn't recommended now)
+        --auto-detect
+
 NILFS 2
 -------
 
