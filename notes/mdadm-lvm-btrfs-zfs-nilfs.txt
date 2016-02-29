@@ -3,7 +3,13 @@ mdadm, LVM, BTRFS, ZFS and NILFS
 mdadm
 -----
 
+https://raid.wiki.kernel.org/index.php/Linux_Raid
+https://raid.wiki.kernel.org/index.php/Overview
+
 $ sudo apt install mdadm
+
+status: /proc/mdstat
+    https://raid.wiki.kernel.org/index.php/Mdstat
 
 configuration:
     /etc/mdadm/{mdadm.conf,mdadm.conf.d}
@@ -27,6 +33,64 @@ modes of operation:
     misc
     auto-detect (in-kernel auto-detect isn't recommended now)
         --auto-detect
+
+Example:
+    dd if=/dev/zero of=fs1.img bs=1M count=200
+    for i in `seq 2 4`; do cp fs1.img fs$i.img; done
+    for i in `seq 1 4`; do sudo losetup -f fs$i.img; done
+    /sbin/losetup -l
+
+    # RAID 0
+    sudo mdadm --create --verbose /dev/md0 --level=raid0 --raid-devices=4 /dev/loop{0,1,2,3}
+        # -l or --level, -n or --raid-devices
+        # -c or --chunk, default is 512KB
+    sudo mdadm --detail /dev/md0
+    sudo mkfs -t xfs /dev/md0
+    sudo mount /dev/md0 /mnt
+    sudo xfs_info /mnt
+        # mkfs.xfs automatically selects best stripe size and width of data section for RAID:
+        #   -d su=<chunk_size(512k)>,sw=<num_of_data_disks>     # this way is easy to remember thus preferred
+        #   or -d sunit=xxx,swidth=xxx
+        #       where sunit * 512 bytes = RAID chunksize(512KB)
+        #             swidth * 512 bytes = RAID chunksize(512KB) * num_of_data_disks
+        #  Notice xfs_info has inconsistent sunit and swidth:
+        #       sunit * bsize(4KB) = RAID chunksize(512KB)
+        #       swidth * bsize(4KB) = RAID chunksize(512KB) * num_of_data_disks (not count mirror and parity disks)
+
+    # RAID 1
+    sudo mdadm --create --verbose /dev/md0 --level=raid1 --raid-devices=2 /dev/loop{0,1} \
+        --spare-devices=2 /dev/loop{2,3}
+
+    # RAID 5
+    sudo mdadm --create --verbose /dev/md0 --level=raid5 --raid-devices=3 /dev/loop{0,1,2} \
+        --spare-devices=1 /dev/loop3
+
+    # RAID 6
+    sudo mdadm --create --verbose /dev/md0 --level=raid6 --raid-devices=4 /dev/loop{0,1,2,3}
+
+    # RAID 10
+    sudo mdadm --create --verbose /dev/md0 --level=raid10 --layout=f2 --raid-devices=4 /dev/loop{0,1,2,3}
+        # --layout=<n|o|f><copies>,  n: near, o: offset, f: far
+
+    # Stop RAID device
+    sudo mdadm --stop /dev/md0
+
+    # Start RAID device
+    sudo mdadm --assemble --scan
+        # or explicitly: sudo mdadm --assemble /dev/md0 /dev/loop{0,1,2,3}
+        #                sudo mdadm --assemble --scan --uuid=xxxxx
+
+    # Save RAID configuration after the RAID has finished initialization(resync).
+    sudo mdadm --detail --scan >> /etc/mdadm/mdadm.conf     # double check it !!!
+
+    # Force-fail by software
+    sudo mdadm --manage --set-faulty /dev/md0 /dev/loop3
+    sudo mdadm /dev/md0 --remove /dev/loop3     # remove the faulty disk
+    sudo mdadm /dev/md0 --add /dev/loop3        # add it back, the array recovers
+
+    # Some optimizations for RAID:
+    https://raid.wiki.kernel.org/index.php/Overview#Some_problem_solving_for_benchmarking
+
 
 NILFS 2
 -------
