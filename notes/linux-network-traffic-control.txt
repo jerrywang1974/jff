@@ -1,0 +1,33 @@
+http://lartc.org/howto/
+man tc
+
+http://lartc.org/howto/lartc.qdisc.advice.html
+classless queueing disciplines:
+
+    * pfifo_fast: default, has three bands for prioritizing traffic according to TOS bits
+    * tbf: token bucket filter, slow down outgoing traffic for a whole network interface
+    * sfq: Stochastical Faireness Queueing, fair among multiple connections
+    * pfifo or bfifo: check backlog on an interface, no internal band
+    * red(random early detection), choke(variation of RED), codel(improvement on RED and its variants):
+      on backbone networks where the kernel can't afford the complexity of per-session state tracking
+      needed by faireness queueing.
+
+http://lartc.org/howto/lartc.qdisc.classful.html#AEN1071
+classful queueing disciplines:
+
+    * cbq: very complex
+    * htb: a more understandable and intuitive replacement for the CBQ
+    * prio
+    * drr: deficit round robin scheduler, more flexible replacement for SFQ
+
+
+rate limit on ingress traffic:
+
+    # http://lartc.org/howto/lartc.adv-filter.policing.html
+    $ sudo tc qdisc del dev $DEV ingress
+    $ sudo tc qdisc add dev $DEV handle ffff: ingress
+    $ sudo tc filter add dev $DEV parent ffff: protocol ip prio 50 u32 \
+        match tcp dst 80 0xffff \
+        police rate 10mbps burst 100kb drop \
+        flowid :1
+
