@@ -23,11 +23,44 @@ classful queueing disciplines:
 
 rate limit on ingress traffic:
 
-    # http://lartc.org/howto/lartc.adv-filter.policing.html
-    $ sudo tc qdisc del dev $DEV ingress
-    $ sudo tc qdisc add dev $DEV handle ffff: ingress
-    $ sudo tc filter add dev $DEV parent ffff: protocol ip prio 50 u32 \
+    (1) use ingress queueing discipline: http://lartc.org/howto/lartc.adv-filter.policing.html
+
+    $ sudo tc qdisc del dev eth0 ingress        # clear existed qdisc
+    $ sudo tc qdisc add dev eth0 ingress        # default handle is ffff:
+    $ sudo tc filter add dev eth0 parent ffff: protocol ip prio 50 u32 \
         match tcp dst 80 0xffff \
-        police rate 10mbps burst 100kb drop \
+        police rate 20mbps burst 160kb drop \
         flowid :1
+
+
+    (2) use ifb(Intermediate Functional Block device) and engress queueing discipline:
+        http://www.linuxfoundation.org/collaborate/workgroups/networking/ifb
+        https://github.com/rfrail3/misc/blob/master/tc/traffic-control.sh
+
+        It's the successor to the IMQ(InterMediate Queueing device) iptables module.
+
+    $ sudo modprobe ifb numifbs=1
+    $ sudo ip link set dev ifb0 up
+    $ sudo tc filter add dev eth0 parent ffff: protocol ip prio 50 u32 \
+        match u32 0 0 \
+        action mirred egress redirect dev ifb0      # redirect ingess eth0 to egress ifb0
+
+    ... then configure HTB based shaping on ifb0 ...
+
+
+    (3) iptables extensions: limit or hashlimit: man iptables-extensions
+
+    xt_limit works like token bucket filter. Notice the maximum value for "--limit" is 10000.
+
+    $ sudo iptables -N ratelimit
+    $ sudo iptables -A ratelimit -m limit --limit 5000/s --limit-burst 5000 -j ACCEPT
+    $ #sudo iptables -A ratelimit -j LOG --log-level "NOTICE" --log-prefix "[RATE_LIMIT]"       # too many logs
+    $ sudo iptables -A ratelimit -j DROP
+    $ sudo iptables -A INPUT -i eth0 -p tcp --dport 80 -j ratelimit
+
+        how to delte chain 'ratelimit':
+        $ sudo iptables -L -n --line-numbers
+        $ sudo iptables -D INPUT n
+        $ sudo iptables -F ratelimit
+        $ sudo iptables -X ratelimit
 
