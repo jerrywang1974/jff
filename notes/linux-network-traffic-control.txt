@@ -23,12 +23,15 @@ classful queueing disciplines:
 
 rate limit on ingress traffic:
 
-    (1) use ingress queueing discipline: http://lartc.org/howto/lartc.adv-filter.policing.html
+    (1) use ingress queueing discipline:
+        http://lartc.org/howto/lartc.adv-filter.policing.html
+        http://b42.cz/notes/u32_classifier/
 
     $ sudo tc qdisc del dev eth0 ingress        # clear existed qdisc
     $ sudo tc qdisc add dev eth0 ingress        # default handle is ffff:
     $ sudo tc filter add dev eth0 parent ffff: protocol ip prio 50 u32 \
-        match tcp dst 80 0xffff \
+        match ip protocol 0x6 0xff \
+        match ip dport 80 0xffff \
         police rate 20mbps burst 160kb drop \
         flowid :1
 
