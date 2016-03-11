@@ -30,7 +30,21 @@ modes of operation:
     incremental assembly
         -I, --incremental
     manage
+        --manage    (optional)
+            --add
+            --re-add
+            --add-spare
+            --fail
+            --remove
+            --replace
     misc
+        -Q, --query
+        -D, --detail
+        -E, --examine
+        -R, --run
+        -S, --stop
+        -o, --readonly
+        -w, --readwrite
     auto-detect (in-kernel auto-detect isn't recommended now)
         --auto-detect
 
@@ -84,7 +98,7 @@ Example:
     sudo mdadm --detail --scan >> /etc/mdadm/mdadm.conf     # double check it !!!
 
     # Force-fail by software
-    sudo mdadm --manage --set-faulty /dev/md0 /dev/loop3
+    sudo mdadm /dev/md0 --fail /dev/loop3
     sudo mdadm /dev/md0 --remove /dev/loop3     # remove the faulty disk
     sudo mdadm /dev/md0 --add /dev/loop3        # add it back, the array recovers
 
