@@ -106,6 +106,25 @@ Example:
     https://raid.wiki.kernel.org/index.php/Overview#Some_problem_solving_for_benchmarking
 
 
+LVM 2
+-----
+
+$ sudo aptitude install lvm2
+$ man lvm
+$ man lvmcache
+$ man lvmthin
+
+
+BTRFS
+-----
+
+$ sudo aptitude install btrfs-tools
+$ sudo mkfs -t btrfs -d raid10 -m raid10 /dev/loop{0,1,2,3}
+$ sudo blkid | grep /dev/loop
+$ sudo btrfs filesystem show
+$ sudo mount -U $UUID /mnt
+
+
 NILFS 2
 -------
 
