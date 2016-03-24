@@ -122,7 +122,20 @@ $ sudo aptitude install btrfs-tools
 $ sudo mkfs -t btrfs -d raid10 -m raid10 /dev/loop{0,1,2,3}
 $ sudo blkid | grep /dev/loop
 $ sudo btrfs filesystem show
+$ sudo btrfs filesystem show /dev/loop0     # can be any of loop0/1/2/3
 $ sudo mount -U $UUID /mnt
+$ sudo mount /dev/loop0 /mnt                # can be any of loop0/1/2/3
+    -o degraded,device=...,device=....,[subvol=rel-path-to-top-vol | subvolid=N]
+
+$ btrfs filesystem df /mnt
+$ sudo btrfs filesystem usage /mnt
+
+$ sudo btrfs subvolume create /mnt/vol1
+$ sudo btrfs subvolume list /mnt
+$ sudo btrfs subvolume show /mnt/vol1
+$ sudo btrfs subvolume snapshot /mnt/vol1 /mnt/snapshot1
+$ sudo btrfs subvolume snapshot -r /mnt/vol1 /mnt/snapshot1-readonly
+$ sudo btrfs subvolume delete /mnt/vol1
 
 
 NILFS 2
