@@ -113,6 +113,15 @@ $ sudo aptitude install lvm2
 $ man lvm
 $ man lvmcache
 $ man lvmthin
+$ man lvcreate
+    --type=cache, cache-pool, error, linear, mirror, raid1, raid4,
+           raid5_la, raid5_ls (= raid5), raid5_ra, raid5_rs,
+           raid6_nc, raid6_nr, raid6_zr (= raid6), raid10, snapshot,
+           striped, thin, thin-pool or zero
+
+https://access.redhat.com/documentation/en-US/Red_Hat_Enterprise_Linux/6/html/Logical_Volume_Manager_Administration/raid-scrub.html
+data scrubbing:
+    lvchange --syncaction {check|repair} vg/raid_lv
 
 
 BTRFS
@@ -126,16 +135,43 @@ $ sudo btrfs filesystem show /dev/loop0     # can be any of loop0/1/2/3
 $ sudo mount -U $UUID /mnt
 $ sudo mount /dev/loop0 /mnt                # can be any of loop0/1/2/3
     -o degraded,device=...,device=....,[subvol=rel-path-to-top-vol | subvolid=N]
+       compress=xxx|compress-force=xxx,nodatacow,recovery,
+       autodefrag   # works best for random writes on small files, not
+                    # well-suited for large database workloads.
+
+    chattr +C somefile  # no copy on write
+
+    cp --reflink=auto  fileA fileB      # do CoW copy, fallback to standard copy if unsupported
 
 $ btrfs filesystem df /mnt
 $ sudo btrfs filesystem usage /mnt
 
 $ sudo btrfs subvolume create /mnt/vol1
 $ sudo btrfs subvolume list /mnt
+$ sudo btrfs subvolume set-default <id> <path>
 $ sudo btrfs subvolume show /mnt/vol1
 $ sudo btrfs subvolume snapshot /mnt/vol1 /mnt/snapshot1
 $ sudo btrfs subvolume snapshot -r /mnt/vol1 /mnt/snapshot1-readonly
 $ sudo btrfs subvolume delete /mnt/vol1
+
+    Concepts:
+        mdadm/lvm/xfs       BTRFS           ZFS             comment
+        =================   =============   =============   =============
+        drive               drive           drive           physical disk
+        LVM VG              fs or volume    storage pool
+        LVM LE              chunk(1GB)                      RAID happens
+        LVM LV + XFS        sub volume      fs
+
+Suggested layout:
+    top-level subvol
+        +--- root subvol
+        +--- home subvol
+        \--- snapshots dir
+                +--- root-YYYY-mm-dd snapshot
+                +--- home-YYYY-mm-dd snapshot
+
+Notice: read-only snapshot can't be moved because the '..' file in this sub
+volume can't be changed, you can move the parent directory of this snapshot.
 
 
 NILFS 2
