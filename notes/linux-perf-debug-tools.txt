@@ -4,11 +4,21 @@ gstack
 perf
 oprofile
 dtrace
-strace
 ltrace
+ftrace:  debugfs, trace-cmd, KernelShark
+strace
+sysdig  http://www.sysdig.org/
+
 
 systemtap
 LTTng
+DProbes
+
+    linux kernel mechanism:
+        KProbes (int 3 breakpoint based, used by systemtap and DProbes)
+        ptrace (used by gdb, strace, ptrace)
+        utrace -> UProbes   (int 3 breakpoint based, used by systemtap)
+        ftrace (supersede kernel markers; used by systemtap)
 
 
 sysstat
@@ -22,8 +32,5 @@ perf-tools
     https://github.com/brendangregg/perf-tools
     https://packages.debian.org/jessie/perf-tools-unstable
 
-ftrace perf_events
 eBPF
-
-sysdig  http://www.sysdig.org/
 

@@ -1,0 +1,22 @@
+Linux Kernel Developement, 3rd                  2010
+        2.6.34
+
+Professional Linux Kernel Architecture          2008
+        2.6.24/25/26
+
+Essential Linux Device Drivers                  2008
+
+Understanding the Linux Kernel, 3rd             2005
+
+Linux Device Drivers, 3rd                       2005
+        2.6.10
+
+Understanding the Linux Virtual Memory Manager  2004
+
+Linux Kernel Networking                         2013
+
+TCP/IP Architecture, Design and Implementation in Linux
+                                                2008
+
+Understanding Linux Network Internals           2006
+
