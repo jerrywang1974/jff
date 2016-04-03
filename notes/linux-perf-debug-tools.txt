@@ -7,18 +7,23 @@ dtrace
 ltrace
 ftrace:  debugfs, trace-cmd, KernelShark
 strace
+
+
 sysdig  http://www.sysdig.org/
-
-
+bcc     https://github.com/iovisor/bcc      requires linux >= 4.1
+        http://iovisor.github.io/bcc/
+ply     https://github.com/iovisor/ply      requires linux >= 4.1
 systemtap
 LTTng
 DProbes
 
     linux kernel mechanism:
         KProbes (int 3 breakpoint based, used by systemtap and DProbes)
-        ptrace (used by gdb, strace, ptrace)
         utrace -> UProbes   (int 3 breakpoint based, used by systemtap)
         ftrace (supersede kernel markers; used by systemtap)
+        tracepoints: https://git.kernel.org/cgit/linux/kernel/git/torvalds/linux.git/tree/Documentation/trace
+        ptrace (used by gdb, strace, ptrace)
+        eBPF (used by perf, bcc, ply)
 
 
 sysstat
