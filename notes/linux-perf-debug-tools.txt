@@ -2,7 +2,26 @@ gdb
 gstack
 
 perf
+    $ sudo aptitude install linux-perf
+    $ sudo perf help list
+    $ sudo perf list hw sw cache tracepoint pmu
+
+    $ sudo perf record ...
+    $ sudo perf report ...
+
+    $ sudo perf timechart record -T -I -- command
+    $ sudo perf timechart
+
+    $ sudo perf top
+
+    $ sudo perf trace ...
+    $ sudo perf trace record ...
+
+    $ sudo perf probe ...
+
 oprofile
+    superseded by perf
+
 dtrace
 ltrace
 ftrace:  debugfs, trace-cmd, KernelShark
