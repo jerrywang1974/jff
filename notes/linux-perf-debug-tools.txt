@@ -29,12 +29,29 @@ strace
 
 
 sysdig  http://www.sysdig.org/
+    $ sudo aptitude install sysdig
+
+systemtap
+    $ sudo aptitude install systemtap
+
 bcc     https://github.com/iovisor/bcc      requires linux >= 4.1
         http://iovisor.github.io/bcc/
+
 ply     https://github.com/iovisor/ply      requires linux >= 4.1
-systemtap
+
 LTTng
+    uses its own TRACE_EVENT() macros, doesn't directly make use of linux kprobes and uprobes.
+
+    $ sudo aptitude install lttngtop lttng-tools lttng-modules-dkms liblttng-ust-java liblttng-ust-agent-java python3-lttnganalyses python3-lttngust
+
+    liblttng-ust-agent-java:    /usr/share/java/liblttng-ust-agent.jar
+    liblttng-ust-java:          /usr/share/java/liblttng-ust-java.jar
+    lttng-tools:                /usr/bin/lttng
+    lttngtop:                   lttngtop, lttngtoptrace
+    python3-lttnganalyses:      /usr/bin/lttng-*
+
 DProbes
+
 
     linux kernel mechanism:
         KProbes (int 3 breakpoint based, used by systemtap and DProbes)
