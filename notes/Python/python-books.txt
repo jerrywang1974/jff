@@ -1,0 +1,16 @@
+A Byte of Python
+    http://python.swaroopch.com/
+
+The Python Tutorial
+    https://docs.python.org/3/tutorial/
+
+Dive Into Python 3
+    http://www.diveinto.org/python3/
+
+Learning Python, 5th edition, Mark Lutz
+
+Python Programming, Mark Lutz
+
+Think Python, 2nd edition
+    http://greenteapress.com/wp/think-python-2e/
+

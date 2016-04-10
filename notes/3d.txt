@@ -24,7 +24,10 @@ modeling methods:
 
 雕刻建模： ZBrush, Mudbox
 silo, modo
-rhino, google sketchup, blender
+sketchup, blender
+
+CAD/CAM:
+    CATIA, Unigraphics NX, Pro/engineer, Rhino3D, SolidWorks
 
 
 http://en.wikipedia.org/wiki/List_of_game_engines

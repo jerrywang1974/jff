@@ -1,0 +1,16 @@
+Anaconda
+    https://www.continuum.io/downloads
+
+WinPython
+    http://winpython.github.io/
+
+Intel distribution for Python
+    https://software.intel.com/zh-cn/forums/intel-distribution-for-python
+    NumPy and SciPy accelerated using Intel MKL
+
+Enthought Canopy
+    https://store.enthought.com/downloads/#default
+
+ActivePython
+    http://www.activestate.com/activepython
+
