@@ -434,7 +434,7 @@ Modules
             * cluster.routing.allocation.awareness.force.zone.values: zone1, zone2
             * Forced awareness NEVER allows copies of the same shard to be allocated to the same zone.
     * Shard allocation filtering
-        * typical use case is to mark nodes to decomission
+        * typical use case is to mark nodes to decommission
         * cluster.routing.allocation.include.{attribute}: attr1,attr2       # has any of attributes
         * cluster.routing.allocation.require.{attribute}: attr1,attr2       # has all attributes
         * cluster.routing.allocation.exclude.{attribute}: attr1,attr2       # has none of attributes
@@ -444,6 +444,7 @@ Modules
         * cluster.blocks.read_only: set whole cluster read only, notice this can be changed by API /_cluster/settings.
         * logger.{module}: dynamically change log level, such as:
             curl -s -XPUT "$ES/_cluster/settings" -d '{ "transient": { "logger.indices.recovery": "DEBUG" }}'
+            curl -s -XPUT "$ES/_cluster/settings" -d '{ "transient": { "logger._root": "DEBUG" }}'
 
 * Discovery
     * cluster.name: [elasticsearch]
