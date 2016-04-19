@@ -1,0 +1,47 @@
+https://en.wikipedia.org/wiki/Happened-before
+https://en.wikipedia.org/wiki/Lamport_timestamps
+    sending:
+        time = time + 1;
+        time_stamp = time;
+        send(Message, time_stamp);
+
+    receiving:
+        (Message, time_stamp) = receive();
+        time = max(time_stamp, time) + 1
+
+    implications:
+        partial causal:
+        if a happened-before b, then C(a) < C(b)        // but CAN'T assure if C(a) < C(b), then a happened-before b;
+            or
+        if C(a) >= C(b) then a can't have happened-before b.
+
+
+https://en.wikipedia.org/wiki/Vector_clock
+    1. initially all clocks are zero
+    2. for internal event, increment its own logical clock in the vector by 1
+    3. send a message with its entire vector
+    4. when receives a message, increment its own logical clock in the vector by 1, and 
+       update each element i to max(own_vector[i], received_vector[i])
+
+    partial causal ordering:
+        VC(x) < VC(y): VC(x)_z is less than or equal to VC(y)_z for all process indices z, and
+                       at least one of those relationships is strictly smaller
+
+        if VC(a) < VC(b), then a happened-before b
+
+
+http://gsd.di.uminho.pt/members/cbm/ps/itc2008.pdf
+https://github.com/sinabz/itc4j
+    Interval Tree Clocks, generalize vector clock for dynamic number of processes
+
+
+https://en.wikipedia.org/wiki/Version_vector (VV)
+
+    small difference to vector clock:
+    4. always update element i to max(own_vector[i], received_vector[i])
+
+Dotted Version Vectors (DVV)
+    Efficient Causality Tracking in Distributed Storage Systems With Dotted Version Vectors
+
+Dotted Version Vector Sets(DVVSet)  http://github.com/ricardobcl/Dotted-Version-Vectors
+
