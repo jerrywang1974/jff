@@ -134,6 +134,25 @@ set rtp+=~/.vim/bundle/Vundle.vim
 call vundle#begin()
 Plugin 'gmarik/Vundle.vim'
 Plugin 'Valloric/YouCompleteMe'
+Plugin 'majutsushi/tagbar'
+Plugin 'a.vim'
+Plugin 'matchit.zip'
+Plugin 'DrawIt'
+Plugin 'bufexplorer.zip'
+Plugin 'word_complete.vim'
+Plugin 'vcscommand.vim'
+Plugin 'taglist.vim'
+Plugin 'Align.vim'
+Plugin 'MultipleSearch'
+Plugin 'mru.vim'
+Plugin 'sketch.vim'
+Plugin 'vim2ansi'
+Plugin 'The-NERD-Commenter'
+Plugin 'Mark'
+Plugin 'LargeFile'
+Plugin 'FencView.vim'
+Plugin 'QuickBuf'
+Plugin 'CmdlineComplete'
 call vundle#end()
 filetype plugin indent on
 
@@ -201,6 +220,7 @@ set sidescrolloff=10
 if has("gui_running")
     colorscheme peachpuff
 else
+    set mouse=
 "   colorscheme murphy
 "   hi link String Comment
     colorscheme torte   "elflord murphy
@@ -222,6 +242,9 @@ set writebackup
 set nobackup
 " useful for some VCSes that use hardlink in working copy
 set backupcopy+=breakhardlink
+
+set undofile
+set undodir=/var/tmp,/tmp,~/tmp,.
 
 set wildmode=list:full
 set wildmenu
