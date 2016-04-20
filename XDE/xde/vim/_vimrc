@@ -82,8 +82,8 @@ let g:qb_hotkey="<S-F7>"
 " mru.vim
 nnoremap <silent> <F8> :MRU<CR>
 
-" Taglist plugin
-nnoremap <silent> <F9> :TlistToggle<CR>
+" TagBar plugin
+nnoremap <silent> <F9> :TagBarToggle<CR>
 
 " autopreview.vim
 nnoremap <S-F9> :AutoPreviewToggle<CR>
@@ -141,7 +141,6 @@ Plugin 'DrawIt'
 Plugin 'bufexplorer.zip'
 Plugin 'word_complete.vim'
 Plugin 'vcscommand.vim'
-Plugin 'taglist.vim'
 Plugin 'Align.vim'
 Plugin 'MultipleSearch'
 Plugin 'mru.vim'
@@ -220,7 +219,6 @@ set sidescrolloff=10
 if has("gui_running")
     colorscheme peachpuff
 else
-    set mouse=
 "   colorscheme murphy
 "   hi link String Comment
     colorscheme torte   "elflord murphy
