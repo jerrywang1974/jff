@@ -1,0 +1,33 @@
+Multi-source replication
+========================
+
+
+1. installation
+
+    docker network create mysql-net
+
+    for i in `seq 1 3`; do
+        docker run -dt --net=mysql-net --name mysql_$i --hostname mysql_$i -e MYSQL_ALLOW_EMPTY_PASSWORD=true mysql
+    done
+
+
+    # MySQL official APT repository:
+    #   http://dev.mysql.com/downloads/repo/apt/
+
+2. configuration
+
+    /etc/mysql/my.cnf
+
+    [mysqld]
+    server-id=1
+    log-bin=ON
+    gtid-mode=ON
+    enforce-gtid-consistency
+
+    binlog_format=ROW
+    sync_binlog=1
+    innodb_flush_log_at_trx_commit=1
+
+    master_info_repository=TABLE
+    relay_log_info_repository=TABLE
+
