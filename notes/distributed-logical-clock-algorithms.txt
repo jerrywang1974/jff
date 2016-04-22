@@ -36,12 +36,17 @@ https://github.com/sinabz/itc4j
 
 
 https://en.wikipedia.org/wiki/Version_vector (VV)
+http://basho.com/posts/technical/vector-clocks-revisited/
 
     small difference to vector clock:
     4. always update element i to max(own_vector[i], received_vector[i])
 
-Dotted Version Vectors (DVV)
+
+http://basho.com/posts/technical/vector-clocks-revisited-part-2-dotted-version-vectors/
+    Dotted Version Vectors (DVV)
     Efficient Causality Tracking in Distributed Storage Systems With Dotted Version Vectors
 
-Dotted Version Vector Sets(DVVSet)  http://github.com/ricardobcl/Dotted-Version-Vectors
+
+http://github.com/ricardobcl/Dotted-Version-Vectors
+    Dotted Version Vector Sets(DVVSet)
 
