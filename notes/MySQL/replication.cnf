@@ -1,6 +1,10 @@
 [mysqld]
 
 server-id=0
+auto_increment_offset=1
+auto_increment_increment=1000
+innodb_autoinc_lock_mode=1
+
 log-bin=mysql-bin
 gtid-mode=ON
 enforce-gtid-consistency

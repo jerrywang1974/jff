@@ -20,7 +20,7 @@ Multi-source replication
 2. configuration
 
     for i in 1 2 3; do
-        sed -e "s/server-id.*/server-id=$i/" replication.cnf >$$.cnf
+        sed -e "s/server-id.*/server-id=$i/" -e "s/auto_increment_offset.*/auto_increment_offset=$i/" replication.cnf >$$.cnf
         docker cp $$.cnf mysql_$i:/etc/mysql/conf.d/90-replication.cnf
         docker restart mysql_$i
     done

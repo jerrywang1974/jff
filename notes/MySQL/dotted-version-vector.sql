@@ -2,21 +2,41 @@ SET SESSION TRANSACTION ISOLATION LEVEL REPEATABLE-READ;
 
 START TRANSACTION;
 
-DROP TABLE t;
-
-CREATE TABLE t (
-    id              SERIAL,
+CREATE TABLE IF NOT EXISTS t (
+    id              BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
     name            VARCHAR(200) NOT NULL,
-    logicalClock    JSON
+    logicalClock    JSON,
+    deleted         BOOLEAN DEFAULT FALSE,
+
+    INDEX           (deleted)
 );
 
-CREATE TRIGGER t__initLogicalClock BEFORE INSERT ON t FOR EACH ROW
-    SET NEW.logicalClock = CONCAT('{"format": 1, "hasSibling": false, "versionVector": {"',
-                                  IF(@@SESSION.gtid_next = 'AUTOMATIC',
-                                     @@server_uuid,
-                                     SUBSTRING_INDEX(@@SESSION.gtid_next, ':', 1)),
-                                  '": 1}}');
+CREATE TABLE IF NOT EXISTS t__sibling (
+    id              BIGINT UNSIGNED NOT NULL,
+    name            VARCHAR(200) NOT NULL,
+    logicalClock    JSON,
+    deleted         BOOLEAN DEFAULT FALSE,
 
+    INDEX           (deleted)
+);
+
+DROP TRIGGER IF EXISTS t__initLogicalClock;
+DROP TRIGGER IF EXISTS t__reconcile;
+
+DELIMITER //
+CREATE TRIGGER t__initLogicalClock BEFORE INSERT ON t FOR EACH ROW
+BEGIN
+    IF NEW.logicalClock IS NULL THEN
+        SET NEW.logicalClock = CONCAT('{"format": 1, "hasSibling": false, "versionVector": {"',
+                                      IF(@@SESSION.gtid_next = 'AUTOMATIC',
+                                         @@server_uuid,
+                                         SUBSTRING_INDEX(@@SESSION.gtid_next, ':', 1)),
+                                      '": 1}}');
+    END IF;
+END //
+DELIMITER ;
+
+DELIMITER //
 CREATE TRIGGER t__reconcile BEFORE UPDATE ON t FOR EACH ROW
 BEGIN
     -- check format = 1
@@ -34,7 +54,8 @@ BEGIN
     --      new.logicalClock.versionVector = merge(old.logicalClock.versionVector, new.logicalClock.versionVector)
     --      increment new.logicalClock.versionVector for gtid_next's server_uuid
     --      new.logicalClock.hasSibling = true
-END
+END //
+DELIMITER ;
 
 COMMIT;
 
