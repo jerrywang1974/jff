@@ -12,8 +12,17 @@ innodb-flush-log-at-trx-commit=1
 master-info-repository=TABLE
 relay-log-info-repository=TABLE
 
+binlog-ignore-db=mysql
+binlog-ignore-db=sys
+binlog-ignore-db=information_schema
+binlog-ignore-db=performance_schema
 binlog-ignore-db=test
 
-replicate-do-db=db1
-replicate-do-db=db2
+replicate-ignore-db=mysql
+replicate-ignore-db=sys
+replicate-ignore-db=information_schema
+replicate-ignore-db=performance_schema
+replicate-ignore-db=test
+
+replicate-wild-ignore-table=%.%__sibling
 
