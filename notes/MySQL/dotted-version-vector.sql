@@ -1,4 +1,4 @@
-SET SESSION TRANSACTION ISOLATION LEVEL REPEATABLE-READ;
+SET SESSION TRANSACTION ISOLATION LEVEL REPEATABLE READ;
 
 START TRANSACTION;
 
@@ -38,16 +38,76 @@ RETURN IF(@@SESSION.gtid_next = 'AUTOMATIC',
 CREATE FUNCTION vv_descend (v1 JSON, v2 JSON)
 RETURNS BOOLEAN DETERMINISTIC
 BEGIN
+    DECLARE servers JSON;
+    DECLARE i, n, counter1, counter2 INTEGER;
+    DECLARE path VARCHAR(100);
+
+    SET servers = JSON_KEYS(v2);
+    IF servers IS NULL THEN
+        RETURN TRUE;
+    END IF;
+
+    SET n = JSON_LENGTH(servers),
+        i = 0;
+
+    WHILE i < n DO
+        SET path = CONCAT('$."', JSON_EXTRACT(servers, CONCAT('$[', i, ']')), '"');
+        SET counter1 = JSON_EXTRACT(v1, path),
+            counter2 = JSON_EXTRACT(v2, path);
+
+        IF counter1 IS NULL OR counter1 < counter2 THEN
+            RETURN FALSE;
+        END IF;
+
+        SET i = i + 1;
+    END WHILE;
+
+    RETURN TRUE;
 END $$
 
 CREATE FUNCTION vv_merge (v1 JSON, v2 JSON)
 RETURNS JSON DETERMINISTIC
 BEGIN
+    DECLARE v, servers, val JSON;
+    DECLARE i, n, e1, e2 INTEGER;
+    DECLARE path VARCHAR(100);
+
+    SET v = JSON_MERGE(v1, v2);
+    SET servers = JSON_KEYS(v);
+    SET n = JSON_LENGTH(servers),
+        i = 0;
+
+    WHILE i < n DO
+        SET path = CONCAT('$."', JSON_EXTRACT(servers, CONCAT('$[', i, ']')), '"');
+        SET val = JSON_EXTRACT(v, path);
+
+        IF JSON_TYPE(val) = 'ARRAY' THEN
+            SET e1 = JSON_EXTRACT(val, '$[0]'),
+                e2 = JSON_EXTRACT(val, '$[1]');
+
+            SET v = JSON_SET(v, path, IF(e1 > e2, e1, e2));
+        END IF;
+
+        SET i = i + 1;
+    END WHILE;
+
+    RETURN v;
 END $$
 
 CREATE FUNCTION vv_increment (v JSON, server CHAR(36))
 RETURNS JSON DETERMINISTIC
 BEGIN
+    DECLARE i INTEGER;
+    DECLARE path VARCHAR(100);
+
+    SET path = CONCAT('$."', server, '"');
+    SET i = JSON_EXTRACT(v, path);
+
+    IF i IS NULL THEN
+        return JSON_SET(v, path, 1);
+    ELSE
+        return JSON_SET(v, path, i + 1);
+    END IF;
 END $$
 
 CREATE TRIGGER t__initLogicalClock BEFORE INSERT ON t FOR EACH ROW
@@ -97,48 +157,39 @@ BEGIN
 
     -- check conflicts
     SET source_id = current_gtid_source_id();
-    IF @@server_id = source_id THEN     -- on master
-        IF new_hasSibling OR NOT vv_descend(new_vv, old_vv) THEN
-            SIGNAL SQLSTATE '55001'
+    IF source_id = @@server_id THEN     -- on master
+        IF new_hasSibling IS TRUE OR vv_descend(new_vv, old_vv) IS FALSE THEN
+            SIGNAL SQLSTATE '55005'
                 SET MESSAGE_TEXT = 'Must reconcile conflicted values';
         END IF;
 
-        IF old_hasSibling THEN
-            UPDATE t__sibling SET deleted = TRUE WHERE id = @NEW.id AND deleted = FALSE;
+        IF old_hasSibling IS TRUE THEN
+            UPDATE t__sibling SET deleted = TRUE WHERE id = @NEW.id AND deleted IS FALSE;
         END IF;
-
-        SET NEW.logicalClock = JSON_SET(NEW.logicalClock,
-                                        '$.versionVector',
-                                        vv_increment(vv_merge(old_vv, new_vv), source_id));
-
-    ELSE    -- on slave
-
-        IF vv_descend(new_vv, old_vv) THEN
-            IF old_hasSibling THEN
-                UPDATE t__sibling SET deleted = TRUE WHERE id = @NEW.id AND deleted = FALSE;
+    ELSE                                -- on slave
+        IF vv_descend(new_vv, old_vv) IS TRUE THEN
+            IF old_hasSibling IS TRUE THEN
+                UPDATE t__sibling SET deleted = TRUE WHERE id = @NEW.id AND deleted IS FALSE;
             END IF;
 
-            SET NEW.hasSibling = FALSE,
-                NEW.logicalClock = JSON_SET(NEW.logicalClock,
-                                            '$.versionVector',
-                                            vv_increment(vv_merge(old_vv, new_vv), source_id));
-
+            SET new_hasSibling = FALSE;
         ELSE
-
-            IF old_hasSibling THEN
-                UPDATE t__sibling SET deleted = TRUE WHERE id = @NEW.id AND deleted = FALSE AND
-                    vv_descend(new_vv, JSON_EXTRACT(logicalClock, '$.versionVector');
+            IF old_hasSibling IS TRUE THEN
+                UPDATE t__sibling SET deleted = TRUE WHERE id = @NEW.id AND deleted IS FALSE AND
+                    vv_descend(new_vv, JSON_EXTRACT(logicalClock, '$.versionVector')) IS TRUE;
             END IF;
 
             INSERT INTO t__sibling SELECT * FROM t WHERE id = @NEW.id;
 
-            SET NEW.hasSibling = TRUE,
-                NEW.logicalClock = JSON_SET(NEW.logicalClock,
-                                            '$.versionVector',
-                                            vv_increment(vv_merge(old_vv, new_vv), source_id));
-
+            SET new_hasSibling = TRUE;
         END IF;
     END IF;
+
+    SET NEW.logicalClock = JSON_SET(NEW.logicalClock,
+                                    '$.hasSibling',
+                                    new_hasSibling,
+                                    '$.versionVector',
+                                    vv_increment(vv_merge(old_vv, new_vv), source_id));
 END $$
 
 DELIMITER ;
