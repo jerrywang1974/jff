@@ -64,6 +64,7 @@ BEGIN
     DECLARE old_format, new_format INTEGER;
     DECLARE old_hasSibling, new_hasSibling BOOLEAN;
     DECLARE old_vv, new_vv JSON;
+    DECLARE source_id CHAR(36);
 
     -- check transaction isolation level
     IF @@SESSION.tx_isolation <> 'REPEATABLE-READ' AND @@SESSION.tx_isolation <> 'SERIALIZABLE' THEN
@@ -95,35 +96,49 @@ BEGIN
     END IF;
 
     -- check conflicts
-    IF current_gtid_source_id() = @@server_id THEN  -- on master
+    SET source_id = current_gtid_source_id();
+    IF @@server_id = source_id THEN     -- on master
         IF new_hasSibling OR NOT vv_descend(new_vv, old_vv) THEN
             SIGNAL SQLSTATE '55001'
                 SET MESSAGE_TEXT = 'Must reconcile conflicted values';
         END IF;
 
-        SET NEW.logicalClock = JSON_SET(NEW.logicalClock,
-                                        '$.versionVector',
-                                        vv_increment(vv_merge(old_vv, new_vv), @@server_id));
-
         IF old_hasSibling THEN
             UPDATE t__sibling SET deleted = TRUE WHERE id = @NEW.id AND deleted = FALSE;
         END IF;
-    ELSE    -- on slave
-    END IF;
 
-    -- if new.logicalClock >= old.logicalClock
-    --      increment new.logicalClock.versionVector for gtid_next's server_uuid
-    --      if old.logicalClock.hasSibling
-    --          mark siblings in t__sibling to be deleted
-    --      new.logicalClock.hasSibling = false
-    -- else
-    --      if on-master
-    --          fail
-    --      prune old siblings in t__sibling when new.logicalClock >= sibling.logicalClock
-    --      copy old into t__sibling
-    --      new.logicalClock.versionVector = merge(old.logicalClock.versionVector, new.logicalClock.versionVector)
-    --      increment new.logicalClock.versionVector for gtid_next's server_uuid
-    --      new.logicalClock.hasSibling = true
+        SET NEW.logicalClock = JSON_SET(NEW.logicalClock,
+                                        '$.versionVector',
+                                        vv_increment(vv_merge(old_vv, new_vv), source_id));
+
+    ELSE    -- on slave
+
+        IF vv_descend(new_vv, old_vv) THEN
+            IF old_hasSibling THEN
+                UPDATE t__sibling SET deleted = TRUE WHERE id = @NEW.id AND deleted = FALSE;
+            END IF;
+
+            SET NEW.hasSibling = FALSE,
+                NEW.logicalClock = JSON_SET(NEW.logicalClock,
+                                            '$.versionVector',
+                                            vv_increment(vv_merge(old_vv, new_vv), source_id));
+
+        ELSE
+
+            IF old_hasSibling THEN
+                UPDATE t__sibling SET deleted = TRUE WHERE id = @NEW.id AND deleted = FALSE AND
+                    vv_descend(new_vv, JSON_EXTRACT(logicalClock, '$.versionVector');
+            END IF;
+
+            INSERT INTO t__sibling SELECT * FROM t WHERE id = @NEW.id;
+
+            SET NEW.hasSibling = TRUE,
+                NEW.logicalClock = JSON_SET(NEW.logicalClock,
+                                            '$.versionVector',
+                                            vv_increment(vv_merge(old_vv, new_vv), source_id));
+
+        END IF;
+    END IF;
 END $$
 
 DELIMITER ;
