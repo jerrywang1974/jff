@@ -12,6 +12,7 @@ enforce-gtid-consistency
 binlog-format=STATEMENT
 sync-binlog=1
 innodb-flush-log-at-trx-commit=1
+expire_logs_days=7
 
 master-info-repository=TABLE
 relay-log-info-repository=TABLE
