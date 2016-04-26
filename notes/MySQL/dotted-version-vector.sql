@@ -51,7 +51,7 @@ BEGIN
         i = 0;
 
     WHILE i < n DO
-        SET path = CONCAT('$."', JSON_EXTRACT(servers, CONCAT('$[', i, ']')), '"');
+        SET path = CONCAT('$.', JSON_EXTRACT(servers, CONCAT('$[', i, ']')));
         SET counter1 = JSON_EXTRACT(v1, path),
             counter2 = JSON_EXTRACT(v2, path);
 
@@ -78,7 +78,7 @@ BEGIN
         i = 0;
 
     WHILE i < n DO
-        SET path = CONCAT('$."', JSON_EXTRACT(servers, CONCAT('$[', i, ']')), '"');
+        SET path = CONCAT('$.', JSON_EXTRACT(servers, CONCAT('$[', i, ']')));
         SET val = JSON_EXTRACT(v, path);
 
         IF JSON_TYPE(val) = 'ARRAY' THEN
@@ -157,7 +157,7 @@ BEGIN
 
     -- check conflicts
     SET source_id = current_gtid_source_id();
-    IF source_id = @@server_id THEN     -- on master
+    IF source_id = @@server_uuid THEN   -- on master
         IF new_hasSibling IS TRUE OR vv_descend(new_vv, old_vv) IS FALSE THEN
             SIGNAL SQLSTATE '55005'
                 SET MESSAGE_TEXT = 'Must reconcile conflicted values';
@@ -187,7 +187,7 @@ BEGIN
 
     SET NEW.logicalClock = JSON_SET(NEW.logicalClock,
                                     '$.hasSibling',
-                                    new_hasSibling,
+                                    CAST(new_hasSibling IS TRUE AS JSON),
                                     '$.versionVector',
                                     vv_increment(vv_merge(old_vv, new_vv), source_id));
 END $$
