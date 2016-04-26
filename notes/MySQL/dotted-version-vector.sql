@@ -164,22 +164,22 @@ BEGIN
         END IF;
 
         IF old_hasSibling IS TRUE THEN
-            UPDATE t__sibling SET deleted = TRUE WHERE id = @NEW.id AND deleted IS FALSE;
+            UPDATE t__sibling SET deleted = TRUE WHERE id = OLD.id AND deleted IS FALSE;
         END IF;
     ELSE                                -- on slave
         IF vv_descend(new_vv, old_vv) IS TRUE THEN
             IF old_hasSibling IS TRUE THEN
-                UPDATE t__sibling SET deleted = TRUE WHERE id = @NEW.id AND deleted IS FALSE;
+                UPDATE t__sibling SET deleted = TRUE WHERE id = OLD.id AND deleted IS FALSE;
             END IF;
 
             SET new_hasSibling = FALSE;
         ELSE
             IF old_hasSibling IS TRUE THEN
-                UPDATE t__sibling SET deleted = TRUE WHERE id = @NEW.id AND deleted IS FALSE AND
+                UPDATE t__sibling SET deleted = TRUE WHERE id = OLD.id AND deleted IS FALSE AND
                     vv_descend(new_vv, JSON_EXTRACT(logicalClock, '$.versionVector')) IS TRUE;
             END IF;
 
-            INSERT INTO t__sibling SELECT * FROM t WHERE id = @NEW.id;
+            INSERT INTO t__sibling SELECT * FROM t WHERE id = OLD.id;
 
             SET new_hasSibling = TRUE;
         END IF;
