@@ -191,7 +191,9 @@ BEGIN
                                     '$.hasSibling',
                                     CAST(new_hasSibling IS TRUE AS JSON),
                                     '$.versionVector',
-                                    vv_increment(vv_merge(old_vv, new_vv), source_id));
+                                    IF(new_hasSibling IS TRUE,
+                                       vv_increment(vv_merge(old_vv, new_vv), source_id),
+                                       vv_increment(new_vv, source_id)));
 END $$
 
 DELIMITER ;
