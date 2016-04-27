@@ -150,7 +150,9 @@ BEGIN
             SET MESSAGE_TEXT = 'Invalid "hasSibling" in logical clock';
     END IF;
 
-    IF old_vv IS NULL OR new_vv IS NULL OR JSON_TYPE(old_vv) <> 'OBJECT' OR JSON_TYPE(new_vv) <> 'OBJECT' THEN
+    IF old_vv IS NULL OR new_vv IS NULL OR
+            JSON_TYPE(old_vv) <> 'OBJECT' OR JSON_TYPE(new_vv) <> 'OBJECT' OR
+            JSON_DEPTH(old_vv) <> 2 OR JSON_DEPTH(new_vv) <> 2 THEN
         SIGNAL SQLSTATE '55000'
             SET MESSAGE_TEXT = 'Invalid "versionVector" in logical clock';
     END IF;
