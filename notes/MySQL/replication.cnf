@@ -17,10 +17,6 @@ expire_logs_days=7
 master-info-repository=TABLE
 relay-log-info-repository=TABLE
 
-binlog-ignore-db=mysql
-binlog-ignore-db=sys
-binlog-ignore-db=information_schema
-binlog-ignore-db=performance_schema
 binlog-ignore-db=test
 
 replicate-ignore-db=mysql
