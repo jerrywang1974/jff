@@ -26,6 +26,7 @@ DROP FUNCTION IF EXISTS current_gtid_source_id;
 DROP FUNCTION IF EXISTS vv_descend;
 DROP FUNCTION IF EXISTS vv_merge;
 DROP FUNCTION IF EXISTS vv_increment;
+DROP FUNCTION IF EXISTS vv_dot;
 
 DELIMITER $$
 
@@ -104,9 +105,22 @@ BEGIN
     SET i = JSON_EXTRACT(v, path);
 
     IF i IS NULL THEN
-        return JSON_SET(v, path, 1);
+        RETURN JSON_SET(v, path, 1);
     ELSE
-        return JSON_SET(v, path, i + 1);
+        RETURN JSON_SET(v, path, i + 1);
+    END IF;
+END $$
+
+CREATE FUNCTION vv_dot (logicalClock JSON)
+RETURNS JSON DETERMINISTIC
+BEGIN
+    DECLARE dot JSON;
+
+    SET dot = JSON_EXTRACT(logicalClock, '$.dot');
+    IF dot IS NULL THEN
+        RETURN JSON_EXTRACT(logicalClock, '$.versionVector');
+    ELSE
+        RETURN dot;
     END IF;
 END $$
 
@@ -178,22 +192,36 @@ BEGIN
         ELSE
             IF old_hasSibling IS TRUE THEN
                 UPDATE t__sibling SET deleted = TRUE WHERE id = OLD.id AND deleted IS FALSE AND
-                    vv_descend(new_vv, JSON_EXTRACT(logicalClock, '$.versionVector')) IS TRUE;
+                    vv_descend(new_vv, vv_dot(logicalClock)) IS TRUE;
             END IF;
 
-            INSERT INTO t__sibling SELECT * FROM t WHERE id = OLD.id;
+            IF vv_descend(new_vv, vv_dot(OLD.logicalClock)) IS FALSE THEN
+                INSERT INTO t__sibling SELECT * FROM t WHERE id = OLD.id;
+            END IF;
 
             SET new_hasSibling = TRUE;
         END IF;
     END IF;
 
+    SET new_vv = IF(new_hasSibling IS TRUE,
+                    vv_increment(vv_merge(old_vv, new_vv), source_id),
+                    vv_increment(new_vv, source_id));
+
     SET NEW.logicalClock = JSON_SET(NEW.logicalClock,
                                     '$.hasSibling',
                                     CAST(new_hasSibling IS TRUE AS JSON),
                                     '$.versionVector',
-                                    IF(new_hasSibling IS TRUE,
-                                       vv_merge(old_vv, vv_increment(new_vv, source_id)),
-                                       vv_increment(new_vv, source_id)));
+                                    new_vv);
+
+    IF JSON_LENGTH(new_vv) > 1 THEN
+        SET NEW.logicalClock = JSON_SET(NEW.logicalClock,
+                                        '$.dot',
+                                        JSON_OBJECT(source_id,
+                                                    JSON_EXTRACT(new_vv, CONCAT('$."', source_id, '"'))));
+    ELSE
+        -- implicitly $.dot is equal to $.versionVector.
+        SET NEW.logicalClock = JSON_REMOVE(NEW.logicalClock, '$.dot');
+    END IF;
 END $$
 
 DELIMITER ;
