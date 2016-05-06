@@ -5,8 +5,8 @@ START TRANSACTION;
 CREATE TABLE IF NOT EXISTS t (
     id              BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
     name            VARCHAR(200) NOT NULL,
-    logicalClock    JSON,
     deleted         BOOLEAN DEFAULT FALSE,
+    logicalClock    JSON,
 
     INDEX           (deleted)
 );
@@ -14,8 +14,8 @@ CREATE TABLE IF NOT EXISTS t (
 CREATE TABLE IF NOT EXISTS t__sibling (
     id              BIGINT UNSIGNED NOT NULL,
     name            VARCHAR(200) NOT NULL,
-    logicalClock    JSON,
     deleted         BOOLEAN DEFAULT FALSE,
+    logicalClock    JSON,
 
     INDEX           (deleted)
 );
