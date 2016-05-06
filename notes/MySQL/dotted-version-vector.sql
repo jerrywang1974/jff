@@ -22,6 +22,8 @@ CREATE TABLE IF NOT EXISTS t__sibling (
 
 DROP TRIGGER IF EXISTS t__initLogicalClock;
 DROP TRIGGER IF EXISTS t__reconcile;
+DROP TRIGGER IF EXISTS t__protect_deletion;
+DROP TRIGGER IF EXISTS t__sibling__protect_deletion;
 DROP FUNCTION IF EXISTS current_gtid_source_id;
 DROP FUNCTION IF EXISTS vv_descend;
 DROP FUNCTION IF EXISTS vv_merge;
@@ -175,7 +177,7 @@ BEGIN
     SET source_id = current_gtid_source_id();
     IF source_id = @@server_uuid THEN   -- on master
         IF new_hasSibling IS TRUE OR vv_descend(new_vv, old_vv) IS FALSE THEN
-            SIGNAL SQLSTATE '55005'
+            SIGNAL SQLSTATE '55055'
                 SET MESSAGE_TEXT = 'Must reconcile conflicted values';
         END IF;
 
@@ -221,6 +223,28 @@ BEGIN
     ELSE
         -- implicitly $.dot is equal to $.versionVector.
         SET NEW.logicalClock = JSON_REMOVE(NEW.logicalClock, '$.dot');
+    END IF;
+END $$
+
+CREATE TRIGGER t__protect_deletion BEFORE DELETE ON t FOR EACH ROW
+BEGIN
+    IF current_gtid_source_id() = @@server_uuid AND (
+            OLD.deleted IS FALSE OR
+            @i_know_what_i_am_doing IS NULL OR
+            @i_know_what_i_am_doing <> 'i_really_want_to_delete_records_in_table_t' ) THEN
+        SIGNAL SQLSTATE '55000'
+            SET MESSAGE_TEXT = 'Do you know what you are doing?';
+    END IF;
+END $$
+
+CREATE TRIGGER t__sibling__protect_deletion BEFORE DELETE ON t__sibling FOR EACH ROW
+BEGIN
+    IF current_gtid_source_id() = @@server_uuid AND (
+            OLD.deleted IS FALSE OR
+            @i_know_what_i_am_doing IS NULL OR
+            @i_know_what_i_am_doing <> 'i_really_want_to_delete_records_in_table_t__sibling' ) THEN
+        SIGNAL SQLSTATE '55000'
+            SET MESSAGE_TEXT = 'Do you know what you are doing?';
     END IF;
 END $$
 
