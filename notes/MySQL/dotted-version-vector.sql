@@ -231,7 +231,7 @@ BEGIN
     IF current_gtid_source_id() = @@server_uuid AND (
             OLD.deleted IS FALSE OR
             @i_know_what_i_am_doing IS NULL OR
-            @i_know_what_i_am_doing <> 'i_really_want_to_delete_records_in_table_t' ) THEN
+            @i_know_what_i_am_doing <> 'i_really_want_to_delete_from_t' ) THEN
         SIGNAL SQLSTATE '55000'
             SET MESSAGE_TEXT = 'Do you know what you are doing?';
     END IF;
@@ -242,7 +242,7 @@ BEGIN
     IF current_gtid_source_id() = @@server_uuid AND (
             OLD.deleted IS FALSE OR
             @i_know_what_i_am_doing IS NULL OR
-            @i_know_what_i_am_doing <> 'i_really_want_to_delete_records_in_table_t__sibling' ) THEN
+            @i_know_what_i_am_doing <> 'i_really_want_to_delete_from_t__sibling' ) THEN
         SIGNAL SQLSTATE '55000'
             SET MESSAGE_TEXT = 'Do you know what you are doing?';
     END IF;
