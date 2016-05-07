@@ -43,7 +43,12 @@ for i in 1 2; do
 done
 
 for i in 1 2 3; do
-    mysql -h mysql_$i -e "start slave USER='root' PASSWORD=''"
+    mysql -h mysql_$i -e "START SLAVE USER='root' PASSWORD=''"
 done
+
+mysql -h mysql_1 -e "CREATE DATABASE db1"
+
 EOF
+
+docker exec -i mysql_1 bash -c "mysql -h mysql_1 db1" < <(sed -E 's/^-- EXAMPLE: ?//' dotted-version-vector.sql)
 
