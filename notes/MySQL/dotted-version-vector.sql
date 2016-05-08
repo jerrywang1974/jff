@@ -11,8 +11,11 @@
 -- Author:
 --      Yubao Liu <yubao.liu@yahoo.com>
 --
+-- Licence:
+--      https://opensource.org/licenses/BSD-3-Clause
+--
 -- ChangeLog:
---      * 2016-05-07 v0.1
+--      * 2016-05-09 v0.2
 
 
 -- EXAMPLE: CREATE TABLE IF NOT EXISTS SomeTable (
@@ -144,11 +147,7 @@ BEGIN
     SET path = CONCAT('$."', server, '"');
     SET i = JSON_EXTRACT(v, path);
 
-    IF i IS NULL THEN
-        RETURN JSON_SET(v, path, 1);
-    ELSE
-        RETURN JSON_SET(v, path, i + 1);
-    END IF;
+    RETURN JSON_SET(v, path, IF(i IS NULL, 1, i + 1));
 END //
 
 CREATE FUNCTION vv_dot (logicalClock JSON)
@@ -157,11 +156,9 @@ BEGIN
     DECLARE dot JSON;
 
     SET dot = JSON_EXTRACT(logicalClock, '$.dot');
-    IF dot IS NULL THEN
-        RETURN JSON_EXTRACT(logicalClock, '$.versionVector');
-    ELSE
-        RETURN dot;
-    END IF;
+    RETURN IF(dot IS NULL,
+              JSON_EXTRACT(logicalClock, '$.versionVector'),
+              dot);
 END //
 
 CREATE TRIGGER SomeTable__initLogicalClock BEFORE INSERT ON SomeTable FOR EACH ROW
@@ -211,6 +208,14 @@ BEGIN
             SET MESSAGE_TEXT = 'Invalid "versionVector" in logical clock';
     END IF;
 
+    -- check whether logicalClock is missing by mistake in update clause,
+    -- the ".dirty" member only exists during execution of update, it's
+    -- never really stored to the row.
+    IF JSON_CONTAINS_PATH(NEW.logicalClock, 'one', '$.dirty') IS FALSE THEN
+        SIGNAL SQLSTATE '55001'
+            SET MESSAGE_TEXT = 'Member "dirty" not found in column "logicalClock"';
+    END IF;
+
     -- check conflicts
     SET source_id = current_gtid_source_id();
     IF source_id = @@server_uuid THEN   -- on master
@@ -243,11 +248,12 @@ BEGIN
         END IF;
     END IF;
 
+    -- calculate the final real NEW.logicalClock
     SET new_vv = IF(new_hasSibling IS TRUE,
                     vv_increment(vv_merge(old_vv, new_vv), source_id),
                     vv_increment(new_vv, source_id));
 
-    SET NEW.logicalClock = JSON_SET(NEW.logicalClock,
+    SET NEW.logicalClock = JSON_SET(JSON_REMOVE(NEW.logicalClock, '$.dirty'),
                                     '$.hasSibling',
                                     CAST(new_hasSibling IS TRUE AS JSON),
                                     '$.versionVector',
