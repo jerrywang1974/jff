@@ -22,7 +22,7 @@
 -- EXAMPLE:     id              BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
 -- EXAMPLE:     name            VARCHAR(200) NOT NULL,
 -- EXAMPLE:     deleted         BOOLEAN DEFAULT FALSE,      -- required by DVV
--- EXAMPLE:     logicalClock    JSON,                       -- required by DVV
+-- EXAMPLE:     logicalClock    JSON NOT NULL,              -- required by DVV
 -- EXAMPLE:
 -- EXAMPLE:     INDEX           (deleted)
 -- EXAMPLE: );
@@ -32,7 +32,7 @@
 -- EXAMPLE:     id              BIGINT UNSIGNED NOT NULL,
 -- EXAMPLE:     name            VARCHAR(200) NOT NULL,
 -- EXAMPLE:     deleted         BOOLEAN DEFAULT FALSE,
--- EXAMPLE:     logicalClock    JSON,
+-- EXAMPLE:     logicalClock    JSON NOT NULL,
 -- EXAMPLE:
 -- EXAMPLE:     INDEX           (deleted)
 -- EXAMPLE: );
