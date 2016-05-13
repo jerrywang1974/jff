@@ -6,7 +6,7 @@
 --
 -- Customization:
 --      s/SomeTable/YourTableName/gi
---      s/\bid\s*=\s*OLD.id\b/Your-Primary-Keys/gi
+--      s/\bid\s*=\s*OLD\.id\b/Your-Primary-Keys/gi
 --
 -- Author:
 --      Yubao Liu <yubao.liu@yahoo.com>
@@ -15,14 +15,14 @@
 --      https://opensource.org/licenses/BSD-3-Clause
 --
 -- ChangeLog:
---      * 2016-05-09 v0.2
+--      * 2016-05-13 v0.3   # remember to update dvv_version() below.
 
 
 -- EXAMPLE: CREATE TABLE IF NOT EXISTS SomeTable (
 -- EXAMPLE:     id              BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
 -- EXAMPLE:     name            VARCHAR(200) NOT NULL,
--- EXAMPLE:     deleted         BOOLEAN DEFAULT FALSE,      -- required by DVV
--- EXAMPLE:     logicalClock    JSON NOT NULL,              -- required by DVV
+-- EXAMPLE:     deleted         BOOLEAN NOT NULL DEFAULT FALSE, -- required by DVV
+-- EXAMPLE:     logicalClock    JSON NOT NULL,                  -- required by DVV
 -- EXAMPLE:
 -- EXAMPLE:     INDEX           (deleted)
 -- EXAMPLE: );
@@ -31,7 +31,7 @@
 -- EXAMPLE: CREATE TABLE IF NOT EXISTS SomeTable__sibling (
 -- EXAMPLE:     id              BIGINT UNSIGNED NOT NULL,
 -- EXAMPLE:     name            VARCHAR(200) NOT NULL,
--- EXAMPLE:     deleted         BOOLEAN DEFAULT FALSE,
+-- EXAMPLE:     deleted         BOOLEAN NOT NULL DEFAULT FALSE,
 -- EXAMPLE:     logicalClock    JSON NOT NULL,
 -- EXAMPLE:
 -- EXAMPLE:     INDEX           (deleted)
@@ -67,11 +67,16 @@ DROP TRIGGER IF EXISTS SomeTable__initLogicalClock //
 DROP TRIGGER IF EXISTS SomeTable__reconcile //
 DROP TRIGGER IF EXISTS SomeTable__protect_deletion //
 DROP TRIGGER IF EXISTS SomeTable__sibling__protect_deletion //
+DROP FUNCTION IF EXISTS dvv_version //
 DROP FUNCTION IF EXISTS current_gtid_source_id //
 DROP FUNCTION IF EXISTS vv_descend //
 DROP FUNCTION IF EXISTS vv_merge //
 DROP FUNCTION IF EXISTS vv_increment //
 DROP FUNCTION IF EXISTS vv_dot //
+
+CREATE FUNCTION dvv_version ()
+RETURNS VARCHAR(100) DETERMINISTIC
+RETURN '0.3' //
 
 CREATE FUNCTION current_gtid_source_id ()
 RETURNS CHAR(36) DETERMINISTIC
