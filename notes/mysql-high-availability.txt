@@ -1,0 +1,15 @@
+Pacemaker/Keepalived/Heatbeat + DRBD
+    Cold backup, slow to serve
+
+MMM
+    http://www.xaprb.com/blog/2011/05/04/whats-wrong-with-mmm/
+    http://code.openark.org/blog/mysql/problems-with-mmm-for-mysql
+
+MHA
+    https://github.com/yoshinorim/mha4mysql-manager
+    https://github.com/yoshinorim/mha4mysql-node
+
+mysqlfailover in mysql-utilities
+
+MySQL Fabric
+
