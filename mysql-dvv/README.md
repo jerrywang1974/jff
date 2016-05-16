@@ -41,9 +41,8 @@ table. Basically you need these steps:
 
 ```
 # Change the pattern according to your case!
-sed -e 's/SomeTable/YourTableName/gi' \
-    -e 's/\bid\s*=\s*OLD\.id\b/Your-Primary-Keys/gi' \
-    dotted-version-vector.sql > dvv.sql
+./release r1 YourTableName 'Your-Primary-Key-WHERE-Condition'
+cat dvv-functions-r1.sql dvv-triggers-r1.sql > dvv.sql
 
 # DON'T forget to specify DB!
 mysql -h SERVER -u USER -p -e 'source dvv.sql' DB

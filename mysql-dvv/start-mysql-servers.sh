@@ -50,5 +50,6 @@ mysql -h mysql_1 -e "CREATE DATABASE db1"
 
 EOF
 
-docker exec -i mysql_1 bash -c "mysql -h mysql_1 db1" < <(sed -E 's/^-- EXAMPLE: ?//' dotted-version-vector.sql)
+./release.sh r1
+docker exec -i mysql_1 bash -c "mysql -h mysql_1 db1" < <(sed -E 's/^-- EXAMPLE: ?//; s/-- DROP FUNCTION/DROP FUNCTION/' dvv-functions-r1.sql dvv-triggers-r1.sql)
 
