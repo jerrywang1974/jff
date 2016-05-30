@@ -140,6 +140,32 @@ done
 endef
 
 #
+# stop_stateful_service_instance(service, i, stateless | stateful)
+#
+define stop_stateful_service_instance
+if [ $(3) = stateful ]; then
+		ids=`$(DOCKER) ps -a --no-trunc \
+		    -f label=deploy.env=$(DEPLOY_ENV) \
+		    -f label=deploy.layer=$(3) \
+		    -f label=deploy.service=$(1) \
+		    -f label=deploy.instance=$(2) \
+		    --format "{{.ID}}"`
+		[ -z "$$$$ids" ] || {
+			echo "	stopping old containers for $(DEPLOY_ENV)-$(1)-$(2), timeout=$(DOCKER_STOP_TIMEOUT)s...";
+			$(DOCKER) stop -t $(DOCKER_STOP_TIMEOUT) $$$$ids >/dev/null;
+			$(DOCKER) wait $$$$ids >/dev/null;
+		}
+		[ -z "$$$$ids" ] || nodes=$(if $(SWARM_ENABLED),`$(DOCKER) inspect --format "{{.Node.ID}}" $$$$ids | sort -u`)
+		[ -z "$$$$nodes" ] || [ `echo $$$$nodes | wc -w` = 1 ] || {
+			echo "	multiple stateful service instances of $(DEPLOY_ENV)-$(1)-$(2) found on different nodes:"
+			echo "	"; echo $$$$nodes
+			exit 1;
+		} >&2
+		[ -z "$$$$nodes" ] || node_constraint="-e constraint:node==$$$$nodes";
+	    fi;
+endef
+
+#
 # start_service_instance(service, i, stateless | stateful)
 #
 define start_service_instance
@@ -153,27 +179,10 @@ start-$(1)-$(2):
 
 	status=`$(DOCKER) ps -a --no-trunc -f name=$$$$CONTAINER_NAME --format "{{.Status}}"`
 	if [ -z "$$$$status" ]; then
-	    if [ $(3) = stateful ]; then
-		ids=`$(DOCKER) ps -a --no-trunc \
-		    -f label=deploy.env=$(DEPLOY_ENV) \
-		    -f label=deploy.layer=$(3) \
-		    -f label=deploy.service=$(1) \
-		    -f label=deploy.instance=$(2) \
-		    --format "{{.ID}}"`
-		[ -z "$$$$ids" ] || {
-			echo "stopping $$$$ids, timeout=$(DOCKER_STOP_TIMEOUT)...";
-			$(DOCKER) stop -t $(DOCKER_STOP_TIMEOUT) $$$$ids >/dev/null;
-		}
-		[ -z "$$$$ids" ] || nodes=$(if $(SWARM_ENABLED),`$(DOCKER) inspect --format "{{.Node.ID}}" $$$$ids | sort -u`)
-		[ -z "$$$$nodes" ] || [ `echo "$$$$nodes" | wc -w` = 1 ] || {
-			echo "multiple stateful service instances of $(DEPLOY_ENV)-$(1)-$(2) found on different nodes:" >&2;
-			echo "$$$$nodes" >&2;
-			exit 1;
-		}
-		[ -z "$$$$nodes" ] || node_constraint="-e constraint:node==$$$$nodes"
-	    fi
+	    $(call stop_stateful_service_instance,$(1),$(2),$(3))
 
 	    tmp_name=$$$$CONTAINER_NAME-$(shell date +%Y%m%d_%H%M%S)-tmp
+	    echo -n "	creating $$$$CONTAINER_NAME "
 	    $(DOCKER) create $($(1)_docker_create_options) -h $$$$HOSTNAME \
 		    -t --name=$$$$tmp_name --restart=unless-stopped \
 		    $(if $(SWARM_ENABLED),$$$$node_constraint) \
@@ -204,7 +213,10 @@ start-$(1)-$(2):
 	    $(DOCKER) rename $$$$tmp_name $$$$CONTAINER_NAME
 	fi
 
-	[ "$$$${status:0:2}" = "Up" ] || $(DOCKER) start $$$$CONTAINER_NAME >/dev/null
+	[ "$$$${status:0:2}" = "Up" ] || {
+		$(call stop_stateful_service_instance,$(1),$(2),$(3))
+		$(DOCKER) start $$$$CONTAINER_NAME >/dev/null
+	}
 
 endef
 
