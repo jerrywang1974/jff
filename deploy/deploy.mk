@@ -8,7 +8,7 @@ DOCKER_VOL_ROOT	:= $(if $(DOCKER_VOL_ROOT),$(strip $(DOCKER_VOL_ROOT)),/dockerda
 DOCKER_STOP_TIMEOUT	?= 60
 
 SHELL		:= /bin/bash
-.SHELLFLAGS	:= -e -o pipefail -c
+.SHELLFLAGS	:= $(if $(XTRACE_ENABLED),-x) -e -o pipefail -c
 .DEFAULT_GOAL	:= list-containers
 SWARM_ENABLED	:= $(findstring swarm,$(shell $(DOCKER) version -f "{{.Server.Version}}"))
 
@@ -160,8 +160,11 @@ start-$(1)-$(2):
 		    -f label=deploy.service=$(1) \
 		    -f label=deploy.instance=$(2) \
 		    --format "{{.ID}}"`
-		[ -z "$$$$ids" ] || $(DOCKER) stop -t $(DOCKER_STOP_TIMEOUT) $$$$ids >/dev/null
-		[ -z "$$$$ids" ] || nodes=`$(DOCKER) inspect --format "{{.Node.ID}}" $$$$ids | sort -u`
+		[ -z "$$$$ids" ] || {
+			echo "stopping $$$$ids, timeout=$(DOCKER_STOP_TIMEOUT)...";
+			$(DOCKER) stop -t $(DOCKER_STOP_TIMEOUT) $$$$ids >/dev/null;
+		}
+		[ -z "$$$$ids" ] || nodes=$(if $(SWARM_ENABLED),`$(DOCKER) inspect --format "{{.Node.ID}}" $$$$ids | sort -u`)
 		[ -z "$$$$nodes" ] || [ `echo "$$$$nodes" | wc -w` = 1 ] || {
 			echo "multiple stateful service instances of $(DEPLOY_ENV)-$(1)-$(2) found on different nodes:" >&2;
 			echo "$$$$nodes" >&2;
