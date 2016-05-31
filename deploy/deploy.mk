@@ -5,7 +5,7 @@ DEPLOY_TAG	:= $(if $(DEPLOY_TAG),$(strip $(DEPLOY_TAG)),$(shell date +%Y%m%d_%H%
 
 DOCKER		:= $(if $(DOCKER),$(strip $(DOCKER)),docker)
 DOCKER_VOL_ROOT	:= $(if $(DOCKER_VOL_ROOT),$(strip $(DOCKER_VOL_ROOT)),/dockerdata)
-DOCKER_STOP_TIMEOUT	?= 60
+DOCKER_STOP_TIMEOUT	?= 10
 
 SHELL		:= /bin/bash
 .SHELLFLAGS	:= $(if $(XTRACE_ENABLED),-x) -e -o pipefail -c
@@ -54,18 +54,20 @@ endef
 #
 define normalize_service_properties
 # INFO: normalize_service_properties($(1))
+$(1)_docker_stop_timeout	?= $(DOCKER_STOP_TIMEOUT)
 $(1)_instances			?= 1
 $(1)_parallels			?= 1
 $(1)_tag			?= $(DEPLOY_TAG)
 
+$(1)_dependencies		:= $(sort $(strip $($(1)_dependencies)))
+$(1)_docker_create_command	:= $(strip $($(1)_docker_create_command))
 $(1)_docker_create_image	:= $(strip $($(1)_docker_create_image))
 $(1)_docker_create_options	:= $(strip $($(1)_docker_create_options))
-$(1)_docker_create_command	:= $(strip $($(1)_docker_create_command))
-$(1)_dependencies		:= $(sort $(strip $($(1)_dependencies)))
+$(1)_docker_stop_timeout	:= $$(strip $$($(1)_docker_stop_timeout))
 $(1)_instances			:= $$(strip $$($(1)_instances))
 $(1)_parallels			:= $$(strip $$($(1)_parallels))
-$(1)_tag			:= $$(strip $$($(1)_tag))
 $(1)_ports			:= $(sort $(strip $($(1)_ports)))
+$(1)_tag			:= $$(strip $$($(1)_tag))
 
 endef
 
@@ -160,8 +162,8 @@ start-$(1)-$(2):
 		    -f label=deploy.instance=$(2) \
 		    --format "{{.ID}}"`
 		[ -z "$$$$ids" ] || {
-			echo "	stopping old containers for $(DEPLOY_ENV)-$(1)-$(2), timeout=$(DOCKER_STOP_TIMEOUT)s..."
-			$(DOCKER) stop -t $(DOCKER_STOP_TIMEOUT) $$$$ids >/dev/null
+			echo "	stopping old containers for $(DEPLOY_ENV)-$(1)-$(2), timeout=$($(1)_docker_stop_timeout)s..."
+			$(DOCKER) stop -t $($(1)_docker_stop_timeout) $$$$ids >/dev/null
 			$(DOCKER) wait $$$$ids >/dev/null
 		}
 		[ -z "$$$$ids" ] || nodes=$(if $(SWARM_ENABLED),`$(DOCKER) inspect --format "{{.Node.ID}}" $$$$ids | sort -u`)
@@ -217,6 +219,7 @@ start-$(1)-$(2):
 		$(DOCKER) start $$$$CONTAINER_NAME >/dev/null
 	}
 
+	echo
 endef
 
 #########################################################################

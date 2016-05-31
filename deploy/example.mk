@@ -9,6 +9,7 @@ stateful_services = dbA
 # docker_create_image = image[:tag]
 # docker_create_options =
 # docker_create_command =
+# docker_stop_timeout = $(DOCKER_STOP_TIMEOUT)
 # dependencies =
 # instances = 1
 # parallels = 1
