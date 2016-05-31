@@ -129,40 +129,14 @@ endef
 #
 define inspect_containers
 for name in $(1); do
-    echo -n $$name;
+    echo -n $$name
     $(DOCKER) inspect -f \
 	"	$(if $(SWARM_ENABLED),Node={{.Node.IP}} )IP={{.NetworkSettings.IPAddress}} \
 	Hostname={{.Config.Hostname}} Domainname={{.Config.Domainname}} \
 	Image={{.Config.Image}} Status={{.State.Status}} \
 	StartedAt={{.State.StartedAt}} Cmd={{.Config.Cmd}}" \
-	$$name 2>/dev/null || true;
+	$$name 2>/dev/null || true
 done
-endef
-
-#
-# stop_stateful_service_instance(service, i, stateless | stateful)
-#
-define stop_stateful_service_instance
-if [ $(3) = stateful ]; then
-		ids=`$(DOCKER) ps -a --no-trunc \
-		    -f label=deploy.env=$(DEPLOY_ENV) \
-		    -f label=deploy.layer=$(3) \
-		    -f label=deploy.service=$(1) \
-		    -f label=deploy.instance=$(2) \
-		    --format "{{.ID}}"`
-		[ -z "$$$$ids" ] || {
-			echo "	stopping old containers for $(DEPLOY_ENV)-$(1)-$(2), timeout=$(DOCKER_STOP_TIMEOUT)s...";
-			$(DOCKER) stop -t $(DOCKER_STOP_TIMEOUT) $$$$ids >/dev/null;
-			$(DOCKER) wait $$$$ids >/dev/null;
-		}
-		[ -z "$$$$ids" ] || nodes=$(if $(SWARM_ENABLED),`$(DOCKER) inspect --format "{{.Node.ID}}" $$$$ids | sort -u`)
-		[ -z "$$$$nodes" ] || [ `echo $$$$nodes | wc -w` = 1 ] || {
-			echo "	multiple stateful service instances of $(DEPLOY_ENV)-$(1)-$(2) found on different nodes:"
-			echo "	"; echo $$$$nodes
-			exit 1;
-		} >&2
-		[ -z "$$$$nodes" ] || node_constraint="-e constraint:node==$$$$nodes";
-	    fi;
 endef
 
 #
@@ -177,9 +151,32 @@ start-$(1)-$(2):
 	VOL_DIR=$(DOCKER_VOL_ROOT)/$$$$HOSTNAME
 	echo container=$$$$CONTAINER_NAME hostname=$$$$HOSTNAME layer=$(3) vol_dir=$$$$VOL_DIR
 
+	stop_stateful_service_instance() {
+	    if [ $(3) = stateful ]; then
+		ids=`$(DOCKER) ps -a --no-trunc \
+		    -f label=deploy.env=$(DEPLOY_ENV) \
+		    -f label=deploy.layer=$(3) \
+		    -f label=deploy.service=$(1) \
+		    -f label=deploy.instance=$(2) \
+		    --format "{{.ID}}"`
+		[ -z "$$$$ids" ] || {
+			echo "	stopping old containers for $(DEPLOY_ENV)-$(1)-$(2), timeout=$(DOCKER_STOP_TIMEOUT)s..."
+			$(DOCKER) stop -t $(DOCKER_STOP_TIMEOUT) $$$$ids >/dev/null
+			$(DOCKER) wait $$$$ids >/dev/null
+		}
+		[ -z "$$$$ids" ] || nodes=$(if $(SWARM_ENABLED),`$(DOCKER) inspect --format "{{.Node.ID}}" $$$$ids | sort -u`)
+		[ -z "$$$$nodes" ] || [ `echo $$$$nodes | wc -w` = 1 ] || {
+			echo "	multiple stateful service instances of $(DEPLOY_ENV)-$(1)-$(2) found on different nodes:"
+			echo "	"$$$$nodes
+			exit 1
+		} >&2
+		[ -z "$$$$nodes" ] || node_constraint="-e constraint:node==$$$$nodes"
+	    fi
+	}
+
 	status=`$(DOCKER) ps -a --no-trunc -f name=$$$$CONTAINER_NAME --format "{{.Status}}"`
 	if [ -z "$$$$status" ]; then
-	    $(call stop_stateful_service_instance,$(1),$(2),$(3))
+	    stop_stateful_service_instance
 
 	    tmp_name=$$$$CONTAINER_NAME-$(shell date +%Y%m%d_%H%M%S)-tmp
 	    echo -n "	creating $$$$CONTAINER_NAME "
@@ -214,7 +211,9 @@ start-$(1)-$(2):
 	fi
 
 	[ "$$$${status:0:2}" = "Up" ] || {
-		$(call stop_stateful_service_instance,$(1),$(2),$(3))
+		stop_stateful_service_instance
+
+		echo "	starting $$$$CONTAINER_NAME"
 		$(DOCKER) start $$$$CONTAINER_NAME >/dev/null
 	}
 
@@ -229,10 +228,10 @@ $(foreach service,$(all_services),$(eval $(call normalize_service_properties,$(s
 $(foreach service,$(stateless_services),$(eval $(call define_service,$(service),stateless)))
 $(foreach service,$(stateful_services),$(eval $(call define_service,$(service),stateful)))
 
-.PHONY: start-all-services start-stateless-services start-stateful-services \
+.PHONY: start-services start-stateless-services start-stateful-services \
 	list-containers list-stateless-containers list-stateful-containers
 
-start-all-services: start-stateless-services
+start-services: start-stateless-services
 start-stateless-services: start-stateful-services
 start-stateful-services:
 
