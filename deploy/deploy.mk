@@ -22,11 +22,9 @@ endif
 #
 define define_service
 # INFO: define_service($(1),$(2))
-.PHONY: start-$(1) start-$(1)-nodep
+.PHONY: start-$(1)
 start-$(2)-services: start-$(1)
-start-$(1): $(foreach service,$($(1)_dependencies),start-$(service))
-start-$(1): start-$(1)-nodep
-start-$(1)-nodep:$(call recursive_parallels,start-$(1),$($(1)_instances),$($(1)_parallels))
+start-$(1):$(call recursive_parallels,start-$(1),$($(1)_instances),$($(1)_parallels))
 $(foreach j,$(shell for ((i=1;i<=$($(1)_instances);++i)); do echo $$i; done),$(call start_service_instance,$(1),$(j),$(2)))
 endef
 
@@ -263,7 +261,7 @@ endef
 #
 define start_service_instance
 .PHONY: start-$(1)-$(2)
-start-$(1)-$(2):
+start-$(1)-$(2): $(foreach service,$($(1)_dependencies),start-$(service))
 	@echo -n "$$@: "
 	CONTAINER_NAME=$($(1)_$(2)_container)
 	HOSTNAME=$($(1)_$(2)_hostname)
