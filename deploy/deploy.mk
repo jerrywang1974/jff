@@ -18,7 +18,7 @@ endif
 .ONESHELL:
 
 #
-# define_service(service, stateless | stateful)
+# define_service(service, stateless | stateful)		!!! TO BE EVAL
 #
 define define_service
 # INFO: define_service($(1),$(2))
@@ -31,7 +31,7 @@ $(foreach j,$(shell for ((i=1;i<=$($(1)_instances);++i)); do echo $$i; done),$(c
 endef
 
 #
-# validate_service(service)
+# validate_service(service)				!!! TO BE EVAL
 #
 define validate_service
 # INFO: validate_service($(1))
@@ -50,7 +50,7 @@ $$(foreach dep,$($(1)_dependencies),\
 endef
 
 #
-# normalize_service_properties(service)
+# normalize_service_properties(service)			!!! TO BE EVAL
 #
 define normalize_service_properties
 # INFO: normalize_service_properties($(1))
@@ -84,6 +84,25 @@ endef
 #
 define recursive_parallels
 $(foreach j,$(shell for ((i=$(2); i>=1; i-=$(3))); do echo $$i; done),$(call recursive_parallels_helper,$(1),$(j),$(3)))
+endef
+
+#
+# set_service_readonly_properties(service)		!!! TO BE EVAL
+#
+define set_service_readonly_properties
+# INFO: set_service_readonly_properties($(1))
+$(foreach j,$(shell for ((i=1; i<= $($(1)_instances); ++i)); do echo $$i; done),$(call \
+	set_service_instance_readonly_properties,$(1),$(j)))
+
+endef
+
+#
+# set_service_instance_readonly_properties(service,i)
+#
+define set_service_instance_readonly_properties
+$(1)_$(2)_container		:= $(call container_name,$(1),$(2))
+$(1)_$(2)_hostname		:= $(call hostname,$(1),$(2),$(if $(filter $(1),$(stateful_services)),stateful,stateless))
+
 endef
 
 #
@@ -148,8 +167,8 @@ define start_service_instance
 .PHONY: start-$(1)-$(2)
 start-$(1)-$(2):
 	@echo -n "$$@: "
-	CONTAINER_NAME=$(call container_name,$(1),$(2))
-	HOSTNAME=$(call hostname,$(1),$(2),$(3))
+	CONTAINER_NAME=$($(1)_$(2)_container)
+	HOSTNAME=$($(1)_$(2)_hostname)
 	VOL_DIR=$(DOCKER_VOL_ROOT)/$$$$HOSTNAME
 	echo container=$$$$CONTAINER_NAME hostname=$$$$HOSTNAME layer=$(3) vol_dir=$$$$VOL_DIR
 
@@ -182,7 +201,9 @@ start-$(1)-$(2):
 
 	    tmp_name=$$$$CONTAINER_NAME-$(shell date +%Y%m%d_%H%M%S)-tmp
 	    echo -n "	creating $$$$CONTAINER_NAME "
-	    $(DOCKER) create $($(1)_docker_create_options) -h $$$$HOSTNAME \
+	    $(DOCKER) create $($(1)_docker_create_options) \
+		    $($(1)_$(2)_docker_create_options) \
+		    -h $$$$HOSTNAME \
 		    -t --name=$$$$tmp_name --restart=unless-stopped \
 		    $(if $(SWARM_ENABLED),$$$$node_constraint) \
 		    -l deploy.env=$(DEPLOY_ENV) \
@@ -228,6 +249,7 @@ stateful_services	:= $(sort $(strip $(stateful_services)))
 all_services		:= $(stateless_services) $(stateful_services)
 $(foreach service,$(all_services),$(eval $(call validate_service,$(service))))
 $(foreach service,$(all_services),$(eval $(call normalize_service_properties,$(service))))
+$(foreach service,$(all_services),$(eval $(call set_service_readonly_properties,$(service))))
 $(foreach service,$(stateless_services),$(eval $(call define_service,$(service),stateless)))
 $(foreach service,$(stateful_services),$(eval $(call define_service,$(service),stateful)))
 

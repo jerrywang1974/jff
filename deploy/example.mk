@@ -8,6 +8,7 @@ stateful_services = dbA
 
 # docker_create_image = image[:tag]
 # docker_create_options =
+# _<i>_docker_create_options =
 # docker_create_command =
 # docker_stop_timeout = $(DOCKER_STOP_TIMEOUT)
 # dependencies =
@@ -15,6 +16,10 @@ stateful_services = dbA
 # parallels = 1
 # tag = $(DEPLOY_TAG)
 # ports = mysql:3306 mysqls:4306 http:8080 https:4443
+
+## read-only variables:
+# _<i>_container
+# _<i>_hostname
 
 gwA_docker_create_image = busybox
 gwA_dependencies = appA
