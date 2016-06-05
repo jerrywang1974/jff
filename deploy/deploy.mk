@@ -1,8 +1,15 @@
 # vi: ft=make ts=8 sts=8 sw=8 noet
+#
+# Yet another not-so-stupid system orchestrator for Docker-based deployment
+#
+# Author: Yubao Liu <yubao.liu@yahoo.com>
+# Version: 2016-06-05 v1.0
+# Licence: https://opensource.org/licenses/BSD-3-Clause
 
 DEPLOY_ENV	:= $(if $(DEPLOY_ENV),$(strip $(DEPLOY_ENV)),play_$(USER))
 DEPLOY_TAG	:= $(if $(DEPLOY_TAG),$(strip $(DEPLOY_TAG)),$(shell date +%Y%m%d_%H%M%S))
 
+SERVICE_SUBNET	:= $(if $(SERVICE_SUBNET),$(strip $(SERVICE_SUBNET)),100.100.100)
 DOCKER		:= $(if $(DOCKER),$(strip $(DOCKER)),docker)
 DOCKER_VOL_ROOT	:= $(if $(DOCKER_VOL_ROOT),$(strip $(DOCKER_VOL_ROOT)),/dockerdata)
 DOCKER_STOP_TIMEOUT	?= 10
@@ -158,6 +165,33 @@ done
 endef
 
 #
+# upper_case(string)
+#
+define upper_case
+$(subst a,A,$(subst b,B,$(subst c,C,$(subst d,D,$(subst e,E,$(subst f,F,$(subst g,G,$(subst \
+	h,H,$(subst i,I,$(subst j,J,$(subst k,K,$(subst l,L,$(subst m,M,$(subst n,N,$(subst \
+	o,O,$(subst p,P,$(subst q,Q,$(subst r,R,$(subst s,S,$(subst t,T,$(subst \
+	u,U,$(subst v,V,$(subst w,W,$(subst x,X,$(subst y,Y,$(subst z,Z,$(1)))))))))))))))))))))))))))
+endef
+
+#
+# lower_case(string)
+#
+define lower_case
+$(subst A,a,$(subst B,b,$(subst C,c,$(subst D,d,$(subst E,e,$(subst F,f,$(subst G,g,$(subst \
+	H,h,$(subst I,i,$(subst J,j,$(subst K,k,$(subst L,l,$(subst M,m,$(subst N,n,$(subst \
+	O,o,$(subst P,p,$(subst Q,q,$(subst R,r,$(subst S,s,$(subst T,t,$(subst \
+	U,u,$(subst V,v,$(subst W,w,$(subst X,x,$(subst Y,y,$(subst Z,z,$(1)))))))))))))))))))))))))))
+endef
+
+#
+# rotate(n,words,[levels])
+#
+define rotate
+$(strip $(if $(filter $(1),$(words $(3))),$(2),$(call \
+	rotate,$(1),$(wordlist 2,$(words $(2)),$(2)) $(firstword $(2)),$(strip $(3) x))))
+endef
+
 # start_service_instance(service, i, stateless | stateful)
 #
 define start_service_instance
@@ -203,6 +237,11 @@ start-$(1)-$(2): $(foreach service,$($(1)_dependencies),start-$(service))
 	    # utilities in package libcap2-bin.
 	    $(DOCKER) create $($(1)_docker_create_options) \
 		    $($(1)_$(2)_docker_create_options) \
+		    $(foreach j,$(shell for ((i=1; i<=$(words $($(1)_dependencies)); ++i)); do echo $$i; done),\
+			--add-host $(call normalize_hostname,$(word $j,$($(1)_dependencies))):$(SERVICE_SUBNET).$j \
+			-e $(call upper_case,$(subst -,_,$(call \
+				normalize_hostname,$(word $j,$($(1)_dependencies)))))_SERVICE_HOST=$(call \
+				normalize_hostname,$(word $j,$($(1)_dependencies)))) \
 		    --cap-add NET_ADMIN \
 		    -h $$$$HOSTNAME \
 		    -t --name=$$$$tmp_name --restart=unless-stopped \
@@ -222,7 +261,7 @@ start-$(1)-$(2): $(foreach service,$($(1)_dependencies),start-$(service))
 		    -v $$$$VOL_DIR/var:/var \
 		    $($(1)_docker_create_image) $($(1)_docker_create_command)
 
-	    $(DOCKER) run --rm -it -v /:/host \
+	    $(DOCKER) run --rm -v /:/host \
 		    $(if $(SWARM_ENABLED),-e affinity:container==$$$$tmp_name) \
 		    $($(1)_docker_create_image) /bin/sh -c \
 		    "dir=/host/$$$$VOL_DIR && \
@@ -241,7 +280,110 @@ start-$(1)-$(2): $(foreach service,$($(1)_dependencies),start-$(service))
 		$(DOCKER) start $$$$CONTAINER_NAME >/dev/null
 	}
 
+	vip_script='$(call escape_bash_script,$(vip_script))'
+	$(foreach j,$(shell for ((i=1; i<=$(words $($(1)_dependencies)); ++i)); do echo $$i; done),\
+		$(DOCKER) exec $$$$CONTAINER_NAME /bin/bash -c \
+		"$$$$vip_script" -- \
+		$(call lower_case,vip-$(call normalize_hostname,$(word $j,$($(1)_dependencies)))) \
+		$(SERVICE_SUBNET).$j \
+		`$(DOCKER) inspect -f '{{.NetworkSettings.IPAddress}}' \
+			$(call rotate,$(2),$(call container_names,$(word $j,$($(1)_dependencies))))` | \
+		while read log; do echo "	$$$$log"; done;)
+
 	echo
+
+endef
+
+#
+# vip_script
+#
+define vip_script
+#!/bin/bash
+
+PURPOSE="Use iptables target DNAT and module statistc to do load balance"
+AUTHOR="Yubao Liu<yubao.liu@yahoo.com>"
+VERSION="2016-06-05 v1.0"
+LICENCE="https://opensource.org/licenses/BSD-3-Clause"
+
+set -e
+
+: $$$${IPTABLES:=iptables}
+CHAIN=$$$$1
+VIP=$$$$2
+shift 2 || true
+args="$$$$@"
+
+[ "$$$$1" ] || { echo "Usage: $$$$0 CHAIN VIP IP..." >&2; exit 1; }
+
+rules="-N $$$$CHAIN"
+for ((i=$$$${#@}; i>1; --i)); do
+    rules="$$$$rules"$$$$'\n'"-A $$$$CHAIN -m statistic --mode nth --every $$$$i --packet 0 -j DNAT --to-destination $$$$1"
+    shift
+done
+rules="$$$$rules"$$$$'\n'"-A $$$$CHAIN -j DNAT --to-destination $$$$1"
+current_rules=`$$$$IPTABLES -t nat --list-rules $$$$CHAIN 2>/dev/null || true`
+
+if [ "$$$$rules" != "$$$$current_rules" ]; then
+    echo "update chain $$$$CHAIN of table nat: vip=$$$$VIP servers=$$$$args"
+    $$$$IPTABLES -t nat -N $$$$CHAIN 2>/dev/null || true
+    $$$$IPTABLES -t nat -F $$$$CHAIN
+    set -- $$$$args
+    for ((i=$$$${#@}; i>1; --i)); do
+        $$$$IPTABLES -t nat -A $$$$CHAIN -m statistic --mode nth --every $$$$i --packet 0 -j DNAT --to-destination $$$$1
+        shift
+    done
+    $$$$IPTABLES -t nat -A $$$$CHAIN -j DNAT --to-destination $$$$1
+fi
+
+rule="-A OUTPUT -d $$$$VIP/32 -j $$$$CHAIN"
+current_rule=`$$$$IPTABLES -t nat --list-rules OUTPUT | fgrep -w $$$$CHAIN || true`
+
+if [ "$$$$rule" != "$$$$current_rule" ]; then
+    echo "update chain OUTPUT of table nat: vip=$$$$VIP servers=$$$$args"
+    $$$$IPTABLES -t nat --list-rules OUTPUT | grep -v "^-P OUTPUT" |
+        cat -n | fgrep -w $$$$CHAIN | tac |
+        while read num left; do
+            [ -z "$$$$num" ] || $$$$IPTABLES -t nat -D OUTPUT $$$$num
+        done
+
+    $$$$IPTABLES -t nat $$$$rule
+fi
+
+endef
+
+#
+# NEWLINE
+#
+define NEWLINE
+
+
+endef
+
+#
+# escape_bash_script
+#	The script must begin with "#!/bin/bash" or empty line.
+#		#!/bin/bash	=> <EMPTY>
+#		\n		=> ;@@NEWLINE@@
+#		'		=> '\''
+#		;@@NEWLINE@@;	=> ;
+#		|;@@@NEWLINE	=> |
+#		&;@@@NEWLINE	=> &
+#		then;@@@NEWLINE	=> then
+#		do;@@@NEWLINE	=> do
+#		@@NEWLINE@@	=> <SPACE>
+#		^;		=> true;
+#
+define escape_bash_script
+true$(subst \
+	@@NEWLINE@@, ,$(subst \
+	do;@@NEWLINE@@,do,$(subst \
+	then;@@NEWLINE@@,then,$(subst \
+	&;@@NEWLINE@@,&,$(subst \
+	|;@@NEWLINE@@,|,$(subst \
+	;@@NEWLINE@@;,;,$(subst \
+	','\'',$(subst \
+	$(NEWLINE),;@@NEWLINE@@,$(subst \
+	#!/bin/bash,,$(1))))))))))
 endef
 
 #########################################################################
@@ -255,7 +397,8 @@ $(foreach service,$(stateless_services),$(eval $(call define_service,$(service),
 $(foreach service,$(stateful_services),$(eval $(call define_service,$(service),stateful)))
 
 .PHONY: start-services start-stateless-services start-stateful-services \
-	list-containers list-stateless-containers list-stateful-containers
+	list-containers list-stateless-containers list-stateful-containers \
+	vip-script
 
 start-services: start-stateless-services
 start-stateless-services: start-stateful-services
@@ -266,4 +409,8 @@ list-stateful-containers:
 	@$(call inspect_containers,$(call container_names,$(stateful_services)))
 list-stateless-containers:
 	@$(call inspect_containers,$(call container_names,$(stateless_services)))
+
+vip-script:
+	@true
+	$(info $(subst $$$$,$,$(vip_script)))
 
