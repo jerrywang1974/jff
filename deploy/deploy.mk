@@ -64,8 +64,6 @@ $(1)_docker_create_options	:= $(strip $($(1)_docker_create_options))
 $(1)_docker_stop_timeout	:= $$(strip $$($(1)_docker_stop_timeout))
 $(1)_instances			:= $$(strip $$($(1)_instances))
 $(1)_parallels			:= $$(strip $$($(1)_parallels))
-$(1)_ports			:= $(sort $(strip $($(1)_ports)))
-$(1)_vips			:= $(sort $(strip $($(1)_vips)))
 $(1)_tag			:= $$(strip $$($(1)_tag))
 
 endef
@@ -93,19 +91,6 @@ define set_service_readonly_properties
 $(foreach j,$(shell for ((i=1; i<= $($(1)_instances); ++i)); do echo $$i; done),$(call \
 	set_service_instance_readonly_properties,$(1),$(j)))
 
-$(foreach port,$($(1)_ports),$(call \
-	set_service_readonly_ports_properties,$(1),$(port)))
-
-endef
-
-#
-# set_service_vips_info(service)			!!! TO BE EVAL
-#
-define set_service_vips_info
-# INFO: set_service_vips_info($(1))
-$(foreach vip,$($(1)_vips),$(call \
-	append_service_vips_info,$(1),$(vip)))
-
 endef
 
 #
@@ -114,90 +99,6 @@ endef
 define set_service_instance_readonly_properties
 $(1)_$(2)_container		:= $(call container_name,$(1),$(2))
 $(1)_$(2)_hostname		:= $(call hostname,$(1),$(2),$(if $(filter $(1),$(stateful_services)),stateful,stateless))
-
-endef
-
-#
-# set_service_readonly_ports_properties(service,port)
-#
-define set_service_readonly_ports_properties
-elements_	:= $(subst :, ,$(subst /, ,$(2)))
-
-# port
-ifeq ($$(words $$(elements_)),1)
-name_		:= default
-port_		:= $$(word 1,$$(elements_))
-proto_		:= tcp
-
-# port/proto or name:port
-else ifeq ($$(words $$(elements_)),2)
-
-ifeq (,$$(filter tcp udp,$$(word 2,$$(elements_))))
-name_		:= $$(word 1,$$(elements_))
-port_		:= $$(word 2,$$(elements_))
-proto_		:= tcp
-
-else
-name_		:= default
-port_		:= $$(word 1,$$(elements_))
-proto_		:= $$(word 2,$$(elements_))
-endif
-
-# name:port/proto
-else
-name_		:= $$(word 1,$$(elements_))
-port_		:= $$(word 2,$$(elements_))
-proto_		:= $$(word 3,$$(elements_))
-
-endif
-
-ifneq (,$$(filter-out tcp udp,$$(proto_)))
-$$(error protocol "$$(proto_)" is not tcp or udp in $(1)_ports)
-endif
-
-ifdef $(1)_ports_$$(name_)
-$$(error duplicate port name "$$(name_)" in $(1)_ports)
-else
-$(1)_ports_names	+= $$(name_)
-$(1)_ports_$$(name_)	:= $$(port_) $$(proto_)
-endif
-
-endef
-
-#
-# append_service_vips_info(service,vip)
-#
-define append_service_vips_info
-elements_	:= $(subst :, ,$(subst /, ,$(2)))
-dependency_	:= $$(word 1,$$(elements_))
-name_		:= $$(word 2,$$(elements_))
-vip_port_	:= $$(word 3,$$(elements_))
-
-ifeq (,$$(filter $$(dependency_),$$($(1)_dependencies)))
-$$(error $$(dependency_) not in $(1)_dependencies)
-endif
-
-ifeq (,$$(name_))
-name_		:= default
-endif
-
-port_		:= $$(word 1,$$($$(dependency_)_ports_$$(name_)))
-proto_		:= $$(word 2,$$($$(dependency_)_ports_$$(name_)))
-
-ifeq (,$$(port_))
-$$(error unknown port $$(dependency_):$$(name_) in $(1)_vips)
-endif
-
-ifeq (,$$(vip_port_))
-vip_port_	:= $$(port_)
-endif
-
-ifdef $(1)_vips_$$(vip_port_)
-$$(error duplicate VIP port $$(vip_port_) in $(1)_vips)
-else
-$(1)_vips_$$(vip_port_)	:= $$(dependency_):$$(name_):$$(port_):$$(proto_)
-$(1)_vips_info	:= $$(strip $$($(1)_vips_info) $$(vip_port_):$$($(1)_vips_$$(vip_port_)))
-endif
 
 endef
 
@@ -350,13 +251,11 @@ all_services		:= $(stateless_services) $(stateful_services)
 $(foreach service,$(all_services),$(eval $(call normalize_service_properties,$(service))))
 $(foreach service,$(all_services),$(eval $(call validate_service,$(service))))
 $(foreach service,$(all_services),$(eval $(call set_service_readonly_properties,$(service))))
-$(foreach service,$(all_services),$(eval $(call set_service_vips_info,$(service))))
 $(foreach service,$(stateless_services),$(eval $(call define_service,$(service),stateless)))
 $(foreach service,$(stateful_services),$(eval $(call define_service,$(service),stateful)))
 
 .PHONY: start-services start-stateless-services start-stateful-services \
-	list-containers list-stateless-containers list-stateful-containers \
-	list-vips
+	list-containers list-stateless-containers list-stateful-containers
 
 start-services: start-stateless-services
 start-stateless-services: start-stateful-services
@@ -367,8 +266,4 @@ list-stateful-containers:
 	@$(call inspect_containers,$(call container_names,$(stateful_services)))
 list-stateless-containers:
 	@$(call inspect_containers,$(call container_names,$(stateless_services)))
-
-list-vips:
-	@true
-	$(foreach service,$(all_services),$(info $(service)	$($(service)_vips_info)))
 

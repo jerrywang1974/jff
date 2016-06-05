@@ -15,8 +15,6 @@ stateful_services = dbA
 # instances = 1
 # parallels = 1
 # tag = $(DEPLOY_TAG)
-# ports = [name:]<port>[/{tcp|udp}]...
-# vips = <dependency>[:name[:vip_port]]...
 
 ## read-only variables:
 # _<i>_container
@@ -24,20 +22,14 @@ stateful_services = dbA
 
 gwA_docker_create_image = busybox
 gwA_dependencies = appA
-gwA_vips = appA
 
 appA_docker_create_image = busybox
 appA_dependencies = appB
-appA_ports = 8080
-appA_vips = appB:default:8081
 
 appB_docker_create_image = busybox
 appB_dependencies = dbA
-appB_ports = 8080
-appB_vips = dbA  dbA:tls
 
 dbA_docker_create_image = busybox
-dbA_ports = 3306 tls:4406/tcp
 
 include deploy.mk
 
