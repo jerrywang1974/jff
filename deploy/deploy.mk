@@ -400,6 +400,10 @@ $(foreach service,$(stateful_services),$(eval $(call define_service,$(service),s
 	list-containers list-stateless-containers list-stateful-containers \
 	vip-script
 
+start-servers:
+	@echo Sorry, we call it \"start-services\"...
+	@echo
+
 start-services: start-stateless-services
 start-stateless-services: start-stateful-services
 start-stateful-services:
