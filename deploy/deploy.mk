@@ -401,8 +401,10 @@ $(foreach service,$(stateful_services),$(eval $(call define_service,$(service),s
 	vip-script
 
 start-servers:
-	@echo Sorry, we call it \"start-services\"...
 	@echo
+	echo Sorry, we call it \"start-services\"...
+	echo
+	exit 1
 
 start-services: start-stateless-services
 start-stateless-services: start-stateful-services
