@@ -83,7 +83,7 @@ let g:qb_hotkey="<S-F7>"
 nnoremap <silent> <F8> :MRU<CR>
 
 " TagBar plugin
-nnoremap <silent> <F9> :TagBarToggle<CR>
+nnoremap <silent> <F9> :TagbarToggle<CR>
 
 " autopreview.vim
 nnoremap <S-F9> :AutoPreviewToggle<CR>
@@ -272,6 +272,9 @@ set fileformats+=mac
 set fencs=ucs-bom,utf-8,gbk,latin1
 "set encoding=utf-8
 set ambiwidth=double
+
+set synmaxcol=128 lazyredraw ttyfast    " Performance
+syntax sync minlines=50 maxlines=200    " Performance
 
 " see http://guoyoooping.blog.163.com/blog/static/135705183201003172555951/
 "     http://guoyoooping.blog.163.com/blog/static/13570518320101291442176/
