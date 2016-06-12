@@ -3,7 +3,7 @@
 # Yet another not-so-stupid system orchestrator for Docker-based deployment
 #
 # Author: Yubao Liu <yubao.liu@yahoo.com>
-# Version: 2016-06-05 v1.0
+# Version: 2016-06-12 v1.1
 # Licence: https://opensource.org/licenses/BSD-3-Clause
 
 DEPLOY_ENV	:= $(if $(DEPLOY_ENV),$(strip $(DEPLOY_ENV)),play_$(USER))
@@ -12,6 +12,7 @@ DEPLOY_TAG	:= $(if $(DEPLOY_TAG),$(strip $(DEPLOY_TAG)),$(shell date +%Y%m%d_%H%
 SERVICE_SUBNET	:= $(if $(SERVICE_SUBNET),$(strip $(SERVICE_SUBNET)),100.100.100)
 DOCKER		:= $(if $(DOCKER),$(strip $(DOCKER)),docker)
 DOCKER_VOL_ROOT	:= $(if $(DOCKER_VOL_ROOT),$(strip $(DOCKER_VOL_ROOT)),/dockerdata)
+BIND_MOUNTS	:= $(if $(BIND_MOUNTS),$(sort $(strip $(BIND_MOUNTS))),/tmp /run /var)
 DOCKER_STOP_TIMEOUT	?= 10
 
 SHELL		:= /bin/bash
@@ -256,9 +257,7 @@ start-$(1)-$(2): $(foreach service,$($(1)_dependencies),start-$(service))
 		    -e DEPLOY_SERVICE=$(1) \
 		    -e DEPLOY_TAG=$($(1)_tag) \
 		    -e DEPLOY_INSTANCE=$(2) \
-		    -v $$$$VOL_DIR/run:/run \
-		    -v $$$$VOL_DIR/tmp:/tmp \
-		    -v $$$$VOL_DIR/var:/var \
+		    $(foreach path,$(BIND_MOUNTS),-v $$$$VOL_DIR/$(path):$(path)) \
 		    $($(1)_docker_create_image) $($(1)_docker_create_command)
 
 	    $(DOCKER) run --rm -v /:/host \
@@ -266,9 +265,9 @@ start-$(1)-$(2): $(foreach service,$($(1)_dependencies),start-$(service))
 		    $($(1)_docker_create_image) /bin/sh -c \
 		    "dir=/host/$$$$VOL_DIR && \
 		     /bin/mkdir -p -m 755 \$$$$dir && \
-		     /bin/mkdir -p 1777 \$$$$dir/tmp && \
-		     /bin/mkdir -p 755  \$$$$dir/run && \
-		     { [ -e \$$$$dir/var ] || /bin/cp -a /var \$$$$dir/; }" >/dev/null
+		     for path in $(BIND_MOUNTS); do \
+			[ -e \$$$$dir/\$$$$path ] || /bin/cp -a \$$$$path \$$$$dir/; \
+		     done" >/dev/null
 
 	    $(DOCKER) rename $$$$tmp_name $$$$CONTAINER_NAME
 	fi
