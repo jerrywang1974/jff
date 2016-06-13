@@ -266,7 +266,7 @@ start-$(1)-$(2): $(foreach service,$($(1)_dependencies),start-$(service))
 		    "dir=/host/$$$$VOL_DIR && \
 		     /bin/mkdir -p -m 755 \$$$$dir && \
 		     for path in $(BIND_MOUNTS); do \
-			[ -e \$$$$dir/\$$$$path ] || /bin/cp -a \$$$$path \$$$$dir/; \
+			[ -e \$$$$dir/\$$$$path ] || { [ ! -e \$$$$path ] && mkdir -m 755 \$$$$dir/\$$$$path || /bin/cp -a \$$$$path \$$$$dir/; } \
 		     done" >/dev/null
 
 	    $(DOCKER) rename $$$$tmp_name $$$$CONTAINER_NAME
