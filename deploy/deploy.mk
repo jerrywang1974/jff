@@ -236,7 +236,9 @@ start-$(1)-$(2): $(foreach service,$($(1)_dependencies),start-$(service))
 	    # CAP_NET_ADMIN is required by iptables, the docker image's
 	    # entry script should properly drop this capability with
 	    # utilities in package libcap2-bin.
-	    $(DOCKER) create $($(1)_docker_create_options) \
+	    $(DOCKER) create --restart=unless-stopped \
+		    -l SERVICE_NAME=$(1) \
+		    $($(1)_docker_create_options) \
 		    $($(1)_$(2)_docker_create_options) \
 		    $(foreach j,$(shell for ((i=1; i<=$(words $($(1)_dependencies)); ++i)); do echo $$i; done),\
 			--add-host $(call normalize_hostname,$(word $j,$($(1)_dependencies))):$(SERVICE_SUBNET).$j \
@@ -245,7 +247,7 @@ start-$(1)-$(2): $(foreach service,$($(1)_dependencies),start-$(service))
 				normalize_hostname,$(word $j,$($(1)_dependencies)))) \
 		    --cap-add NET_ADMIN \
 		    -h $$$$HOSTNAME \
-		    -t --name=$$$$tmp_name --restart=unless-stopped \
+		    -t --name=$$$$tmp_name \
 		    $(if $(SWARM_ENABLED),$$$$node_constraint) \
 		    -l deploy.env=$(DEPLOY_ENV) \
 		    -l deploy.layer=$(3) \
