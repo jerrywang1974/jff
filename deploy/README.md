@@ -5,7 +5,7 @@ See example.mk for an example system deployment description file.
 ## Test example deployment
 
 ```bash
-docker build . -t jessie-example
+docker build -t jessie-example Dockerfiles/jessie-example
 make -f example.mk DEPLOY_TAG=20160605
 make -f example.mk DEPLOY_TAG=20160605 start-services
 make -f example.mk DEPLOY_TAG=20160605

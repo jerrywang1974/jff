@@ -1,3 +1,5 @@
+# Modified from  https://raw.githubusercontent.com/hashicorp/docker-consul/master/0.6/Dockerfile
+
 FROM alpine:3.4
 MAINTAINER James Phillips <james@hashicorp.com> (@slackpad)
 
@@ -39,12 +41,13 @@ RUN apk add --no-cache ca-certificates gnupg openssl && \
 # The /consul/data dir is used by Consul to store state. The agent will be started
 # with /consul/config as the configuration directory so you can add additional
 # config files in that location.
-RUN mkdir -p /consul/data && \
-    mkdir -p /consul/config && \
-    chown -R consul:consul /consul
+#RUN mkdir -p /consul/data && \
+#    mkdir -p /consul/config && \
+#    chown -R consul:consul /consul
+RUN mkdir -p /var/lib/consul && chown -R consul:consul /consul
 
 # Expose the consul data directory as a volume since there's mutable state in there.
-VOLUME /consul/data
+#VOLUME /consul/data
 
 # Server RPC is used for communication between Consul clients and servers for internal
 # request forwarding.
@@ -62,10 +65,11 @@ EXPOSE 8400 8500 8600 8600/udp
 # Consul doesn't need root privileges so we run it as the consul user from the
 # entry point script. The entry point script also uses dumb-init as the top-level
 # process to reap any zombie processes created by Consul sub-processes.
-COPY docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
-ENTRYPOINT ["docker-entrypoint.sh"]
+#COPY docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
+#ENTRYPOINT ["docker-entrypoint.sh"]
 
 # By default you'll get a single-node development server that stores everything
 # in RAM, exposes a web UI, and bootstraps itself. Don't use this configuration
 # for production.
-CMD ["agent", "-dev"]
+#CMD ["agent", "-dev"]
+CMD ["dumb-init", "gosu" "consul", "consul", "agent", "-dev", "-data-dir=/var/lib/consul"]
