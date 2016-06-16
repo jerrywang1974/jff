@@ -3,7 +3,7 @@
 # Yet another not-so-stupid system orchestrator for Docker-based deployment
 #
 # Author: Yubao Liu <yubao.liu@yahoo.com>
-# Version: 2016-06-12 v1.1
+# Version: 2016-06-16 v1.2
 # Licence: https://opensource.org/licenses/BSD-3-Clause
 
 DEPLOY_ENV	:= $(if $(DEPLOY_ENV),$(strip $(DEPLOY_ENV)),play_$(USER))
@@ -340,7 +340,7 @@ define vip_script
 
 PURPOSE="Use iptables target DNAT and module statistc to do load balance"
 AUTHOR="Yubao Liu<yubao.liu@yahoo.com>"
-VERSION="2016-06-05 v1.0"
+VERSION="2016-06-16 v1.2"
 LICENCE="https://opensource.org/licenses/BSD-3-Clause"
 
 set -e
