@@ -21,17 +21,21 @@ stateful_services = dbA
 # _<i>_hostname
 
 gwA_docker_create_image = jessie-example
+gwA_docker_create_options = -P
 gwA_dependencies = appA
 
 appA_docker_create_image = jessie-example
+appA_docker_create_options = -P
 appA_dependencies = appB
 appA_instances = 2
 
 appB_docker_create_image = jessie-example
+appB_docker_create_options = -P
 appB_dependencies = dbA
 appB_instances = 2
 
 dbA_docker_create_image = jessie-example
+dbA_docker_create_options = -P
 
 include deploy.mk
 

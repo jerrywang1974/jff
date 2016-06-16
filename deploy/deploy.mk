@@ -283,14 +283,45 @@ start-$(1)-$(2): $(foreach service,$($(1)_dependencies),start-$(service))
 
 	vip_script='$(call escape_bash_script,$(vip_script))'
 	$(foreach j,$(shell for ((i=1; i<=$(words $($(1)_dependencies)); ++i)); do echo $$i; done),\
-		$(DOCKER) exec $$$$CONTAINER_NAME /bin/bash -c \
-		"$$$$vip_script" -- \
-		$(call lower_case,vip-$(call normalize_hostname,$(word $j,$($(1)_dependencies)))) \
-		$(SERVICE_SUBNET).$j \
-		`$(DOCKER) inspect -f '{{.NetworkSettings.IPAddress}}' \
-			$(call rotate,$(2),$(call container_names,$(word $j,$($(1)_dependencies))))` | \
-		while read log; do echo "	$$$$log"; done;)
-
+		array=(`$(DOCKER) inspect -f \
+			'{{.Id}} {{.NetworkSettings.IPAddress}} $(if $(SWARM_ENABLED),{{.Node.IP}},null) \
+			 {{range $$$$k, $$$$v := .NetworkSettings.Ports}} \
+				{{$$$$k}} {{if $$$$v}}{{with (index $$$$v 0)}}{{.HostIp}}:{{.HostPort}}{{end}}{{else}}null{{end}}{{end}}' \
+			$(call rotate,$(2),$(call container_names,$(word $j,$($(1)_dependencies))))`); \
+		num_containers=$(words $(call container_names,$(word $j,$($(1)_dependencies)))); \
+		num_ports_per_container=$$$$(( ($$$${#array[@]} - 3 * $$$$num_containers) / 2 / $$$$num_containers )); \
+		[ $$$${#array[@]} = $$$$(( $$$$num_containers * (3 + 2 * $$$$num_ports_per_container) )) ]; \
+		for ((k=0; k<$$$$num_ports_per_container; ++k)); do \
+		    destinations=(); \
+		    port_proto=; \
+		    for ((l=0; l<$$$$num_containers; ++l)); do \
+		        m=$$$$(( $$$${#array[@]} / $$$$num_containers * $$$$l )); \
+		        id=$$$${array[$$$$((m++))]}; \
+		        ip=$$$${array[$$$$((m++))]}; \
+			node=$$$${array[$$$$((m++))]}; \
+		        [ "$$$$node" != null ] || eval node=\$$$$node_$$$$id; \
+		        [ "$$$$node" ] || { node=`$(DOCKER) run \
+						$(if $(SWARM_ENABLED),-e affinity:container==$$$$id) \
+						--rm --net=host busybox ip route show | \
+						grep -m 1 ^default | awk '{print $$$$3}'`; \
+					    eval node_$$$$id=$$$$node; }; \
+			m=$$$$(( $$$$m + 2 * $$$$k )); \
+		        tmp=$$$${array[$$$$((m++))]}; \
+			[ -z "$$$$port_proto" ] && port_proto=$$$$tmp || [ "$$$$port_proto" = "$$$$tmp" ]; \
+		        dest=$$$${array[$$$$m]}; \
+			[ "$$$${dest#0.0.0.0:}" = "$$$$dest" ] || dest=$$$$node:$$$${dest#0.0.0.0:}; \
+			[ "$$$${dest#127.}" = "$$$$dest" ] || dest=$$$$ip; \
+			[ "$$$$dest" != null ] || dest=$$$$ip:$$$${port_proto%%/*}; \
+			destinations[$$$${#destinations[@]}]=$$$$dest; \
+		    done; \
+		    $(DOCKER) exec $$$$CONTAINER_NAME /bin/bash -c \
+			    "$$$$vip_script" -- \
+			    $(call lower_case,vip-$(call normalize_hostname,$(word $j,$($(1)_dependencies)))) \
+			    $(SERVICE_SUBNET).$j \
+			    $$$$port_proto \
+			    "$$$${destinations[@]}" | \
+			while read log; do echo "	$$$$log"; done; \
+		done; )
 	echo
 
 endef
@@ -311,36 +342,42 @@ set -e
 : $$$${IPTABLES:=iptables}
 CHAIN=$$$$1
 VIP=$$$$2
-shift 2 || true
+PORT_PROTO=$$$$3
+shift 3 || true
 args="$$$$@"
 
-[ "$$$$1" ] || { echo "Usage: $$$$0 CHAIN VIP IP..." >&2; exit 1; }
+PORT=$$$${PORT_PROTO%%/*}
+PROTO=$$$${PORT_PROTO##*/}
+CHAIN=$$$$CHAIN-$$$$PORT-$$$$PROTO
+
+[ "$$$$PROTO" = tcp -o "$$$$PROTO" = udp ] && [ "$$$$1" ] ||
+    { echo "Usage: $$$$0 CHAIN_PREFIX VIP PORT/{tcp|udp} IP[:PORT]..." >&2; exit 1; }
 
 rules="-N $$$$CHAIN"
 for ((i=$$$${#@}; i>1; --i)); do
-    rules="$$$$rules"$$$$'\n'"-A $$$$CHAIN -m statistic --mode nth --every $$$$i --packet 0 -j DNAT --to-destination $$$$1"
+    rules="$$$$rules"$$$$'\n'"-A $$$$CHAIN -p $$$$PROTO -m statistic --mode nth --every $$$$i --packet 0 -j DNAT --to-destination $$$$1"
     shift
 done
-rules="$$$$rules"$$$$'\n'"-A $$$$CHAIN -j DNAT --to-destination $$$$1"
+rules="$$$$rules"$$$$'\n'"-A $$$$CHAIN -p $$$$PROTO -j DNAT --to-destination $$$$1"
 current_rules=`$$$$IPTABLES -t nat --list-rules $$$$CHAIN 2>/dev/null || true`
 
 if [ "$$$$rules" != "$$$$current_rules" ]; then
-    echo "update chain $$$$CHAIN of table nat: vip=$$$$VIP servers=$$$$args"
+    echo "update chain $$$$CHAIN of table nat: vip=$$$$VIP:$$$$PORT_PROTO servers=$$$$args"
     $$$$IPTABLES -t nat -N $$$$CHAIN 2>/dev/null || true
     $$$$IPTABLES -t nat -F $$$$CHAIN
     set -- $$$$args
     for ((i=$$$${#@}; i>1; --i)); do
-        $$$$IPTABLES -t nat -A $$$$CHAIN -m statistic --mode nth --every $$$$i --packet 0 -j DNAT --to-destination $$$$1
+        $$$$IPTABLES -t nat -A $$$$CHAIN -p $$$$PROTO -m statistic --mode nth --every $$$$i --packet 0 -j DNAT --to-destination $$$$1
         shift
     done
-    $$$$IPTABLES -t nat -A $$$$CHAIN -j DNAT --to-destination $$$$1
+    $$$$IPTABLES -t nat -A $$$$CHAIN -p $$$$PROTO -j DNAT --to-destination $$$$1
 fi
 
-rule="-A OUTPUT -d $$$$VIP/32 -j $$$$CHAIN"
+rule="-A OUTPUT -d $$$$VIP/32 -p $$$$PROTO -m $$$$PROTO --dport $$$$PORT -j $$$$CHAIN"
 current_rule=`$$$$IPTABLES -t nat --list-rules OUTPUT | fgrep -w $$$$CHAIN || true`
 
 if [ "$$$$rule" != "$$$$current_rule" ]; then
-    echo "update chain OUTPUT of table nat: vip=$$$$VIP servers=$$$$args"
+    echo "update chain OUTPUT of table nat: vip=$$$$VIP:$$$$PORT_PROTO servers=$$$$args"
     $$$$IPTABLES -t nat --list-rules OUTPUT | grep -v "^-P OUTPUT" |
         cat -n | fgrep -w $$$$CHAIN | tac |
         while read num left; do
