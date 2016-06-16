@@ -290,7 +290,10 @@ start-$(1)-$(2): $(foreach service,$($(1)_dependencies),start-$(service))
 			$(call rotate,$(2),$(call container_names,$(word $j,$($(1)_dependencies))))`); \
 		num_containers=$(words $(call container_names,$(word $j,$($(1)_dependencies)))); \
 		num_ports_per_container=$$$$(( ($$$${#array[@]} - 3 * $$$$num_containers) / 2 / $$$$num_containers )); \
-		[ $$$${#array[@]} = $$$$(( $$$$num_containers * (3 + 2 * $$$$num_ports_per_container) )) ]; \
+		[ $$$${#array[@]} = $$$$(( $$$$num_containers * (3 + 2 * $$$$num_ports_per_container) )) ] || { \
+		    echo "	inconsistent exposed ports among instances of service $(word $j,$($(1)_dependencies))" >&2; \
+		    exit 1; \
+	        }; \
 		for ((k=0; k<$$$$num_ports_per_container; ++k)); do \
 		    destinations=(); \
 		    port_proto=; \
@@ -307,7 +310,10 @@ start-$(1)-$(2): $(foreach service,$($(1)_dependencies),start-$(service))
 					    eval node_$$$$id=$$$$node; }; \
 			m=$$$$(( $$$$m + 2 * $$$$k )); \
 		        tmp=$$$${array[$$$$((m++))]}; \
-			[ -z "$$$$port_proto" ] && port_proto=$$$$tmp || [ "$$$$port_proto" = "$$$$tmp" ]; \
+			[ -z "$$$$port_proto" ] && port_proto=$$$$tmp || [ "$$$$port_proto" = "$$$$tmp" ] || { \
+			    echo "	ports in 'docker inspect -f {{.NetworkSettings.Ports}}' isn't sorted" >&2; \
+			    exit 1; \
+			}; \
 		        dest=$$$${array[$$$$m]}; \
 			[ "$$$${dest#0.0.0.0:}" = "$$$$dest" ] || dest=$$$$node:$$$${dest#0.0.0.0:}; \
 			[ "$$$${dest#127.}" = "$$$$dest" ] || dest=$$$$ip; \
