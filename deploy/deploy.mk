@@ -14,6 +14,7 @@ DOCKER		:= $(if $(DOCKER),$(strip $(DOCKER)),docker)
 DOCKER_VOL_ROOT	:= $(if $(DOCKER_VOL_ROOT),$(strip $(DOCKER_VOL_ROOT)),/dockerdata)
 BIND_MOUNTS	:= $(if $(BIND_MOUNTS),$(sort $(strip $(BIND_MOUNTS))),/tmp /run /var)
 DOCKER_STOP_TIMEOUT	?= 10
+DOCKER_CREATE_OPTIONS	:= $(strip $(DOCKER_CREATE_OPTIONS))
 
 SHELL		:= /bin/bash
 .SHELLFLAGS	:= $(if $(XTRACE_ENABLED),-x) -e -o pipefail -c
@@ -238,6 +239,7 @@ start-$(1)-$(2): $(foreach service,$($(1)_dependencies),start-$(service))
 	    # utilities in package libcap2-bin.
 	    $(DOCKER) create --restart=unless-stopped \
 		    -l SERVICE_NAME=$(1) \
+		    $(DOCKER_CREATE_OPTIONS) \
 		    $($(1)_docker_create_options) \
 		    $($(1)_$(2)_docker_create_options) \
 		    $(foreach j,$(shell for ((i=1; i<=$(words $($(1)_dependencies)); ++i)); do echo $$i; done),\
@@ -303,10 +305,10 @@ start-$(1)-$(2): $(foreach service,$($(1)_dependencies),start-$(service))
 		        ip=$$$${array[$$$$((m++))]}; \
 			node=$$$${array[$$$$((m++))]}; \
 		        [ "$$$$node" != null ] || eval node=\$$$$node_$$$$id; \
-		        [ "$$$$node" ] || { node=`$(DOCKER) run \
+		        [ "$$$$node" ] || { node=`$(DOCKER) exec \
 						$(if $(SWARM_ENABLED),-e affinity:container==$$$$id) \
 						--rm --net=host busybox ip route show | \
-						grep -m 1 ^default | awk '{print $$$$3}'`; \
+						grep ^default | head -1 | awk '{print $$$$3}'`; \
 					    eval node_$$$$id=$$$$node; }; \
 			m=$$$$(( $$$$m + 2 * $$$$k )); \
 		        tmp=$$$${array[$$$$((m++))]}; \

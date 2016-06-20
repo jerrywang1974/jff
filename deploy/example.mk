@@ -20,6 +20,10 @@ stateful_services = dbA
 # _<i>_container
 # _<i>_hostname
 
+# DON'T use "-p host-port:container-port", be careful
+# that Swarm thinks an exited container still occupies
+# allocated cpu/memory/port resources!
+
 gwA_docker_create_image = jessie-example
 gwA_docker_create_options = -P
 gwA_dependencies = appA
