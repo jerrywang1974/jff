@@ -15,6 +15,9 @@ DOCKER_VOL_ROOT	:= $(if $(DOCKER_VOL_ROOT),$(strip $(DOCKER_VOL_ROOT)),/dockerda
 BIND_MOUNTS	:= $(if $(BIND_MOUNTS),$(sort $(strip $(BIND_MOUNTS))),/tmp /run /var)
 DOCKER_STOP_TIMEOUT	?= 10
 DOCKER_CREATE_OPTIONS	:= $(strip $(DOCKER_CREATE_OPTIONS))
+DOCKER_ADVERTISE_IP_FILE:= $(if $(DOCKER_ADVERTISE_IP_FILE),$(strip $(DOCKER_ADVERTISE_IP_FILE)),/etc/advertise-ip)
+DOCKER_HOST_IP_FILE	:= $(if $(DOCKER_HOST_IP_FILE),$(strip $(DOCKER_HOST_IP_FILE)),/etc/host-ip)
+CONSUL_HTTP_PORT	:= $(if $(CONSUL_HTTP_PORT),$(strip $(CONSUL_HTTP_PORT)),8500)
 
 SHELL		:= /bin/bash
 .SHELLFLAGS	:= $(if $(XTRACE_ENABLED),-x) -e -o pipefail -c
@@ -261,7 +264,10 @@ start-$(1)-$(2): $(foreach service,$($(1)_dependencies),start-$(service))
 		    -e DEPLOY_SERVICE=$(1) \
 		    -e DEPLOY_TAG=$($(1)_tag) \
 		    -e DEPLOY_INSTANCE=$(2) \
+		    -e DOCKER_HOST_IP_FILE=$(DOCKER_HOST_IP_FILE) \
+		    -e SERVICE_REGISTRY_URL=consul://dockerhost:$(CONSUL_HTTP_PORT) \
 		    $(foreach path,$(BIND_MOUNTS),-v $$$$VOL_DIR/$(path):$(path)) \
+		    -v $(DOCKER_ADVERTISE_IP_FILE):$(DOCKER_HOST_IP_FILE):ro \
 		    $($(1)_docker_create_image) $($(1)_docker_create_command)
 
 	    $(DOCKER) run --rm -v /:/host \
@@ -305,10 +311,7 @@ start-$(1)-$(2): $(foreach service,$($(1)_dependencies),start-$(service))
 		        ip=$$$${array[$$$$((m++))]}; \
 			node=$$$${array[$$$$((m++))]}; \
 		        [ "$$$$node" != null ] || eval node=\$$$$node_$$$$id; \
-		        [ "$$$$node" ] || { node=`$(DOCKER) exec \
-						$(if $(SWARM_ENABLED),-e affinity:container==$$$$id) \
-						--rm --net=host busybox ip route show | \
-						grep ^default | head -1 | awk '{print $$$$3}'`; \
+		        [ "$$$$node" ] || { node=`$(DOCKER) exec $$$$id cat $(DOCKER_HOST_IP_FILE)`; \
 					    eval node_$$$$id=$$$$node; }; \
 			m=$$$$(( $$$$m + 2 * $$$$k )); \
 		        tmp=$$$${array[$$$$((m++))]}; \
