@@ -151,6 +151,10 @@ Plugin 'LargeFile'
 Plugin 'FencView.vim'
 Plugin 'QuickBuf'
 Plugin 'CmdlineComplete'
+" need fonts at https://github.com/powerline/fonts, change Non-ASCII
+" font to Source Code Pro for Powerline in iTerm profile settings.
+Plugin 'vim-airline/vim-airline'
+Plugin 'vim-airline/vim-airline-themes'
 call vundle#end()
 filetype plugin indent on
 
@@ -194,6 +198,9 @@ let vala_space_errors = 1
 "let vala_no_trail_space_error = 1
 let vala_no_tab_space_error = 1
 "let vala_minlines = 120
+
+" for vim-airline
+let g:airline#extensions#tabline#enabled = 1
 
 "--------------------------------------misc settings-----------------------------
 " recursively search tag file upwards, see :help file-searching
