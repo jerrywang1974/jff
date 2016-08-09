@@ -6,23 +6,23 @@
 # Version: 2016-06-16 v1.2
 # Licence: https://opensource.org/licenses/BSD-3-Clause
 
-DEPLOY_ENV	:= $(if $(DEPLOY_ENV),$(strip $(DEPLOY_ENV)),play_$(USER))
-DEPLOY_TAG	:= $(if $(DEPLOY_TAG),$(strip $(DEPLOY_TAG)),$(shell date +%Y%m%d_%H%M%S))
+DEPLOY_ENV			:= $(if $(DEPLOY_ENV),$(strip $(DEPLOY_ENV)),play_$(USER))
+DEPLOY_TAG			:= $(if $(DEPLOY_TAG),$(strip $(DEPLOY_TAG)),$(shell date +%Y%m%d_%H%M%S))
 
-SERVICE_SUBNET	:= $(if $(SERVICE_SUBNET),$(strip $(SERVICE_SUBNET)),100.100.100)
-DOCKER		:= $(if $(DOCKER),$(strip $(DOCKER)),docker)
-DOCKER_VOL_ROOT	:= $(if $(DOCKER_VOL_ROOT),$(strip $(DOCKER_VOL_ROOT)),/dockerdata)
-BIND_MOUNTS	:= $(if $(BIND_MOUNTS),$(sort $(strip $(BIND_MOUNTS))),/tmp /run /var)
-DOCKER_STOP_TIMEOUT	?= 10
-DOCKER_CREATE_OPTIONS	:= $(strip $(DOCKER_CREATE_OPTIONS))
-DOCKER_ADVERTISE_IP_FILE:= $(if $(DOCKER_ADVERTISE_IP_FILE),$(strip $(DOCKER_ADVERTISE_IP_FILE)),/etc/advertise-ip)
-DOCKER_HOST_IP_FILE	:= $(if $(DOCKER_HOST_IP_FILE),$(strip $(DOCKER_HOST_IP_FILE)),/etc/host-ip)
-CONSUL_HTTP_PORT	:= $(if $(CONSUL_HTTP_PORT),$(strip $(CONSUL_HTTP_PORT)),8500)
+SERVICE_SUBNET			:= $(if $(SERVICE_SUBNET),$(strip $(SERVICE_SUBNET)),100.100.100)
+DOCKER				:= $(if $(DOCKER),$(strip $(DOCKER)),docker)
+DOCKER_VOL_ROOT			:= $(if $(DOCKER_VOL_ROOT),$(strip $(DOCKER_VOL_ROOT)),/dockerdata)
+BIND_MOUNTS			:= $(if $(BIND_MOUNTS),$(sort $(strip $(BIND_MOUNTS))),/tmp /run /var)
+DOCKER_STOP_TIMEOUT		?= 10
+DOCKER_CREATE_OPTIONS		:= $(strip $(DOCKER_CREATE_OPTIONS))
+DOCKER_ADVERTISE_IP_FILE	:= $(if $(DOCKER_ADVERTISE_IP_FILE),$(strip $(DOCKER_ADVERTISE_IP_FILE)),/etc/advertise-ip)
+DOCKER_HOST_IP_FILE		:= $(if $(DOCKER_HOST_IP_FILE),$(strip $(DOCKER_HOST_IP_FILE)),/etc/host-ip)
+CONSUL_HTTP_PORT		:= $(if $(CONSUL_HTTP_PORT),$(strip $(CONSUL_HTTP_PORT)),8500)
 
-SHELL		:= /bin/bash
-.SHELLFLAGS	:= $(if $(XTRACE_ENABLED),-x) -e -o pipefail -c
-.DEFAULT_GOAL	:= list-containers
-SWARM_ENABLED	:= $(findstring swarm,$(shell $(DOCKER) version -f "{{.Server.Version}}"))
+SHELL				:= /bin/bash
+.SHELLFLAGS			:= $(if $(XTRACE_ENABLED),-x) -e -o pipefail -c
+.DEFAULT_GOAL			:= list-containers
+SWARM_ENABLED			:= $(findstring swarm,$(shell $(DOCKER) version -f "{{.Server.Version}}"))
 
 ifeq (,$(filter oneshell,$(.FEATURES)))
 $(error GNU Make 3.82 or newer is required for feature "oneshell")
@@ -411,16 +411,16 @@ endef
 #
 # escape_bash_script
 #	The script must begin with "#!/bin/bash" or empty line.
-#		#!/bin/bash	=> <EMPTY>
-#		\n		=> ;@@NEWLINE@@
-#		'		=> '\''
-#		;@@NEWLINE@@;	=> ;
-#		|;@@@NEWLINE	=> |
-#		&;@@@NEWLINE	=> &
-#		then;@@@NEWLINE	=> then
-#		do;@@@NEWLINE	=> do
-#		@@NEWLINE@@	=> <SPACE>
-#		^;		=> true;
+#		#!/bin/bash		=> <EMPTY>
+#		\n			=> ;@@NEWLINE@@
+#		'			=> '\''
+#		;@@NEWLINE@@;		=> ;
+#		|;@@NEWLINE@@		=> |
+#		&;@@NEWLINE@@		=> &
+#		then;@@NEWLINE@@	=> then
+#		do;@@NEWLINE@@		=> do
+#		@@NEWLINE@@		=> <SPACE>
+#		^			=> true
 #
 define escape_bash_script
 true$(subst \
