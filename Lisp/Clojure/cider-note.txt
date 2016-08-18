@@ -1,0 +1,52 @@
+http://cider.readthedocs.io/en/latest/
+
+Common Lisp:
+    https://github.com/slime/slime
+    https://github.com/capitaomorte/sly
+
+Scheme:
+    https://github.com/jaor/geiser
+
+
+cider-mode's keybindings:
+
+             C-c C-e      evaluate the form preceding point
+             C-c C-p      evaluate the form preceding point and pretty-print the result in a popup buffer
+
+             C-c C-c      evaluate the top level form under point and display the result in the echo area 
+             C-c C-f      evaluate the top level form under point and pretty-print the result in a popup buffer
+
+             C-u C-c C-c  debug the top level form under point and walk through its evaluation
+
+             C-c C-b      interrupt any pending evaluations
+
+             C-c C-m      macroexpand-1
+                          C-u C-c C-m  macroexpand
+
+             C-c C-z      switch to the relevant REPL
+
+             C-c C-k      load(eval) the current buffer
+             C-c C-l      load(eval) a Clojure file
+             C-c C-x      Reload all modified files on the classpath
+                          C-u C-c C-x         reload all files
+                          C-u C-u C-c C-x     clear the state of the namespace tracker before reloading
+
+             C-c C-d C-d  display doc string for the symbol at point
+
+             C-c C-d C-j  display Javadoc for the symbol at point
+
+             C-c M-i      inspect expression
+
+             C-c M-t v    toggle var tracing
+             C-c M-t n    toggle namespace tracing
+
+             C-c C-u      undefine a symbol
+
+             C-c C-t C-t  run test at point
+
+             M-.          jump to the definition of a symbol
+             M-,          return to pre-jump location
+             M-TAB        complete the symbol at point
+
+             C-c C-q      quit current nREPL connection
+                          C-u C-c C-q  quit all connections
