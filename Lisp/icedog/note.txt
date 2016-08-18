@@ -1,7 +1,0 @@
-Dependencies:
-
-cl-acl-compat
-cl+ssl
-  cl-cffi
-  cl-flexi-streams
-
