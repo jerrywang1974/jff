@@ -1,7 +1,7 @@
 # vi: ft=make ts=8 sts=8 sw=8 noet
 
 DEPLOY_ENV		:= plumbing
-DEPLOY_TAG		:= 20160620
+DEPLOY_TAG		:= 20160831
 
 REGISTRATOR_CONSUL_HTTP_TOKEN	?= $(CONSUL_HTTP_TOKEN)
 VAULT_CONSUL_HTTP_TOKEN		?= $(CONSUL_HTTP_TOKEN)
@@ -20,7 +20,7 @@ DOCKER_CREATE_OPTIONS		:= \
 # gracefully handle connection failure to Consul.
 stateful_services = consul swarm registrator vault
 
-consul_docker_create_image = my-consul:v0.6.4
+consul_docker_create_image = consul:v0.6.4
 consul_docker_create_options = \
 	-l SERVICE_IGNORE=true \
 	--net host
@@ -34,12 +34,12 @@ registrator_docker_create_options = \
 	-l SERVICE_IGNORE=true \
 	-e CONSUL_HTTP_TOKEN=$(REGISTRATOR_CONSUL_HTTP_TOKEN)
 
-vault_docker_create_image = cgswong/vault:0.5.2
+vault_docker_create_image = vault:0.6.1
 vault_docker_create_options = \
 	-P \
 	-e CONSUL_HTTP_TOKEN=$(VAULT_CONSUL_HTTP_TOKEN)
 
-swarm_docker_create_image = swarm:1.2.3
+swarm_docker_create_image = swarm:1.2.5
 swarm_docker_create_options = \
 	-P \
 	-e CONSUL_HTTP_TOKEN=$(SWARM_CONSUL_HTTP_TOKEN)

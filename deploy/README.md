@@ -4,11 +4,13 @@ See example.mk for an example system deployment description file.
 
 ## Test example deployment
 
+Update `xxx_docker_create_image` in example.mk to some Docker image with iptables installed.
+
 ```bash
-docker build -t jessie-example Dockerfiles/jessie-example
-make -f example.mk DEPLOY_TAG=20160605
-make -f example.mk DEPLOY_TAG=20160605 start-services
-make -f example.mk DEPLOY_TAG=20160605
+export DEPLOY_TAG=`date +%Y%m%d`
+make -f example.mk          # default target "list"
+make -f example.mk start
+make -f example.mk
 ```
 
 ## Setup Swarm cluster
@@ -32,3 +34,4 @@ docker version
 docker info
 docker ps
 ```
+

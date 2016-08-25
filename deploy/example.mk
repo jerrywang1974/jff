@@ -24,21 +24,21 @@ stateful_services = dbA
 # that Swarm thinks an exited container still occupies
 # allocated cpu/memory/port resources!
 
-gwA_docker_create_image = jessie-example
+gwA_docker_create_image = some-gateway
 gwA_docker_create_options = -P
 gwA_dependencies = appA
 
-appA_docker_create_image = jessie-example
+appA_docker_create_image = some-appA
 appA_docker_create_options = -P
 appA_dependencies = appB
 appA_instances = 2
 
-appB_docker_create_image = jessie-example
+appB_docker_create_image = some-appB
 appB_docker_create_options = -P
 appB_dependencies = dbA
 appB_instances = 2
 
-dbA_docker_create_image = jessie-example
+dbA_docker_create_image = some-db
 dbA_docker_create_options = -P
 
 include deploy.mk

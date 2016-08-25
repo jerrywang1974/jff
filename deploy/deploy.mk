@@ -3,7 +3,7 @@
 # Yet another not-so-stupid system orchestrator for Docker-based deployment
 #
 # Author: Yubao Liu <yubao.liu@yahoo.com>
-# Version: 2016-06-16 v1.2
+# Version: 2016-08-31 v1.3
 # Licence: https://opensource.org/licenses/BSD-3-Clause
 
 DEPLOY_ENV			:= $(if $(DEPLOY_ENV),$(strip $(DEPLOY_ENV)),play_$(USER))
@@ -12,7 +12,7 @@ DEPLOY_TAG			:= $(if $(DEPLOY_TAG),$(strip $(DEPLOY_TAG)),$(shell date +%Y%m%d_%
 SERVICE_SUBNET			:= $(if $(SERVICE_SUBNET),$(strip $(SERVICE_SUBNET)),100.100.100)
 DOCKER				:= $(if $(DOCKER),$(strip $(DOCKER)),docker)
 DOCKER_VOL_ROOT			:= $(if $(DOCKER_VOL_ROOT),$(strip $(DOCKER_VOL_ROOT)),/dockerdata)
-BIND_MOUNTS			:= $(if $(BIND_MOUNTS),$(sort $(strip $(BIND_MOUNTS))),/tmp /run /var)
+BIND_MOUNTS			:= $(sort $(strip $(BIND_MOUNTS)))
 DOCKER_STOP_TIMEOUT		?= 10
 DOCKER_CREATE_OPTIONS		:= $(strip $(DOCKER_CREATE_OPTIONS))
 DOCKER_ADVERTISE_IP_FILE	:= $(if $(DOCKER_ADVERTISE_IP_FILE),$(strip $(DOCKER_ADVERTISE_IP_FILE)),/etc/advertise-ip)
@@ -270,7 +270,7 @@ start-$(1)-$(2): $(foreach service,$($(1)_dependencies),start-$(service))
 		    -v $(DOCKER_ADVERTISE_IP_FILE):$(DOCKER_HOST_IP_FILE):ro \
 		    $($(1)_docker_create_image) $($(1)_docker_create_command)
 
-	    $(DOCKER) run --rm -v /:/host \
+	    [ -z "$(BIND_MOUNTS)" ] || $(DOCKER) run --rm -v /:/host \
 		    $(if $(SWARM_ENABLED),-e affinity:container==$$$$tmp_name) \
 		    $($(1)_docker_create_image) /bin/sh -c \
 		    "dir=/host/$$$$VOL_DIR && \
@@ -345,7 +345,7 @@ define vip_script
 
 PURPOSE="Use iptables target DNAT and module statistc to do load balance"
 AUTHOR="Yubao Liu<yubao.liu@yahoo.com>"
-VERSION="2016-06-16 v1.2"
+VERSION="2016-08-31 v1.3"
 LICENCE="https://opensource.org/licenses/BSD-3-Clause"
 
 set -e
@@ -445,8 +445,8 @@ $(foreach service,$(all_services),$(eval $(call set_service_readonly_properties,
 $(foreach service,$(stateless_services),$(eval $(call define_service,$(service),stateless)))
 $(foreach service,$(stateful_services),$(eval $(call define_service,$(service),stateful)))
 
-.PHONY: start-services start-stateless-services start-stateful-services \
-	list-containers list-stateless-containers list-stateful-containers \
+.PHONY: start start-services start-stateless-services start-stateful-services \
+	list list-containers list-stateless-containers list-stateful-containers \
 	vip-script
 
 start-servers:
@@ -455,10 +455,12 @@ start-servers:
 	echo
 	exit 1
 
+start: start-services
 start-services: start-stateless-services
 start-stateless-services: start-stateful-services
 start-stateful-services:
 
+list: list-containers
 list-containers: list-stateful-containers list-stateless-containers
 list-stateful-containers:
 	@$(call inspect_containers,$(call container_names,$(stateful_services)))
