@@ -1,6 +1,6 @@
 # vi: ft=make ts=8 sts=8 sw=8 noet
 
-DEPLOY_ENV			?= plumbing
+DEPLOY_ENV			?= infra
 DEPLOY_TAG			?= $(shell date +%Y%m%d)
 
 REGISTRATOR_CONSUL_HTTP_TOKEN	?= $(CONSUL_HTTP_TOKEN)
@@ -25,7 +25,7 @@ DOCKER_CREATE_OPTIONS		:= \
 #
 # <service>_dependencies isn't specified for swarm/registrator/vault
 # because the Consul service runs on host OS, we don't need VIP and can't
-# use VIP to bootstrap plumbing service. All those services must
+# use VIP to bootstrap infra service. All those services must
 # gracefully handle connection failure to Consul.
 stateful_services = consul swarm_manager swarm_agent registrator vault
 

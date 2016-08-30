@@ -41,14 +41,14 @@ Example daemon.json:
 }
 ```
 
-3. Bootstrap plumbing services on each VM.
+3. Bootstrap infra services on each VM.
 
 ```
 docker-machine ssh node1 tce-load -wi bash make
 docker-machine ssh node2 tce-load -wi bash make
-docker-machine ssh node1 "cd `pwd` &&  make -f plumbing-services.mk start CONSUL_BOOTSTRAP_EXPECT=2 CONSUL_IS_SERVER=true"
-docker-machine ssh node2 "cd `pwd` &&  make -f plumbing-services.mk start CONSUL_BOOTSTRAP_EXPECT=2 CONSUL_IS_SERVER=true"
-docker-machine ssh node2 docker exec plumbing-consul-\`date +%Y%m%d\`-1 consul join `docker-machine ip node1`
+docker-machine ssh node1 "cd `pwd` &&  make -f infra-services.mk start CONSUL_BOOTSTRAP_EXPECT=2 CONSUL_IS_SERVER=true"
+docker-machine ssh node2 "cd `pwd` &&  make -f infra-services.mk start CONSUL_BOOTSTRAP_EXPECT=2 CONSUL_IS_SERVER=true"
+docker-machine ssh node2 docker exec infra-consul-\`date +%Y%m%d\`-1 consul join `docker-machine ip node1`
 docker-machine ssh node1 curl -s -v "'localhost:8500/v1/kv/?recurse&pretty'"
 docker-machine ssh node2 curl -s -v "'localhost:8500/v1/kv/?recurse&pretty'"
 ```
