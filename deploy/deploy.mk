@@ -16,7 +16,7 @@ BIND_MOUNTS			:= $(sort $(strip $(BIND_MOUNTS)))
 DOCKER_STOP_TIMEOUT		?= 10
 DOCKER_CREATE_OPTIONS		:= $(strip $(DOCKER_CREATE_OPTIONS))
 DOCKER_ADVERTISE_IP_FILE	:= $(if $(DOCKER_ADVERTISE_IP_FILE),$(strip $(DOCKER_ADVERTISE_IP_FILE)),/etc/advertise-ip)
-DOCKER_HOST_IP_FILE		:= $(if $(DOCKER_HOST_IP_FILE),$(strip $(DOCKER_HOST_IP_FILE)),/etc/host-ip)
+DOCKER_HOST_IP_FILE		:= $(if $(DOCKER_HOST_IP_FILE),$(strip $(DOCKER_HOST_IP_FILE)),/etc/docker/host-ip)
 CONSUL_HTTP_PORT		:= $(if $(CONSUL_HTTP_PORT),$(strip $(CONSUL_HTTP_PORT)),8500)
 
 SHELL				:= /bin/bash
@@ -265,7 +265,7 @@ start-$(1)-$(2): $(foreach service,$($(1)_dependencies),start-$(service))
 		    -e DEPLOY_TAG=$($(1)_tag) \
 		    -e DEPLOY_INSTANCE=$(2) \
 		    -e DOCKER_HOST_IP_FILE=$(DOCKER_HOST_IP_FILE) \
-		    -e SERVICE_REGISTRY_URL=consul://dockerhost:$(CONSUL_HTTP_PORT) \
+		    -e SERVICE_REGISTRY_URL=consul://consul:$(CONSUL_HTTP_PORT) \
 		    $(foreach path,$(BIND_MOUNTS),-v $$$$VOL_DIR/$(path):$(path)) \
 		    -v $(DOCKER_ADVERTISE_IP_FILE):$(DOCKER_HOST_IP_FILE):ro \
 		    $($(1)_docker_create_image) $($(1)_docker_create_command)
