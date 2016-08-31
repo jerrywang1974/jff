@@ -15,8 +15,8 @@ DOCKER_VOL_ROOT			:= $(if $(DOCKER_VOL_ROOT),$(strip $(DOCKER_VOL_ROOT)),/docker
 BIND_MOUNTS			:= $(sort $(strip $(BIND_MOUNTS)))
 DOCKER_STOP_TIMEOUT		?= 10
 DOCKER_CREATE_OPTIONS		:= $(strip $(DOCKER_CREATE_OPTIONS))
-DOCKER_ADVERTISE_IP_FILE	:= $(if $(DOCKER_ADVERTISE_IP_FILE),$(strip $(DOCKER_ADVERTISE_IP_FILE)),/etc/advertise-ip)
-DOCKER_HOST_IP_FILE		:= $(if $(DOCKER_HOST_IP_FILE),$(strip $(DOCKER_HOST_IP_FILE)),/etc/docker/host-ip)
+DOCKER_ADVERTISE_IP_FILE	:= $(if $(DOCKER_ADVERTISE_IP_FILE),$(strip $(DOCKER_ADVERTISE_IP_FILE)),/etc/docker/advertise-ip)
+DOCKER_HOST_IP_FILE		:= $(if $(DOCKER_HOST_IP_FILE),$(strip $(DOCKER_HOST_IP_FILE)),/etc/host-ip)
 CONSUL_HTTP_PORT		:= $(if $(CONSUL_HTTP_PORT),$(strip $(CONSUL_HTTP_PORT)),8500)
 
 SHELL				:= /bin/bash

@@ -1,2 +1,12 @@
 CFSSL-*/
 
+*.srl
+*.crt
+*.csr
+*.key
+*.pem
+*.crt.txt
+*.csr.txt
+*.key.txt
+*.pem.txt
+

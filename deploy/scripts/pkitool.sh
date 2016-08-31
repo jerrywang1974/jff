@@ -2,8 +2,10 @@
 
 set -e -o pipefail
 
+[ ! -r ./env.sh ] || . ./env.sh
+
 : ${OPENSSL:=openssl}
-: ${OPENSSL_CNF:=../openssl.cnf}
+: ${OPENSSL_CNF:=$(dirname "$0")/openssl.cnf}
 
 : ${KEY_DIR:=.}
 : ${KEY_SIZE:=2048}
@@ -69,30 +71,29 @@ create_all_ca() {
     create_ca $INFRA_CLIENT_CA
 }
 
-issue_cert_for_docker_engine() {
+issue_cert_for_dockerd() {
     local host="${1:?}"
 
-    issue_cert "$host" $DOCKER_SERVICE_CA docker-engine server
-    issue_cert "$host" $INFRA_SERVICE_CA docker-engine libkv
+    issue_cert "$host" $DOCKER_SERVICE_CA dockerd server
+    issue_cert "$host" $INFRA_SERVICE_CA dockerd libkv
 }
 
-issue_cert_for_swarm_manager() {
+issue_cert_for_swarm() {
     local host="${1:?}"
 
-    issue_cert "$host" $DOCKER_SERVICE_CA swarm-manager server $DOCKER_CLIENT_CA
-    issue_cert "$host" $INFRA_SERVICE_CA swarm-manager libkv
+    issue_cert "$host" $DOCKER_SERVICE_CA swarm server $DOCKER_CLIENT_CA
+    issue_cert "$host" $INFRA_SERVICE_CA swarm libkv
 }
 
-issue_cert_for_swarm_agent() {
+issue_cert_for_docker() {
     local host="${1:?}"
 
-    issue_cert "$host" $INFRA_SERVICE_CA swarm-agent libkv
-}
+    issue_cert "$host" $DOCKER_CLIENT_CA docker client $DOCKER_SERVICE_CA
 
-issue_cert_for_docker_client() {
-    local host="${1:?}"
-
-    issue_cert "$host" $DOCKER_CLIENT_CA docker-client client
+    # Docker expects $DOCKER_CERT_PATH/{ca,cert,key}.pem
+    cp "$host/docker/client.ca-bundle.crt" "$host/docker/ca.pem"
+    cp "$host/docker/client.crt" "$host/docker/cert.pem"
+    cp "$host/docker/client.key" "$host/docker/key.pem"
 }
 
 issue_cert_for_registrator() {
@@ -111,18 +112,20 @@ issue_cert_for_vault() {
     local host="${1:?}"
 
     issue_cert "$host" $INFRA_SERVICE_CA vault server $INFRA_CLIENT_CA
+
+    # Vault listener uses concatenated certificate file, see https://www.vaultproject.io/docs/config/index.html
+    cat "$host/vault/server.crt" "$host/vault/server.ca-bundle.crt" > "$host/vault/server.all.crt"
 }
 
 issue_cert_for_client() {
     local host="${1:?}"
 
-    issue_cert "$host" $INFRA_CLIENT_CA "$host" server
+    issue_cert "$host" $INFRA_CLIENT_CA client server
 }
 
 issue_cert_for_infra_services() {
-    issue_cert_for_docker_engine "$@"
-    issue_cert_for_swarm_manager "$@"
-    issue_cert_for_swarm_agent "$@"
+    issue_cert_for_dockerd "$@"
+    issue_cert_for_swarm "$@"
     issue_cert_for_registrator "$@"
     issue_cert_for_consul "$@"
     issue_cert_for_vault "$@"
@@ -132,7 +135,10 @@ issue_cert_for_infra_services() {
 role="${1//-/_/}"
 host="$2"
 
-[ "$host" ] && : ${KEY_SAN:=DNS.1:localhost,DNS.2:$host,IP.1:127.0.0.1,IP.2:$host} || : ${KEY_SAN:=DNS.1:localhost,IP.1:127.0.0.1}
+[ "$host" ] && {
+    [[ "$host" =~ ^[0-9\.]+$ ]] && : ${KEY_SAN:=DNS.1:localhost,IP.1:127.0.0.1,IP.2:$host} ||
+                                 : ${KEY_SAN:=DNS.1:localhost,DNS.2:$host,IP.1:127.0.0.1}
+} || : ${KEY_SAN:=DNS.1:localhost,IP.1:127.0.0.1}
 export KEY_SAN
 
 shift || true
@@ -152,13 +158,12 @@ case "$role" in
         echo
         echo "Commands:"
         echo "    ca                    Create root CAs"
-        echo "    bootstrap HOST        Create certificates for Docker Engine, Swarm Manager/Agent, Registrator, Consul and Vault"
+        echo "    bootstrap HOST        Create certificates for Docker Engine, Swarm Manager, Registrator, Consul and Vault"
         echo "    oneshot HOST          Run commands 'ca' and 'bootstrap HOST'"
         echo "    client HOST           Create certificates for clients of Consul and Vault"
-        echo "    docker-client HOST    Create certificates for Docker client"
-        echo "    docker-engine HOST    Create certificates for Docker Engine"
-        echo "    swarm-manager HOST    Create certificates for Swarm Manager"
-        echo "    swarm-agent HOST      Create certificates for Swarm Agent"
+        echo "    docker HOST           Create certificates for Docker client"
+        echo "    dockerd HOST          Create certificates for Docker Engine"
+        echo "    swarm HOST            Create certificates for Swarm Manager"
         echo "    registrator HOST      Create certificates for Registrator"
         echo "    consul HOST           Create certificates for Consul"
         echo "    vault HOST            Create certificates for Vault"

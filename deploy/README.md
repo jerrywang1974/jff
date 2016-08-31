@@ -2,63 +2,26 @@
 
 See example.mk for an example system deployment description file.
 
-## Bootstrap a cluster
-
-1. Create VM instances and create file `host-ip`.
+## Bootstrap an example cluster with Docker Machine
 
 ```bash
-docker-machine create -d virtualbox node1
-docker-machine create -d virtualbox node2
-node1=`docker-machine ip node1`
-node2=`docker-machine ip node2`
-docker-machine ssh node1 "echo $node1 | sudo tee /etc/docker/host-ip"
-docker-machine ssh node2 "echo $node2 | sudo tee /etc/docker/host-ip"
+scripts/bootstrap-with-docker-machine.sh node1 node2
+
+for node in node1 node2; do
+    curl -s -v --cacert ./localhost/client/server.ca-bundle.crt \
+        --cert ./localhost/client/server.crt \
+        --key ./localhost/client/server.key \
+        "https://`docker-machine ip $node`:8500/v1/kv/?recurse&pretty"
+done
 ```
 
-2. Configure /etc/docker/daemon.json on each VM.
+## Verify the example cluster
 
 ```bash
-docker-machine ssh node1 sudo ln -s `pwd`/daemon.json /etc/docker/
-docker-machine ssh node2 sudo ln -s `pwd`/daemon.json /etc/docker/
-docker-machine ssh node1 sudo pkill -HUP dockerd
-docker-machine ssh node2 sudo pkill -HUP dockerd
-```
-
-Example daemon.json:
-```json
-{
-    "cluster-advertise"         : "eth1:2376",
-    "cluster-store"             : "consul://localhost:8500",
-    "cluster-store-opts"        : {
-        "discovery.heartbeat"   : "20",
-        "discovery.ttl"         : "60",
-        "kv.cacertfile"         : "/var/lib/boot2docker/ca.pem",
-        "kv.certfile"           : "/var/lib/boot2docker/server.pem",
-        "kv.keyfile"            : "/var/lib/boot2docker/server-key.pem",
-        "kv.path"               : "docker/nodes"
-    },
-    "live-restore"              : true
-}
-```
-
-3. Bootstrap infra services on each VM.
-
-```
-docker-machine ssh node1 tce-load -wi bash make
-docker-machine ssh node2 tce-load -wi bash make
-docker-machine ssh node1 "cd `pwd` &&  make -f infra-services.mk start CONSUL_BOOTSTRAP_EXPECT=2 CONSUL_IS_SERVER=true"
-docker-machine ssh node2 "cd `pwd` &&  make -f infra-services.mk start CONSUL_BOOTSTRAP_EXPECT=2 CONSUL_IS_SERVER=true"
-docker-machine ssh node2 docker exec infra-consul-\`date +%Y%m%d\`-1 consul join `docker-machine ip node1`
-docker-machine ssh node1 curl -s -v "'localhost:8500/v1/kv/?recurse&pretty'"
-docker-machine ssh node2 curl -s -v "'localhost:8500/v1/kv/?recurse&pretty'"
-```
-
-4. Verify Swarm setup
-
-```bash
-eval $(docker-machine env --shell bash node1)
-port=3376
-export DOCKER_HOST=$(docker-machine ip node1):$port
+export DOCKER_MACHINE_NAME=node1
+export DOCKER_HOST=tcp://`docker-machine ip $DOCKER_MACHINE_NAME`:3376
+export DOCKER_TLS_VERIFY=1
+export DOCKER_CERT_PATH=`pwd`/certs/local/localhost/docker
 docker version
 docker info
 docker ps

@@ -1,0 +1,13 @@
+{
+    "cluster-advertise"         : "eth1:2376",
+    "cluster-store"             : "consul://localhost:8500",
+    "cluster-store-opts"        : {
+        "discovery.heartbeat"   : "20",
+        "discovery.ttl"         : "60",
+        "kv.cacertfile"         : "/etc/docker/certs/dockerd/libkv.ca-bundle.crt",
+        "kv.certfile"           : "/etc/docker/certs/dockerd/libkv.crt",
+        "kv.keyfile"            : "/etc/docker/certs/dockerd/libkv.key",
+        "kv.path"               : "docker/nodes"
+    },
+    "live-restore"              : true
+}
