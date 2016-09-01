@@ -1,0 +1,2 @@
+#deb https://deb.nodesource.com/node_6.x/ trusty main
+deb https://mirrors.tuna.tsinghua.edu.cn/nodesource/deb_6.x/ trusty main
