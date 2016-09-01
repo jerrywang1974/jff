@@ -29,7 +29,7 @@ for node in "$@"; do
 
     docker-machine ssh $node "sudo rm -rf certs/$node /etc/docker/certs; mkdir -p -m 0700 certs"
     docker-machine scp -r certs/local/$node $node:certs/
-    docker-machine ssh $node "find certs/$node \( -name '*.csr' -o -name '*.txt' \) -delete"
+    docker-machine ssh $node "find certs/$node \( -name '*.csr' -o -name '*.txt' -o -name '*.p12' \) -delete"
     docker-machine ssh $node sudo mv certs/$node /etc/docker/certs
     docker-machine ssh $node sudo ln -sf /etc/docker/certs/dockerd/server.ca-bundle.crt /var/lib/boot2docker/ca.pem
     docker-machine ssh $node sudo ln -sf /etc/docker/certs/dockerd/server.crt /var/lib/boot2docker/server.pem
@@ -58,8 +58,4 @@ done
     $SCRIPTS/pkitool.sh docker localhost     # certs for Docker client
     $SCRIPTS/pkitool.sh client localhost     # certs for client of Consul and Vault
 )
-
-for node in "$@"; do
-    :
-done
 

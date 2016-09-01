@@ -4,8 +4,11 @@ set -e -o pipefail
 
 [ ! -r ./env.sh ] || . ./env.sh
 
+: ${PASSWORD:=changeit}
+
 : ${OPENSSL:=openssl}
-: ${OPENSSL_CNF:=$(dirname "$0")/openssl.cnf}
+: ${OPENSSL_CONF:=$(dirname "$0")/openssl.cnf}
+export OPENSSL_CONF
 
 : ${KEY_DIR:=.}
 : ${KEY_SIZE:=2048}
@@ -28,40 +31,47 @@ export KEY_DIR KEY_SIZE KEY_COUNTRY KEY_PROVINCE KEY_CITY KEY_ORG KEY_OU KEY_CN 
 create_ca() {
     local name="${1:?}"
 
-    [ -e "$OPENSSL_CNF" ] || { echo "$OPENSSL_CNF not found!"; exit 1; }
+    [ -s "$OPENSSL_CONF" ] || { echo "$OPENSSL_CONF not found!"; exit 1; }
     echo "create CA $name ..."
 
-    [ -e "$name.key" ] || $OPENSSL genrsa -out "$name.key" $KEY_SIZE
+    [ -s "$name.key" ] || $OPENSSL genrsa -out "$name.key" $KEY_SIZE
     chmod 0600 "$name.key"
-    [ -e "$name.key.txt" ] || $OPENSSL rsa -in "$name.key" -out "$name.key.txt" -text
+    [ -s "$name.key.txt" ] || $OPENSSL rsa -in "$name.key" -text > "$name.key.txt"
     chmod 0600 "$name.key.txt"
 
-    [ -e "$name.crt" ] || $OPENSSL req -new -x509 -batch -utf8 -config "$OPENSSL_CNF" -key "$name.key" -out "$name.crt"
-    [ -e "$name.crt.txt" ] || $OPENSSL x509 -in "$name.crt" -out "$name.crt.txt" -text
+    [ -s "$name.crt" ] || $OPENSSL req -new -x509 -sha256 -batch -utf8 -subj "/CN=$name" -config "$OPENSSL_CONF" -key "$name.key" -out "$name.crt"
+    [ -s "$name.crt.txt" ] || $OPENSSL x509 -in "$name.crt" -text > "$name.crt.txt"
+
+    [ -s "$name.p12" ] || $OPENSSL pkcs12 -export -out "$name.p12" -in "$name.crt" -inkey "$name.key" -password "pass:$PASSWORD"
+    chmod 0600 "$name.p12"
 }
 
 issue_cert() {
     local host="${1:?}" ca="${2:?}" name="${3:?}" purpose="${4:?}" ca_bundle="$2,$5"
     local dir="$host/$name"
 
-    [ -e "$OPENSSL_CNF" ] || { echo "$OPENSSL_CNF not found!"; exit 1; }
+    [ -s "$OPENSSL_CONF" ] || { echo "$OPENSSL_CONF not found!"; exit 1; }
     echo "create certificate $dir/$purpose with CA $ca ..."
     mkdir -p "$dir"
 
-    [ -e "$dir/$purpose.key" ] || $OPENSSL genrsa -out "$dir/$purpose.key" $KEY_SIZE
+    [ -s "$dir/$purpose.key" ] || $OPENSSL genrsa -out "$dir/$purpose.key" $KEY_SIZE
     chmod 0600 "$dir/$purpose.key"
-    [ -e "$dir/$purpose.key.txt" ] || $OPENSSL rsa -in "$dir/$purpose.key" -out "$dir/$purpose.key.txt" -text
+    [ -s "$dir/$purpose.key.txt" ] || $OPENSSL rsa -in "$dir/$purpose.key" -text > "$dir/$purpose.key.txt"
     chmod 0600 "$dir/$purpose.key.txt"
 
-    [ -e "$dir/$purpose.csr" ] || $OPENSSL req -new -batch -utf8 -subj "/CN=$host" -key "$dir/$purpose.key" -out "$dir/$purpose.csr"
-    [ -e "$dir/$purpose.csr.txt" ] || $OPENSSL req -in "$dir/$purpose.csr" -out "$dir/$purpose.csr.txt" -text
+    [ -s "$dir/$purpose.csr" ] || $OPENSSL req -new -sha256 -batch -utf8 -subj "/CN=$name" -key "$dir/$purpose.key" -out "$dir/$purpose.csr"
+    [ -s "$dir/$purpose.csr.txt" ] || $OPENSSL req -in "$dir/$purpose.csr" -text > "$dir/$purpose.csr.txt"
 
-    [ -e "$dir/$purpose.crt" ] || $OPENSSL x509 -req -in "$dir/$purpose.csr" -CA "$ca.crt" -CAkey "$ca.key" \
-        -CAcreateserial -out "$dir/$purpose.crt" -extensions v3_req -extfile "$OPENSSL_CNF"
-    [ -e "$dir/$purpose.crt.txt" ] || $OPENSSL x509 -in "$dir/$purpose.crt" -out "$dir/$purpose.crt.txt" -text
+    [ -s "$dir/$purpose.crt" ] || $OPENSSL x509 -req -sha256 -in "$dir/$purpose.csr" -CA "$ca.crt" -CAkey "$ca.key" \
+        -CAcreateserial -out "$dir/$purpose.crt" -extensions v3_req -extfile "$OPENSSL_CONF"
+    [ -s "$dir/$purpose.crt.txt" ] || $OPENSSL x509 -in "$dir/$purpose.crt" -text > "$dir/$purpose.crt.txt"
 
     ca_bundle=${ca_bundle%,}
     cat ${ca_bundle//,/.crt }.crt > "$dir/$purpose.ca-bundle.crt"
+
+    [ -s "$dir/$purpose.p12" ] || $OPENSSL pkcs12 -export -out "$dir/$purpose.p12" -in "$dir/$purpose.crt" \
+        -certfile "$dir/$purpose.ca-bundle.crt" -inkey "$dir/$purpose.key" -password "pass:$PASSWORD"
+    chmod 0600 "$dir/$purpose.p12"
 }
 
 create_all_ca() {
@@ -120,7 +130,7 @@ issue_cert_for_vault() {
 issue_cert_for_client() {
     local host="${1:?}"
 
-    issue_cert "$host" $INFRA_CLIENT_CA client server
+    issue_cert "$host" $INFRA_CLIENT_CA client server $INFRA_SERVICE_CA
 }
 
 issue_cert_for_infra_services() {
@@ -137,7 +147,7 @@ host="$2"
 
 [ "$host" ] && {
     [[ "$host" =~ ^[0-9\.]+$ ]] && : ${KEY_SAN:=DNS.1:localhost,IP.1:127.0.0.1,IP.2:$host} ||
-                                 : ${KEY_SAN:=DNS.1:localhost,DNS.2:$host,IP.1:127.0.0.1}
+                                   : ${KEY_SAN:=DNS.1:localhost,DNS.2:$host,IP.1:127.0.0.1}
 } || : ${KEY_SAN:=DNS.1:localhost,IP.1:127.0.0.1}
 export KEY_SAN
 

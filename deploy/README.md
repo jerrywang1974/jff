@@ -6,16 +6,12 @@ See example.mk for an example system deployment description file.
 
 ```bash
 scripts/bootstrap-with-docker-machine.sh node1 node2
-
-for node in node1 node2; do
-    curl -s -v --cacert ./localhost/client/server.ca-bundle.crt \
-        --cert ./localhost/client/server.crt \
-        --key ./localhost/client/server.key \
-        "https://`docker-machine ip $node`:8500/v1/kv/?recurse&pretty"
-done
 ```
 
 ## Verify the example cluster
+
+Notice Consul and Swarm need some time to elect master node, you might
+need to wait for about 10 seconds to verify.
 
 ```bash
 export DOCKER_MACHINE_NAME=node1
@@ -25,6 +21,45 @@ export DOCKER_CERT_PATH=`pwd`/certs/local/localhost/docker
 docker version
 docker info
 docker ps
+
+CURL_OPTS="-s --cacert ./certs/local/localhost/client/server.ca-bundle.crt"
+[ "`uname -s`" = Darwin ] &&
+    CURL_OPTS="$CURL_OPTS --cert ./certs/local/localhost/client/server.p12:changeit --cert-type P12" ||
+    CURL_OPTS="$CURL_OPTS --cert ./certs/local/localhost/client/server.crt --cert-type PEM --key ./certs/local/localhost/client/server.key"
+
+for node in node1 node2; do
+    curl -v $CURL_OPTS "https://`docker-machine ip $node`:8500/v1/kv/?recurse&pretty"
+    curl -v $CURL_OPTS "https://`docker-machine ip $node`:8500/v1/catalog/services?pretty"
+    curl -v $CURL_OPTS "https://`docker-machine ip $node`:8500/v1/catalog/service/consul?pretty"
+    curl -v $CURL_OPTS "https://`docker-machine ip $node`:8500/v1/catalog/service/vault?pretty"
+done
+```
+
+Download Vault binary from https://www.vaultproject.io/downloads.html,
+then initialize Vault.
+
+```bash
+export VAULT_ADDR=https://`docker-machine ip node1`:8200
+export VAULT_CACERT=`pwd`/certs/local/localhost/client/server.ca-bundle.crt
+export VAULT_CLIENT_CERT=`pwd`/certs/local/localhost/client/server.crt
+export VAULT_CLIENT_KEY=`pwd`/certs/local/localhost/client/server.key
+
+./vault init    # write down 5 master keys and initial root token
+./vault status
+./vault unseal  # input first master key
+./vault unseal  # input second master key
+./vault unseal  # input third master key
+./vault status
+
+export VAULT_TOKEN=...initial-root-token...
+./vault mounts
+
+for node in node1 node2; do
+    curl -v $CURL_OPTS "https://`docker-machine ip $node`:8500/v1/kv/?recurse&pretty"
+    curl -v $CURL_OPTS "https://`docker-machine ip $node`:8500/v1/catalog/services?pretty"
+    curl -v $CURL_OPTS "https://`docker-machine ip $node`:8500/v1/catalog/service/consul?pretty"
+    curl -v $CURL_OPTS "https://`docker-machine ip $node`:8500/v1/catalog/service/vault?pretty"
+done
 ```
 
 ## Test example deployment

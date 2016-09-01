@@ -55,7 +55,7 @@ CONSUL_TLS_CONFIG		:= \
 	"verify_incoming": true, \
 	"verify_outgoing": true, \
 	"verify_server_hostname": false, \
-	"ports": { "http": -1, "https": 8500 }
+	"ports": { "dns": -1, "http": -1, "https": 8500 }
 
 DOCKER_SOCK_FILE		?= /var/run/docker.sock
 DOCKER_HOST_IP			:= $(shell ip -o -4 addr list $(CONSUL_BIND_INTERFACE) | head -n1 | awk '{print $$4}' | cut -d/ -f1)

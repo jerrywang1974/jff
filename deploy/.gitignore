@@ -1,5 +1,6 @@
 CFSSL-*/
 
+certs/
 *.srl
 *.crt
 *.csr
