@@ -83,7 +83,7 @@ consul_docker_create_command = \
 
 # Recommended for 0.6. Consul 0.7 will set the configuration by default.
 ifeq ($(CONSUL_IS_SERVER),true)
-	consul_docker_create_options += -e 'CONSUL_LOCAL_CONFIG={"skip_leave_on_interrupt": true, $(CONSUL_TLS_CONFIG)}'
+consul_docker_create_options += -e 'CONSUL_LOCAL_CONFIG={"skip_leave_on_interrupt": true, $(CONSUL_TLS_CONFIG)}'
 consul_docker_create_command += -server -bootstrap-expect $(CONSUL_BOOTSTRAP_EXPECT)
 else
 consul_docker_create_options += -e 'CONSUL_LOCAL_CONFIG={"leave_on_terminate": true, $(CONSUL_TLS_CONFIG)}'
