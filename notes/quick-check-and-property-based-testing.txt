@@ -1,0 +1,28 @@
+https://en.wikipedia.org/wiki/QuickCheck
+http://hypothesis.works/articles/quickcheck-in-every-language/
+
+https://github.com/jsverify/jsverify            JavaScript
+
+http://hypothesis.works/                        Python
+
+https://github.com/clojure/test.check           Clojure
+
+https://www.scalacheck.org/                     Scala
+https://github.com/scalaprops/scalaprops        Scala
+https://github.com/japgolly/nyaya               Scala
+
+https://github.com/fscheck/FsCheck              F#
+
+https://hackage.haskell.org/package/QuickCheck  Haskell
+
+http://www.quviq.com/                           Erlang
+https://github.com/manopapad/proper             Erlang
+https://github.com/krestenkrab/triq             Erlang
+
+https://github.com/pholser/junit-quickcheck/    Java
+http://www.functionaljava.org/docs.html         Java
+
+https://github.com/mcandre/cl-quickcheck        Common Lisp
+
+https://docs.racket-lang.org/quickcheck/index.html  Racket
+
