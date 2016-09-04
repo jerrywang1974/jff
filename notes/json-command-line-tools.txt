@@ -1,0 +1,9 @@
+https://stedolan.github.io/jq/
+https://github.com/ddopson/underscore-cli
+http://trentm.com/json/
+
+http://kmkeen.com/jshon/
+https://github.com/micha/jsawk
+
+https://github.com/kristopolous/TickTick     JSON parsing in Bash
+
