@@ -1,5 +1,8 @@
 Xapian      http://xapian.org/
 Sphinx      http://sphinxsearch.com/
+Groonga     http://groonga.org/related-projects.html
+MySQL       https://dev.mysql.com/doc/refman/5.7/en/fulltext-search.html
+PostgreSQL  https://www.postgresql.org/docs/9.5/static/textsearch.html
 Solr
 Katta
 ElasticSearch
