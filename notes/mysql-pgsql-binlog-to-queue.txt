@@ -1,0 +1,10 @@
+MySQL
+
+    https://developer.zendesk.com/blog/introducing-maxwell-a-mysql-to-kafka-binlog-processor
+    http://debezium.io/docs/connectors/mysql/
+    https://github.com/alibaba/canal
+
+PostgreSQL
+
+    http://www.confluent.io/blog/bottled-water-real-time-integration-of-postgresql-and-kafka/
+
