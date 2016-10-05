@@ -22,6 +22,8 @@ if [ -s "$DOCKER_HOST_IP_FILE" ]; then
     if [ "$host_ip" ]; then
         export CONSUL_SERVICE_HOST="$host_ip"
         export CONSUL_SERVICE_PORT="${CONSUL_SERVICE_PORT:-8500}"
+        export CONSUL_HTTP_ADDR=$CONSUL_SERVICE_HOST:$CONSUL_SERVICE_PORT
+        export CONSUL_HTTP_SSL=true
 
         if [ -w /etc/hosts ]; then
             printf "\n%s\t%s\n" $host_ip consul >> /etc/hosts

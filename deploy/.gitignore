@@ -1,6 +1,7 @@
 CFSSL-*/
 
 certs/
+consul-tokens/
 *.srl
 *.crt
 *.csr
@@ -10,4 +11,4 @@ certs/
 *.csr.txt
 *.key.txt
 *.pem.txt
-
+.DS_Store

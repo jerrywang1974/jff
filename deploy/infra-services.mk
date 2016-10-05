@@ -3,18 +3,16 @@
 DEPLOY_ENV			?= infra
 DEPLOY_TAG			?= $(shell date +%Y%m%d)
 
-REGISTRATOR_CONSUL_HTTP_TOKEN	?= $(CONSUL_HTTP_TOKEN)
-REGISTRATOR_EXTRA_OPTIONS	?= -retry-attempts -1 --resync 0
+REGISTRATOR_EXTRA_OPTIONS	?= -retry-attempts 10 --resync 0
 REGISTRATOR_CERTS_DIR		?= /etc/docker/certs/registrator
 
-VAULT_CONSUL_HTTP_TOKEN		?= $(CONSUL_HTTP_TOKEN)
 VAULT_HTTP_PORT			?= 8200
 VAULT_CLUSTER_ADDR		?= $(DOCKER_HOST_IP):8201
 VAULT_CERTS_DIR			?= /etc/docker/certs/vault
-VAULT_LOCAL_CONFIG		?= '{ \
+VAULT_LOCAL_CONFIG		?= { \
 	"backend": { "consul": { \
 		"path": "vault/", \
-		"address": "localhost:$(CONSUL_HTTP_PORT)", \
+		"address": "127.0.0.1:$(CONSUL_HTTP_PORT)", \
 		"scheme": "https", \
 		"check_timeout": "5s", \
 		"disable_registration": "false", \
@@ -37,9 +35,8 @@ VAULT_LOCAL_CONFIG		?= '{ \
 		"tls_min_version": "tls12" \
 	} }, \
 	"default_lease_ttl": "720h", \
-	"max_lease_ttl": "720h" }'
+	"max_lease_ttl": "720h" }
 
-SWARM_CONSUL_HTTP_TOKEN		?= $(CONSUL_HTTP_TOKEN)
 SWARM_CERTS_DIR			?= /etc/docker/certs/swarm
 SWARM_HTTP_PORT			?= 3376
 
@@ -48,14 +45,22 @@ CONSUL_BIND_INTERFACE		?= eth1
 CONSUL_BOOTSTRAP_EXPECT		?= 5
 CONSUL_IS_SERVER		?= false
 CONSUL_CERTS_DIR		?= /etc/docker/certs/consul
-CONSUL_TLS_CONFIG		:= \
+CONSUL_DATACENTER		?= dc1
+CONSUL_ACL_DATACENTER		?= dc1
+CONSUL_ACL_MASTER_TOKEN		?= dummy
+CONSUL_LOCAL_CONFIG		?= { \
+	"datacenter": "$(CONSUL_DATACENTER)", \
+	"acl_datacenter": "$(CONSUL_ACL_DATACENTER)", \
+	"acl_default_policy": "deny", \
+	"acl_down_policy": "extend-cache", \
+	"acl_master_token": "$(CONSUL_ACL_MASTER_TOKEN)", \
 	"ca_file": "/certs/server.ca-bundle.crt", \
 	"cert_file": "/certs/server.crt", \
 	"key_file": "/certs/server.key", \
 	"verify_incoming": true, \
 	"verify_outgoing": true, \
 	"verify_server_hostname": false, \
-	"ports": { "dns": -1, "http": -1, "https": 8500 }
+	"ports": { "dns": -1, "http": -1, "https": $(CONSUL_HTTP_PORT) } }
 
 DOCKER_SOCK_FILE		?= /var/run/docker.sock
 DOCKER_HOST_IP			:= $(shell ip -o -4 addr list $(CONSUL_BIND_INTERFACE) | head -n1 | awk '{print $$4}' | cut -d/ -f1)
@@ -72,21 +77,18 @@ DOCKER_CREATE_OPTIONS		:= --restart=always
 stateful_services = consul swarm registrator vault
 
 
-consul_docker_create_image = consul:v0.6.4
+consul_docker_create_image = consul:v0.7.0
 consul_docker_create_options = \
 	-l SERVICE_IGNORE=true \
 	--net host \
 	-e CONSUL_BIND_INTERFACE=$(CONSUL_BIND_INTERFACE) \
+	-e 'CONSUL_LOCAL_CONFIG=$(CONSUL_LOCAL_CONFIG)' \
 	-v $(CONSUL_CERTS_DIR):/certs:ro
 consul_docker_create_command = \
 	agent -client=0.0.0.0 -rejoin
 
-# Recommended for 0.6. Consul 0.7 will set the configuration by default.
 ifeq ($(CONSUL_IS_SERVER),true)
-consul_docker_create_options += -e 'CONSUL_LOCAL_CONFIG={"skip_leave_on_interrupt": true, $(CONSUL_TLS_CONFIG)}'
 consul_docker_create_command += -server -bootstrap-expect $(CONSUL_BOOTSTRAP_EXPECT)
-else
-consul_docker_create_options += -e 'CONSUL_LOCAL_CONFIG={"leave_on_terminate": true, $(CONSUL_TLS_CONFIG)}'
 endif
 
 
@@ -104,17 +106,19 @@ registrator_docker_create_options = \
 registrator_docker_create_command = \
 	-ip $(DOCKER_HOST_IP) \
 	$(REGISTRATOR_EXTRA_OPTIONS) \
-	consul-tls://localhost:$(CONSUL_HTTP_PORT)
+	consul-tls://127.0.0.1:$(CONSUL_HTTP_PORT)
 
 
+# Vault registers itself into Consul, don't need Registrator.
 vault_docker_create_image = vault:0.6.1
 vault_docker_create_options = \
+	-l SERVICE_IGNORE=true \
 	-l SERVICE_NAME=vault \
 	--net host \
 	-e CONSUL_HTTP_TOKEN=$(VAULT_CONSUL_HTTP_TOKEN) \
 	-e VAULT_REDIRECT_ADDR=https://$(DOCKER_HOST_IP):8200 \
 	-e VAULT_CLUSTER_ADDR=$(VAULT_CLUSTER_ADDR) \
-	-e VAULT_LOCAL_CONFIG=$(VAULT_LOCAL_CONFIG) \
+	-e 'VAULT_LOCAL_CONFIG=$(VAULT_LOCAL_CONFIG)' \
 	--cap-add IPC_LOCK \
 	-v $(VAULT_CERTS_DIR):/certs:ro
 vault_docker_create_command = \
@@ -138,12 +142,28 @@ swarm_docker_create_command = \
 	--discovery-opt kv.certfile=/certs/libkv.crt \
 	--discovery-opt kv.keyfile=/certs/libkv.key \
 	--discovery-opt kv.path=docker/nodes \
-	consul://localhost:$(CONSUL_HTTP_PORT)
+	consul://127.0.0.1:$(CONSUL_HTTP_PORT)
 
 
 include deploy.mk
 
 ifneq (,$(SWARM_ENABLED))
 $(error This Makefile is expected to be ran directly against Docker Engine!)
+endif
+
+ifeq ($(CONSUL_IS_SERVER)+$(CONSUL_ACL_MASTER_TOKEN),true+dummy)
+$(error CONSUL_ACL_MASTER_TOKEN must be set for Consul server)
+endif
+
+ifeq (,$(SWARM_CONSUL_HTTP_TOKEN))
+$(error SWARM_CONSUL_HTTP_TOKEN must not be empty)
+endif
+
+ifeq (,$(REGISTRATOR_CONSUL_HTTP_TOKEN))
+$(error REGISTRATOR_CONSUL_HTTP_TOKEN must not be empty)
+endif
+
+ifeq (,$(VAULT_CONSUL_HTTP_TOKEN))
+$(error VAULT_CONSUL_HTTP_TOKEN must not be empty)
 endif
 
