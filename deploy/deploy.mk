@@ -247,6 +247,7 @@ start-$(1)-$(2): $(foreach service,$($(1)_dependencies),start-$(service))
 	    # utilities in package libcap2-bin.
 	    trace_and_run $(DOCKER) create --restart=unless-stopped \
 		    -l SERVICE_NAME=$(1) \
+		    -l SERVICE_TAGS=$(DEPLOY_ENV) \
 		    $(DOCKER_CREATE_OPTIONS) \
 		    $($(1)_docker_create_options) \
 		    $($(1)_$(2)_docker_create_options) \
