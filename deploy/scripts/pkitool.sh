@@ -130,7 +130,7 @@ issue_cert_for_vault() {
 issue_cert_for_client() {
     local host="${1:?}"
 
-    issue_cert "$host" $INFRA_CLIENT_CA client server $INFRA_SERVICE_CA
+    issue_cert "$host" $INFRA_CLIENT_CA client client $INFRA_SERVICE_CA
 }
 
 issue_cert_for_infra_services() {

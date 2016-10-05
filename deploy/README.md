@@ -22,10 +22,10 @@ docker version
 docker info
 docker ps
 
-CURL_OPTS="-s --cacert ./certs/local/localhost/client/server.ca-bundle.crt"
+CURL_OPTS="-s --cacert ./certs/local/localhost/client/client.ca-bundle.crt"
 [ "`uname -s`" = Darwin ] &&
-    CURL_OPTS="$CURL_OPTS --cert ./certs/local/localhost/client/server.p12:changeit --cert-type P12" ||
-    CURL_OPTS="$CURL_OPTS --cert ./certs/local/localhost/client/server.crt --cert-type PEM --key ./certs/local/localhost/client/server.key"
+    CURL_OPTS="$CURL_OPTS --cert ./certs/local/localhost/client/client.p12:changeit --cert-type P12" ||
+    CURL_OPTS="$CURL_OPTS --cert ./certs/local/localhost/client/client.crt --cert-type PEM --key ./certs/local/localhost/client/client.key"
 
 for node in node1 node2; do
     curl -v $CURL_OPTS "https://`docker-machine ip $node`:8500/v1/kv/?recurse&pretty"
@@ -40,9 +40,9 @@ then initialize Vault.
 
 ```bash
 export VAULT_ADDR=https://`docker-machine ip node1`:8200
-export VAULT_CACERT=`pwd`/certs/local/localhost/client/server.ca-bundle.crt
-export VAULT_CLIENT_CERT=`pwd`/certs/local/localhost/client/server.crt
-export VAULT_CLIENT_KEY=`pwd`/certs/local/localhost/client/server.key
+export VAULT_CACERT=`pwd`/certs/local/localhost/client/client.ca-bundle.crt
+export VAULT_CLIENT_CERT=`pwd`/certs/local/localhost/client/client.crt
+export VAULT_CLIENT_KEY=`pwd`/certs/local/localhost/client/client.key
 
 ./vault init    # write down 5 master keys and initial root token
 ./vault status

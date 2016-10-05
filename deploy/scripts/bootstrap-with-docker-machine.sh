@@ -38,10 +38,13 @@ for node in "$@"; do
         cd certs/local
         rm -rf $node/
         env KEY_SAN=$(docker-machine ssh $node bash gen-subject-alt-names.sh) $SCRIPTS/pkitool.sh oneshot $node
+        $SCRIPTS/pkitool.sh docker localhost    # certs for Docker client
+        $SCRIPTS/pkitool.sh client localhost    # certs for client of Consul and Vault
     )
 
     docker-machine ssh $node "sudo rm -rf certs/$node /etc/docker/certs; mkdir -p -m 0700 certs"
     docker-machine scp -r certs/local/$node $node:certs/
+    docker-machine scp -r certs/local/localhost/client $node:certs/$node/
     docker-machine ssh $node "find certs/$node \( -name '*.csr' -o -name '*.txt' -o -name '*.p12' \) -delete"
     docker-machine ssh $node sudo mv certs/$node /etc/docker/certs
     docker-machine ssh $node sudo ln -sf /etc/docker/certs/dockerd/server.ca-bundle.crt /var/lib/boot2docker/ca.pem
@@ -81,17 +84,10 @@ for node in "$@"; do
 done
 
 
-(
-    cd certs/local
-    $SCRIPTS/pkitool.sh docker localhost     # certs for Docker client
-    $SCRIPTS/pkitool.sh client localhost     # certs for client of Consul and Vault
-)
-
-
-CURL_OPTS="-s --cacert ./certs/local/localhost/client/server.ca-bundle.crt"
+CURL_OPTS="-s --cacert ./certs/local/localhost/client/client.ca-bundle.crt"
 [ "`uname -s`" = Darwin ] &&
-    CURL_OPTS="$CURL_OPTS --cert ./certs/local/localhost/client/server.p12:changeit --cert-type P12" ||
-    CURL_OPTS="$CURL_OPTS --cert ./certs/local/localhost/client/server.crt --cert-type PEM --key ./certs/local/localhost/client/server.key"
+    CURL_OPTS="$CURL_OPTS --cert ./certs/local/localhost/client/client.p12:changeit --cert-type P12" ||
+    CURL_OPTS="$CURL_OPTS --cert ./certs/local/localhost/client/client.crt --cert-type PEM --key ./certs/local/localhost/client/client.key"
 
 for token in anonymous docker registrator vault; do
     id=`cat consul-tokens/$token`

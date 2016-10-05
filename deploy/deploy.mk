@@ -265,6 +265,10 @@ start-$(1)-$(2): $(foreach service,$($(1)_dependencies),start-$(service))
 		    -e DEPLOY_TAG=$($(1)_tag) \
 		    -e DEPLOY_INSTANCE=$(2) \
 		    -e DOCKER_HOST_IP_FILE=$(DOCKER_HOST_IP_FILE) \
+		    -e CLIENT_TLS_CACERT=/client-certs/client.ca-bundle.crt \
+		    -e CLIENT_TLS_CERT=/client-certs/client.crt \
+		    -e CLIENT_TLS_KEY=/client-certs/client.key \
+		    -v /etc/docker/certs/client:/client-certs:ro \
 		    $(foreach path,$(BIND_MOUNTS),-v $$$$VOL_DIR/$(path):$(path)) \
 		    -v $(DOCKER_ADVERTISE_IP_FILE):$(DOCKER_HOST_IP_FILE):ro \
 		    $($(1)_docker_create_image) $($(1)_docker_create_command)
