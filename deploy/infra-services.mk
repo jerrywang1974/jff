@@ -113,7 +113,6 @@ registrator_docker_create_command = \
 vault_docker_create_image = vault:0.6.1
 vault_docker_create_options = \
 	-l SERVICE_IGNORE=true \
-	-l SERVICE_NAME=vault \
 	--net host \
 	-e CONSUL_HTTP_TOKEN=$(VAULT_CONSUL_HTTP_TOKEN) \
 	-e VAULT_REDIRECT_ADDR=https://$(DOCKER_HOST_IP):8200 \
@@ -127,7 +126,6 @@ vault_docker_create_command = \
 
 swarm_docker_create_image = swarm:1.2.5
 swarm_docker_create_options = \
-	-l SERVICE_NAME=swarm \
 	--net host \
 	-e CONSUL_HTTP_TOKEN=$(SWARM_CONSUL_HTTP_TOKEN) \
 	-v $(SWARM_CERTS_DIR):/certs:ro

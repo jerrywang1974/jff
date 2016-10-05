@@ -231,16 +231,21 @@ start-$(1)-$(2): $(foreach service,$($(1)_dependencies),start-$(service))
 	    fi
 	}
 
+	trace_and_run() {
+	    echo -ne "\t"; echo "$$$$@"; echo
+	    "$$$$@"
+	}
+
 	status=`$(DOCKER) ps -a --no-trunc -f name=$$$$CONTAINER_NAME --format "{{.Status}}"`
 	if [ -z "$$$$status" ]; then
 	    stop_stateful_service_instance
 
 	    tmp_name=$$$$CONTAINER_NAME-$(shell date +%Y%m%d_%H%M%S)-tmp
-	    echo -n "	creating $$$$CONTAINER_NAME "
+	    echo "	creating $$$$CONTAINER_NAME..."
 	    # CAP_NET_ADMIN is required by iptables, the docker image's
 	    # entry script should properly drop this capability with
 	    # utilities in package libcap2-bin.
-	    $(DOCKER) create --restart=unless-stopped \
+	    trace_and_run $(DOCKER) create --restart=unless-stopped \
 		    -l SERVICE_NAME=$(1) \
 		    $(DOCKER_CREATE_OPTIONS) \
 		    $($(1)_docker_create_options) \
@@ -288,7 +293,7 @@ start-$(1)-$(2): $(foreach service,$($(1)_dependencies),start-$(service))
 	[ "$$$${status:0:2}" = "Up" ] || {
 		stop_stateful_service_instance
 
-		echo "	starting $$$$CONTAINER_NAME"
+		echo "	starting $$$$CONTAINER_NAME..."
 		$(DOCKER) start $$$$CONTAINER_NAME >/dev/null
 	}
 
