@@ -41,6 +41,7 @@ RUN         set -e -x && \
                 traceroute \
                 tree \
                 unzip \
+                uuid-runtime \
                 vim \
                 wget \
                 xz-utils \
@@ -145,16 +146,6 @@ RUN         set -e -x && \
             unzip $zipball -d / && \
             rm $zipball
 
-# consul-template
-RUN         set -e -x && \
-            export DEBIAN_FRONTEND=noninteractive && \
-            cd /opt && \
-            zipball=consul-template_0.15.0_linux_amd64.zip && \
-            curl -L -O https://releases.hashicorp.com/consul-template/0.15.0/$zipball && \
-            [ `sha1sum -b $zipball | awk '{print $1}'` = 6cb37c40ea9a3885f12121d74f1b50a814fd0bb1 ] && \
-            unzip $zipball -d /usr/local/bin/ && \
-            rm $zipball
-
 # dumb-init has issues: https://github.com/Yelp/dumb-init/issues/78
 #                       https://github.com/Yelp/dumb-init/issues/51
 # tini
@@ -164,6 +155,16 @@ RUN         set -e -x && \
             curl -L -O https://github.com/krallin/tini/releases/download/v0.10.0/tini && \
             [ `sha1sum -b tini | awk '{print $1}'` = 03e12f4652c4afb252dbb18a305d0c3e6ec1a43d ] && \
             chmod 555 tini
+
+# consul-template
+RUN         set -e -x && \
+            export DEBIAN_FRONTEND=noninteractive && \
+            cd /opt && \
+            zipball=consul-template_0.16.0_linux_amd64.zip && \
+            curl -L -O https://releases.hashicorp.com/consul-template/0.16.0/$zipball && \
+            [ `sha1sum -b $zipball | awk '{print $1}'` = 974a270f0c83828d8915f7fb4e33bbd84a50b87f ] && \
+            unzip $zipball -d /usr/local/bin/ && \
+            rm $zipball
 
 # Cleanup
 RUN         rm -rf /var/lib/apt/lists/* /tmp/* /root/{.npm,.gem}
