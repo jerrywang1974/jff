@@ -20,3 +20,10 @@ R distribution, the former the faster:
     Atlas + R   https://packages.debian.org/unstable/libatlas3-base
     BLAS + R    https://packages.debian.org/unstable/libblas3
 
+
+Awesome R       *****
+    https://github.com/qinwf/awesome-R
+
+Data Science R
+    https://github.com/ujjwalkarn/DataScienceR
+

@@ -8,3 +8,5 @@ lsusb
 hal
 dmidecode
 
+Puppet facter
+Chef ohai
