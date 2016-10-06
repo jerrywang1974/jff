@@ -64,7 +64,6 @@ CONSUL_LOCAL_CONFIG		?= { \
 
 DOCKER_SOCK_FILE		?= /var/run/docker.sock
 DOCKER_HOST_IP			:= $(shell ip -o -4 addr list $(CONSUL_BIND_INTERFACE) | head -n1 | awk '{print $$4}' | cut -d/ -f1)
-DOCKER_CREATE_OPTIONS		:= --restart=always
 
 # Although some are not stateful, we hope they keep single running
 # instance on each node. Remember deploy.mk doesn't automatically stop
