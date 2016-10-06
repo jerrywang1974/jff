@@ -19,14 +19,14 @@ client:
 (4) IPSec: http://wiki.debian.org/IPsec
 FreeS/WAN: 不再维护，派生出 OpenSWAN 和 StrongSWAN。
 
-OpenSWAN
-StrongSWAN
+StrongSWAN      (recommended)
+OpenSWAN        https://github.com/xelerance/Openswan (almost dead)
+LibreSWARN      forked by original developers of OpenSWAN in 2012 after a lawsuit
+ipsec-tools     (racoon, used by FreeBSD/NetBSD/MacOSX and Linux, least features, doesn't support IKEv2)
 
 clients:
     ike         http://www.shrew.net/
-    racoon
     IsaKmpD
-    ipsec-tools
 
 (5) L2TP
 xl2tpd      http://www.xelerance.com/software/xl2tpd/
