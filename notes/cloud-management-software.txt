@@ -1,8 +1,0 @@
-OpenStack
-OpenQRM
-OpenNebula
-Eucalyptus
-ConVirt
-XenServer
-CloudStack
-Oracle VM
