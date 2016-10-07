@@ -319,6 +319,12 @@ set listchars+=extends:>,precedes:<
 
 set updatetime=2000
 
+if version >= 704
+    set cryptmethod=blowfish2
+elseif version >= 703
+    set cryptmethod=blowfish
+endif
+
 " for linux kernel source
 if getcwd() =~ 'linux-2.6'
     set noet tabstop=8 shiftwidth=8
