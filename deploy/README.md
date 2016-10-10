@@ -22,10 +22,10 @@ docker version
 docker info
 docker ps
 
-CURL_OPTS="-s --cacert ./certs/local/localhost/client/client.ca-bundle.crt"
+CURL_OPTS="-s --cacert `pwd`/certs/local/localhost/client/client.ca-bundle.crt"
 [ "`uname -s`" = Darwin ] &&
-    CURL_OPTS="$CURL_OPTS --cert ./certs/local/localhost/client/client.p12:changeit --cert-type P12" ||
-    CURL_OPTS="$CURL_OPTS --cert ./certs/local/localhost/client/client.crt --cert-type PEM --key ./certs/local/localhost/client/client.key"
+    CURL_OPTS="$CURL_OPTS --cert `pwd`/certs/local/localhost/client/client.p12:changeit --cert-type P12" ||
+    CURL_OPTS="$CURL_OPTS --cert `pwd`/certs/local/localhost/client/client.crt --cert-type PEM --key `pwd`/certs/local/localhost/client/client.key"
 
 for node in node1 node2; do
     curl -v $CURL_OPTS "https://`docker-machine ip $node`:8500/v1/kv/?recurse&pretty"
