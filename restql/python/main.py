@@ -34,7 +34,12 @@ def select(q):
     params = { k: normalize(params.getall(k)) for k in params.keys() }
     rows = query['db'].query(query['sql'].format(**params))
     response.content_type = 'application/json; charset=utf-8'
-    return rows.export('json')
+    try:
+        # bypass https://github.com/kennethreitz/records/issues/62
+        rows.next()
+        return rows.export('json')
+    except StopIteration:
+        return '[]'
 
 run(host='0.0.0.0', port=8080)
 
