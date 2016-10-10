@@ -8,7 +8,7 @@ db = records.Database(os.getenv('DB_URL'))
 
 queries = {
     'order': {
-        'sql': 'SELECT * FROM order WHERE pay_status IN :pay_status LIMIT :n',
+        'sql': 'SELECT * FROM order WHERE pay_status IN ({pay_status}) LIMIT {n}',
         'db': db
     }
 }
@@ -24,15 +24,15 @@ def digitize(s):
         return s
 
 def normalize(v):
-    if len(v) == 1: return digitize(v[0])
-    else: return tuple(map(digitize, v))
+    if len(v) == 1: return repr(digitize(v[0]))
+    else: return ', '.join(map(repr, map(digitize, v)))
 
 @get('/q/<q>')
 def select(q):
     query = queries[q]
     params = request.query
     params = { k: normalize(params.getall(k)) for k in params.keys() }
-    rows = query['db'].query(query['sql'], **params)
+    rows = query['db'].query(query['sql'].format(**params))
     response.content_type = 'application/json; charset=utf-8'
     return rows.export('json')
 
