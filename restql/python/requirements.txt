@@ -1,0 +1,4 @@
+bottle
+mysqlclient
+records
+ujson
