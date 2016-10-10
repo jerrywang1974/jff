@@ -1,0 +1,28 @@
+{
+  "name": "restql",
+  "version": "0.1.0",
+  "description": "a simple REST style SQL query service",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev-start": "env DEBUG=* NODE_ENV=development node index.js"
+  },
+  "author": "Yubao Liu <yubao.liu@gmail.com>",
+  "license": "ISC",
+  "dependencies": {
+    "apicache": "^0.2.2",
+    "compression": "^1.6.2",
+    "debug": "^2.2.0",
+    "express": "^4.14.0",
+    "lodash": "^4.14.1",
+    "mkdirp": "^0.5.1",
+    "morgan": "^1.7.0",
+    "mysql": "^2.11.1",
+    "pg": "^6.1.0",
+    "pg-hstore": "^2.3.2",
+    "sequelize": "^3.24.3",
+    "sqlite3": "^3.1.6",
+    "uuid": "^2.0.2",
+    "winston": "^2.2.0"
+  }
+}
