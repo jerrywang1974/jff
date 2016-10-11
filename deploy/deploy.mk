@@ -208,6 +208,15 @@ start-$(1)-$(2): $(foreach service,$($(1)_dependencies),start-$(service))
 	VOL_DIR=$(DOCKER_VOL_ROOT)/$$$$HOSTNAME
 	echo container=$$$$CONTAINER_NAME hostname=$$$$HOSTNAME layer=$(3) vol_dir=$$$$VOL_DIR
 
+	log() {
+	    echo -ne "\t[`date '+%Y-%m-%d %H:%M:%S'`] "; echo "$$$$@"
+	}
+
+	trace_and_run() {
+	    log "$$$$@"; echo
+	    "$$$$@"
+	}
+
 	stop_stateful_service_instance() {
 	    if [ $(3) = stateful ]; then
 		ids=`$(DOCKER) ps -a --no-trunc \
@@ -217,23 +226,18 @@ start-$(1)-$(2): $(foreach service,$($(1)_dependencies),start-$(service))
 		    -f label=deploy.instance=$(2) \
 		    --format "{{.ID}}"`
 		[ -z "$$$$ids" ] || {
-			echo "	stopping old containers for $(DEPLOY_ENV)-$(1)-$(2), timeout=$($(1)_docker_stop_timeout)s..."
+			log "stopping old containers for $(DEPLOY_ENV)-$(1)-$(2), timeout=$($(1)_docker_stop_timeout)s..."
 			$(DOCKER) stop -t $($(1)_docker_stop_timeout) $$$$ids >/dev/null
 			$(DOCKER) wait $$$$ids >/dev/null
 		}
 		[ -z "$$$$ids" ] || nodes=$(if $(SWARM_ENABLED),`$(DOCKER) inspect --format "{{.Node.ID}}" $$$$ids | sort -u`)
 		[ -z "$$$$nodes" ] || [ `echo $$$$nodes | wc -w` = 1 ] || {
-			echo "	multiple stateful service instances of $(DEPLOY_ENV)-$(1)-$(2) found on different nodes:"
-			echo "	"$$$$nodes
+			log "multiple stateful service instances of $(DEPLOY_ENV)-$(1)-$(2) found on different nodes:"
+			log $$$$nodes
 			exit 1
 		} >&2
 		[ -z "$$$$nodes" ] || node_constraint="-e constraint:node==$$$$nodes"
 	    fi
-	}
-
-	trace_and_run() {
-	    echo -ne "\t"; echo "$$$$@"; echo
-	    "$$$$@"
 	}
 
 	status=`$(DOCKER) ps -a --no-trunc -f name=$$$$CONTAINER_NAME --format "{{.Status}}"`
@@ -241,7 +245,7 @@ start-$(1)-$(2): $(foreach service,$($(1)_dependencies),start-$(service))
 	    stop_stateful_service_instance
 
 	    tmp_name=$$$$CONTAINER_NAME-$(shell date +%Y%m%d_%H%M%S)-tmp
-	    echo "	creating $$$$CONTAINER_NAME..."
+	    log "creating $$$$CONTAINER_NAME..."
 	    # CAP_NET_ADMIN is required by iptables, the docker image's
 	    # entry script should properly drop this capability with
 	    # utilities in package libcap2-bin.
@@ -294,7 +298,7 @@ start-$(1)-$(2): $(foreach service,$($(1)_dependencies),start-$(service))
 	[ "$$$${status:0:2}" = "Up" ] || {
 		stop_stateful_service_instance
 
-		echo "	starting $$$$CONTAINER_NAME..."
+		log "starting $$$$CONTAINER_NAME..."
 		$(DOCKER) start $$$$CONTAINER_NAME >/dev/null
 	}
 
@@ -308,7 +312,7 @@ start-$(1)-$(2): $(foreach service,$($(1)_dependencies),start-$(service))
 		num_containers=$(words $(call container_names,$(word $j,$($(1)_dependencies)))); \
 		num_ports_per_container=$$$$(( ($$$${#array[@]} - 3 * $$$$num_containers) / 2 / $$$$num_containers )); \
 		[ $$$${#array[@]} = $$$$(( $$$$num_containers * (3 + 2 * $$$$num_ports_per_container) )) ] || { \
-		    echo "	inconsistent exposed ports among instances of service $(word $j,$($(1)_dependencies))" >&2; \
+		    log "inconsistent exposed ports among instances of service $(word $j,$($(1)_dependencies))" >&2; \
 		    exit 1; \
 	        }; \
 		for ((k=0; k<$$$$num_ports_per_container; ++k)); do \
@@ -325,7 +329,7 @@ start-$(1)-$(2): $(foreach service,$($(1)_dependencies),start-$(service))
 			m=$$$$(( $$$$m + 2 * $$$$k )); \
 		        tmp=$$$${array[$$$$((m++))]}; \
 			[ -z "$$$$port_proto" ] && port_proto=$$$$tmp || [ "$$$$port_proto" = "$$$$tmp" ] || { \
-			    echo "	ports in 'docker inspect -f {{.NetworkSettings.Ports}}' isn't sorted" >&2; \
+			    log "ports in 'docker inspect -f {{.NetworkSettings.Ports}}' isn't sorted" >&2; \
 			    exit 1; \
 			}; \
 		        dest=$$$${array[$$$$m]}; \
@@ -340,7 +344,7 @@ start-$(1)-$(2): $(foreach service,$($(1)_dependencies),start-$(service))
 			    $(SERVICE_SUBNET).$j \
 			    $$$$port_proto \
 			    "$$$${destinations[@]}" | \
-			while read log; do echo "	$$$$log"; done; \
+			while read log; do log "$$$$log"; done; \
 		done; )
 	echo
 
