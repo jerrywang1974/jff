@@ -51,11 +51,11 @@ RUN         set -e -x && \
 RUN         set -e -x && \
             export DEBIAN_FRONTEND=noninteractive && \
             cd /opt && \
-            tarball=jdk-8u102-linux-x64.tar.gz && \
-            curl -L -b oraclelicense=a -O http://download.oracle.com/otn-pub/java/jdk/8u102-b14/$tarball && \
-            [ `sha1sum -b $tarball | awk '{print $1}'` = 01e57a2f73bd908ecc99cd9a32740062e4cf0ec3 ] && \
+            tarball=jdk-8u112-linux-x64.tar.gz && \
+            curl -L -b oraclelicense=a -O http://download.oracle.com/otn-pub/java/jdk/8u112-b14/$tarball && \
+            [ `sha256sum -b $tarball | awk '{print $1}'` = 777bd7d5268408a5a94f5e366c2e43e720c6ce4fe8c59d9a71e2961e50d774a5 ] && \
             tar xvf $tarball && \
-            ln -snf jdk1.8.0_102 jdk && \
+            ln -snf jdk1.8.0_112 jdk && \
             ln -snf /opt/jdk/bin/* /usr/local/bin/ && \
             rm $tarball
 
@@ -68,7 +68,7 @@ RUN         set -e -x && \
             rm /tmp/nodesource.gpg.key && \
             apt-get update && \
             apt-get install -y nodejs && \
-            npm install -g --registry=https://registry.npm.taobao.org pm2
+            npm install -g --registry=https://registry.npm.taobao.org pm2 yarn
 
 # PhantomJS
 RUN         set -e -x && \
