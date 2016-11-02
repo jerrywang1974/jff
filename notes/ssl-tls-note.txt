@@ -1,0 +1,8 @@
+Certificate Transparency
+    https://www.google.com/transparencyreport/https/ct/?hl=zh-CN
+    https://crt.sh/
+
+https://www.sslshopper.com/
+
+https://www.ssllabs.com/ssltest/
+

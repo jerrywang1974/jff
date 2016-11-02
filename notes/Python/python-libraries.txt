@@ -1,3 +1,37 @@
 http://py3readiness.org/
 https://python3wos.appspot.com/
 
+MySQL
+    MySQL-Python (for py2, C extension, not actively maintained)
+        $ pip install MySQL-python      # provide module MySQLdb
+
+    mysqlclient (fork of mysql-python for py3)      *****
+        $ pip install mysqlclient
+
+    MyPySQL (C extension, not fully support Python DBAPI 2.0)
+
+    OurSQL (C extension, not actively maintained)
+
+    PyMySQL (pure Python)   http://www.pymysql.org/ *****
+        $ pip install PyMySQL
+
+    CyMySQL (fork of PyMySQL with Cython optimization)
+        $ pip install cython
+        $ pip install cymysql
+
+    Oracle MySQL Connector/Python (both as pure Python and C extension)     *****
+        $ pip install mysql-connector   # or mysql-connector-python-rf
+
+
+    Benchmark to fetch 7477 rows and iterator the cursor, repeat 10 times, on 2016-10-30.
+        mysqlclient:                    2.8s
+        mysql-connector with raw=True:  3.2s        (use_pure=True)
+        cymysql:                        4.4s
+        pymysql:                        9.5s
+        mysql-connector with raw=False: 10.3s       (use_pure=True)
+
+Better REPL
+    bPython
+    ptPython and ptipython
+    IPython
+
