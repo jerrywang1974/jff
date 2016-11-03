@@ -33,8 +33,10 @@ RUN         yum -y update  && \
             yum clean all
 
 COPY        gpsupport-1.2.0.0 \
-            greenplum-db-4.3.9.1-build-1-rhel5-x86_64.bin \
-            greenplum-cc-web-2.4.0-build-dev-RHEL5-x86_64.bin \
+            fix_madpack.sh \
+            README-fix_madpack.txt \
+            greenplum-db-4.3.10.0-build-1-rhel5-x86_64.bin \
+            greenplum-cc-web-2.5.0-RHEL5-x86_64.bin \
             greenplum-loaders-4.3.8.1-build-1-RHEL5-x86_64.bin \
             libgppc-pv1.2_gpdb4.3orca-rhel5-x86_64.gppkg \
             madlib-ossv1.9.1_pv1.9.6_gpdb4.3orca-rhel5-x86_64.gppkg \

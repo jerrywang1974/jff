@@ -36,6 +36,8 @@ Use command `gpstate` to check service status, `gpaddmirrors` to add
 segment mirrors, `gpinitstandby` to add standby master, and `gppkg`
 to install extension packages `/opt/gpdb-pkgs/*.gppkg`.
 
+NOTICE: read /opt/gpdb-pkgs/README-fix\_madpack.txt first before install madlib!
+
 Enable Pivotal Query Optimizer on master:
 
 ```sh
