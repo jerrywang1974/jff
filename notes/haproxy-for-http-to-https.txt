@@ -1,0 +1,13 @@
+global
+
+    ssl-default-bind-ciphers ECDH+AESGCM:DH+AESGCM:ECDH+AES256:DH+AES256:ECDH+AES128:DH+AES:ECDH+3DES:DH+3DES:RSA+AESGCM:RSA+AES:RSA+3DES:!aNULL:!MD5:!DSS
+    ssl-default-bind-options no-sslv3
+
+frontend http_server
+    bind 127.0.0.1:80
+    use_backend https_server
+
+backend https_server
+    http-request set-header Host some.host.name
+    server https some.host.name:443 ssl verify required ca-file /etc/ssl/certs/ca-certificates.crt crt /path/to/cat/crt/and/key.pem force-tlsv12 sni str(some.host.name)
+
