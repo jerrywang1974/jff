@@ -1,0 +1,57 @@
+国密非对称加密算法 SM2
+
+http://www.oscca.gov.cn/News/201012/News_1197.htm
+https://github.com/guanzhi/GmSSL/wiki/SM2%E6%A4%AD%E5%9C%86%E6%9B%B2%E7%BA%BF%E5%85%AC%E9%92%A5%E5%AF%86%E7%A0%81
+https://wiki.openssl.org/index.php/Command_Line_Elliptic_Curve_Operations
+https://wiki.openssl.org/index.php/Elliptic_Curve_Cryptography
+
+(1) 椭圆曲线参数：
+
+    gmssl ecparam -list_curves
+
+    gmssl ecparam -name sm2p256v1 -param_enc explicit -text -noout
+
+    gmssl ecparam -name sm2p256v1 -param_enc explicit -out sm2p256v1.pem
+
+
+(2) 生成私钥：
+
+    gmssl ecparam -name sm2p256v1 -param_enc explicit -genkey -out sm2key.pem
+
+    gmssl ecparam -in sm2p256v1.pem -param_enc explicit -genkey -out sm2key.pem
+
+
+(3) Traditional SSLeay compatible format private key in PEM:
+
+-----BEGIN EC PRIVATE KEY-----
+...BASE64...
+-----END EC PRIVATE KEY-----
+
+
+(4) PKCS8 format private key in PEM:
+
+-----BEGIN PRIVATE KEY-----
+...BASE64...
+-----END PRIVATE KEY-----
+
+PKCS8 private key files, like the above, are capable of holding many different types of private key - not just EC keys.
+
+
+(5) Conversion
+
+pkcs8 -> traditional: openssl ec -in p8.pem -out trad.pem
+                      or:  openssl pkcs8 -in p8.pem -out trad.pem -nocrypt
+
+traditional -> pkcs8: openssl pkcs8 -topk8 -nocrypt -in trad.pem -out p8.pem
+
+
+(6) 公钥
+
+gmssl ec -in sm2key.pem -pubout -out sm2pub.pem
+
+-----BEGIN PUBLIC KEY-----
+...BASE64...
+-----END PUBLIC KEY-----
+
+This format is used to store all types of public keys in OpenSSL not just EC keys.
+
