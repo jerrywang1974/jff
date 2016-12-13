@@ -1,0 +1,45 @@
+MySQL 5.7.17 group replication on Debian Jessie
+
+http://lefred.be/content/group-replication-vs-galera/
+http://mysqlhighavailability.com/performance-evaluation-mysql-5-7-group-replication/
+http://www.gpfeng.com/?p=603
+http://feed.askmaclean.com/archives/group-replication-is-ga-with-mysql-5-7-17-comparison-with-galera.html
+
+基于binlog复制和Paxos 一致性协议，确保事务的全序，通过主键判断事务间是否冲突。
+* 组通讯传播 binlog, 各节点提取 writeset(修改的行的主键的hash值) 判断冲突；
+* 两两全连接；
+* 事务在各个节点间认证是否可提交是同步的，一旦认证，则应用事务是异步的；
+
+```
+for i in 1 2 3; do
+    docker run -dt --name mysql$i debian /bin/bash
+done
+
+apt update && apt install -y lsb-release wget whiptail
+dpkg -i mysql-apt-config_0.8.0-1_all.deb
+apt update && apt install -y mysql-server
+```
+
+需要注意的点：
+
+* 不同节点的 hostname 要能互相解析，否则节点在加入 group 时无法联通（可以在 /etc/hosts 设置);
+* 需要把 /etc/mysql/mysql.conf.d/mysqld.cnf 的 bind-address	= 127.0.0.1 注释掉，否则 rpl 账户不能连接其它节点;
+* http://dev.mysql.com/doc/refman/5.7/en/group-replication-ip-address-whitelisting.html
+  默认的 automatic, IP 白名单只有 127/8 子网，后续节点无法连接其它节点;
+  STOP GROUP_REPLICATION;
+  SET GLOBAL group_replication_ip_whitelist="10.0.0.0/8,172.17.0.0/16,127.0.0.0/8";
+  START GROUP_REPLICATION;
+* 最多 9 个 MySQL 节点;
+* 所有表都要有主键，只支持 InnoDB，必需使用 RBR 复制模式。
+* 避免大事务（在 certification 阶段可能冲突)，避免热点行在不同节点修改（频繁冲突而回滚事务)
+
+http://dev.mysql.com/doc/refman/5.7/en/group-replication-find-primary.html
+single-master 模式下找 master：
+SELECT VARIABLE_VALUE FROM performance_schema.global_status WHERE VARIABLE_NAME= 'group_replication_primary_member';
+
+http://dev.mysql.com/doc/refman/5.7/en/group-replication-data-definition-statements.html
+multi-master 下 DDL 不安全。
+
+http://dev.mysql.com/doc/refman/5.7/en/group-replication-usage-advice-and-limitations-of-distributed-recovery.html
+恢复时最好做一个快照恢复，否则可能 binlog 重放会花很长时间。
+
