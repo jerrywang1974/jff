@@ -10,6 +10,17 @@ http://feed.askmaclean.com/archives/group-replication-is-ga-with-mysql-5-7-17-co
 * 两两全连接；
 * 事务在各个节点间认证是否可提交是同步的，一旦认证，则应用事务是异步的；
 
+Galera 和 GR 非常像，比较大的区别：
+
+* Oracle 官方宣称 GR 性能高一倍 (http://mysqlhighavailability.com/performance-evaluation-mysql-5-7-group-replication/ ，作者是 Oracle 的性能工程师);
+* 用的一致性协议算法不一样(http://lefred.be/content/group-replication-vs-galera/)，GR 用的是 Paxos 变种 (http://sysnet.ucsd.edu/~yamao/pub/mencius-osdi.pdf), 
+  Galera 用的 Virtual Synchrony (http://dsn.jhu.edu/~yairamir/Yair_phd.pdf)， 大致意思是 GR 节点间两两通讯，而 VS 是令牌环，同一时刻只能一个节点发消息，所以 GR 的通讯效率更好;
+* Galera 支持不存储数据的 Arbitrator 节点，GR 不支持;
+* Galera 有一个 State Snapshot Transfer，在新节点或者落后太多节点加入时，可以自动传输快照（类似 redis 复制，如果 aof 断档跟不上则 dump rdb 给 slave），
+  GR 没这个功能，需要手动 mysqldump 导出导入，因为 binlog 可能被 purge，而且 binlog 重放会很慢，每个中间操作都需要重放。  但也有说法是 Galera 的 SST
+  要尽量避免（估计是突然大数据量传输，对网络，对 MySQL 锁机制影响很大);
+* Galera 在大事务下会导致集群基本挂起，这点 GR 的文档也提议要避免大事务，不知道并发性能比 Galera 是否要好点;
+
 ```
 for i in 1 2 3; do
     docker run -dt --name mysql$i debian /bin/bash
