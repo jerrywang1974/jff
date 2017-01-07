@@ -3,7 +3,7 @@
 set -e -o pipefail
 
 node1=$1
-[ $# -le 5 ] && n=$# || n=5     # no more than 5 server mode Consul agents in single data center!
+[ $# -le 6 ] && n=$# || n=6     # no more than 6 server mode Consul agents in single data center!
 [ $# -ge 2 ] || {
     echo "ERROR: must specify at least 2 nodes!"
     exit 1

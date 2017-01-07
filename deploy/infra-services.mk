@@ -41,8 +41,8 @@ SWARM_CERTS_DIR			?= /etc/docker/certs/swarm
 SWARM_HTTP_PORT			?= 3376
 
 CONSUL_BIND_INTERFACE		?= eth1
-# No more than 5 server mode Consul agents in single data center!
-CONSUL_BOOTSTRAP_EXPECT		?= 5
+# No more than 6 server mode Consul agents in single data center!
+CONSUL_BOOTSTRAP_EXPECT		?= 6
 CONSUL_IS_SERVER		?= false
 CONSUL_CERTS_DIR		?= /etc/docker/certs/consul
 CONSUL_DATACENTER		?= dc1

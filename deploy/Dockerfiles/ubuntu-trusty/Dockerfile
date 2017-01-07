@@ -3,6 +3,10 @@ FROM        ubuntu:trusty
 # Essential tools
 COPY        aliyun.list /etc/apt/sources.list.d/
 RUN         set -e -x && \
+            echo 'Asia/Shanghai' > /etc/timezone && \
+            cp -f /usr/share/zoneinfo/Asia/Shanghai /etc/localtime && \
+            { echo LANG=en_US.UTF-8; echo LANGUAGE=en_US; } > /etc/default/locale && \
+            locale-gen en_US.UTF-8 en_US && \
             export DEBIAN_FRONTEND=noninteractive && \
             mv /etc/apt/sources.list /etc/apt/sources.list.disabled && \
             apt-get update && \
@@ -13,6 +17,7 @@ RUN         set -e -x && \
                 curl \
                 dos2unix \
                 gdb \
+                git \
                 htop \
                 httperf \
                 iperf \
@@ -52,7 +57,7 @@ RUN         set -e -x && \
             export DEBIAN_FRONTEND=noninteractive && \
             cd /opt && \
             tarball=jdk-8u112-linux-x64.tar.gz && \
-            curl -L -b oraclelicense=a -O http://download.oracle.com/otn-pub/java/jdk/8u112-b14/$tarball && \
+            curl -L -b oraclelicense=a -O http://download.oracle.com/otn-pub/java/jdk/8u112-b15/$tarball && \
             [ `sha256sum -b $tarball | awk '{print $1}'` = 777bd7d5268408a5a94f5e366c2e43e720c6ce4fe8c59d9a71e2961e50d774a5 ] && \
             tar xvf $tarball && \
             ln -snf jdk1.8.0_112 jdk && \
@@ -91,8 +96,8 @@ RUN         set -e -x && \
             bash -c '. /usr/local/rvm/scripts/rvm && \
                 set -e -x && \
                 sed -i -E "s!https?://cache.ruby-lang.org/pub/ruby!https://ruby.taobao.org/mirrors/ruby!" $rvm_path/config/db && \
-                rvm --disable-binary install 2.3.1 && \
-                [ `sha1sum -b /usr/local/rvm/archives/ruby-2.3.1.tar.bz2 | awk "{print \\$1}"` = 4ee76c7c1b12d5c5b0245fc71595c5635d2217c9 ] && \
+                rvm --disable-binary install 2.3.3 && \
+                [ `sha256sum -b /usr/local/rvm/archives/ruby-2.3.3.tar.bz2 | awk "{print \\$1}"` = 882e6146ed26c6e78c02342835f5d46b86de95f0dc4e16543294bc656594cc5b ] && \
                 which ruby && ruby -v && gem -v && \
                 gem sources --add https://ruby.taobao.org/ --remove https://rubygems.org/ && \
                 gem sources -l && \
@@ -116,13 +121,13 @@ RUN         set -e -x && \
             apt-get update && \
             apt-get install -y haproxy
 
-# MySQL client
+# MySQL client: http://dev.mysql.com/downloads/repo/apt/
 RUN         set -e -x && \
             export DEBIAN_FRONTEND=noninteractive && \
             cd /opt && \
-            debball=mysql-apt-config_0.7.3-1_all.deb && \
+            debball=mysql-apt-config_0.8.1-1_all.deb && \
             curl -L -O http://repo.mysql.com/$debball && \
-            [ `sha1sum -b $debball | awk '{print $1}'` = a62415f8103889aa85326f2a96842515d4d25d15 ] && \
+            [ `sha256sum -b $debball | awk '{print $1}'` = cbee2a94486d7b3e0729f6b9111b7d71bb591a7d541a0786e80ad724dcad1249 ] && \
             dpkg -i $debball && \
             rm $debball && \
             apt-get update && \
@@ -152,8 +157,8 @@ RUN         set -e -x && \
 RUN         set -e -x && \
             export DEBIAN_FRONTEND=noninteractive && \
             cd /usr/local/bin && \
-            curl -L -O https://github.com/krallin/tini/releases/download/v0.10.0/tini && \
-            [ `sha1sum -b tini | awk '{print $1}'` = 03e12f4652c4afb252dbb18a305d0c3e6ec1a43d ] && \
+            curl -L -o tini https://github.com/krallin/tini/releases/download/v0.13.2/tini-static-amd64 && \
+            [ `sha256sum -b tini | awk '{print $1}'` = 1b20578e2c178c9f7e53af6320adfd5223cdcc4a651b7ad95202a4c43d3cb972 ] && \
             chmod 555 tini
 
 # consul-template
@@ -162,12 +167,15 @@ RUN         set -e -x && \
             cd /opt && \
             zipball=consul-template_0.16.0_linux_amd64.zip && \
             curl -L -O https://releases.hashicorp.com/consul-template/0.16.0/$zipball && \
-            [ `sha1sum -b $zipball | awk '{print $1}'` = 974a270f0c83828d8915f7fb4e33bbd84a50b87f ] && \
+            [ `sha256sum -b $zipball | awk '{print $1}'` = 064b0b492bb7ca3663811d297436a4bbf3226de706d2b76adade7021cd22e156 ] && \
             unzip $zipball -d /usr/local/bin/ && \
             rm $zipball
 
 # Cleanup
-RUN         rm -rf /var/lib/apt/lists/* /tmp/* /root/{.npm,.gem}
+RUN         rm -rf /var/lib/apt/lists/* /tmp/* /root/{.npm*,.gem*,.yarn*}
+
+ENV         LANG en_US.UTF-8
+ENV         LANGUAGE en_US
 
 # Entrypoint to discover Consul address
 COPY        docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
