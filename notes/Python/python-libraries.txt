@@ -35,3 +35,13 @@ Better REPL
     ptPython and ptipython
     IPython
 
+Datetime
+    https://pendulum.eustace.io/
+    http://crsmithdev.com/arrow/
+
+Date frame
+    https://github.com/airtoxin/pysqldf
+
+Property based testing
+    https://hypothesis.readthedocs.io/en/latest/index.html
+

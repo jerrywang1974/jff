@@ -1,0 +1,45 @@
+Install Kubernetes with kubeadm
+
+http://kubernetes.io/docs/getting-started-guides/kubeadm/
+
+
+# both node01/node02, or the packets from Calico subnets will be dropped
+# https://nrocco.github.io/2013/04/13/disable-rp-filter.html
+# http://www.tldp.org/HOWTO/Adv-Routing-HOWTO/lartc.kernel.rpf.html
+for f in /proc/sys/net/ipv4/conf/*/rp_filter; do echo 0 > $f; done
+
+# both node01/node02, f**k GFW, 172.19.40.3 is a SNIProxy
+echo "172.19.40.3 gcr.io" >> /etc/hosts
+
+# both node01/node02, accelerate docker pull
+#... add {"registry-mirrors": ["https://docker.mirrors.ustc.edu.cn"] } to /etc/docker/daemon.json, then kill -s HUP `pidof dockerd`
+
+# node01
+kubeadm init
+kubectl taint nodes --all dedicated-
+
+## v2.0 有 bug: https://github.com/projectcalico/k8s-policy/commit/0bb96287de8877c2882c4a38350f13a5e56fab26
+##kubectl apply -f http://docs.projectcalico.org/v2.0/getting-started/kubernetes/installation/hosted/kubeadm/calico.yaml
+
+## http://docs.projectcalico.org/master/getting-started/kubernetes/installation/hosted/kubeadm/
+kubectl apply -f http://docs.projectcalico.org/master/getting-started/kubernetes/installation/hosted/kubeadm/calico.yaml
+
+kubectl create -f https://rawgit.com/kubernetes/dashboard/master/src/deploy/kubernetes-dashboard.yaml
+
+
+# node02
+kubeadm join --token=ede318.d293b35f94a866c7 192.168.31.100
+
+
+# node01
+## https://www.weave.works/documentation/scope-latest-installing/#k8s
+kubectl apply -f https://cloud.weave.works/launch/k8s/weavescope.yaml
+
+## http://kubernetes.io/docs/getting-started-guides/kubeadm/#optional-installing-a-sample-application
+kubectl create namespace sock-shop
+kubectl apply -n sock-shop -f 'https://github.com/microservices-demo/microservices-demo/blob/master/deploy/kubernetes/complete-demo.yaml?raw=true'
+
+## https://github.com/kubernetes/heapster/blob/master/docs/influxdb.md
+git clone git@github.com:kubernetes/heapster.git
+cd heapster && kubectl create -f deploy/kube-config/influxdb/
+

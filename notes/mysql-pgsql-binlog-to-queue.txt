@@ -3,6 +3,12 @@ MySQL
     https://developer.zendesk.com/blog/introducing-maxwell-a-mysql-to-kafka-binlog-processor
     http://debezium.io/docs/connectors/mysql/
     https://github.com/alibaba/canal
+    https://github.com/zendesk/open-replicator
+    https://github.com/shyiko/mysql-binlog-connector-java
+    https://github.com/noplay/python-mysql-replication
+
+    https://engineeringblog.yelp.com/2016/11/open-sourcing-yelps-data-pipeline.html
+    https://github.com/Yelp/mysql_streamer
 
 PostgreSQL
 

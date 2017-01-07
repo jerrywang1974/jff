@@ -1,0 +1,20 @@
+IPTables trace
+
+http://serverfault.com/questions/385937/how-to-enable-iptables-trace-target-on-debian-squeeze-6
+
+Old kernel:
+    sudo modprobe ipt_LOG
+    sudo sysctl net.netfilter.nf_log.2=ipt_LOG
+
+New kernel:
+    modprobe nf_log_ipv4
+    sysctl net.netfilter.nf_log.2=nf_log_ipv4
+
+    The numbers here represent the protocol family numbers, as defined in /usr/include/bits/socket.h. 2 is AF_INET (that's IPv4), and 10 is AF_INET6 (IPv6).
+
+Then:
+
+iptables -t raw -A PREROUTING -p tcp -j TRACE
+iptables -t raw -A OUTPUT -p tcp -j TRACE
+
+Check log at /var/log/{kern.log,syslog,messages}.

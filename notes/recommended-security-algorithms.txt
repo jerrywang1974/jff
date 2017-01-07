@@ -1,0 +1,7 @@
+Used by TLS 1.2 to https://elpa.gnu.org/
+
+signature: RSA-SHA256
+key exchange: ECDHE-RSA
+cipher: AES-256-GCM
+mac: AEAD
+
