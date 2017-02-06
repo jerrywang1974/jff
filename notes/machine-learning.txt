@@ -3,9 +3,16 @@
 https://en.wikipedia.org/wiki/Comparison_of_deep_learning_software
 https://github.com/zer0n/deepframeworks
 
+DIGITS          https://developer.nvidia.com/digits
+TensorBoard     https://github.com/tensorflow/tensorflow/tree/master/tensorflow/tensorboard
+
+DyNet           http://github.com/clab/dynet
+Chainer         http://chainer.org/
+PyTorch         http://pytorch.org/
+
 Torch           http://torch.ch/
-TensorFlow      https://www.tensorflow.org/
 MXNet           https://github.com/dmlc/mxnet
+TensorFlow      https://www.tensorflow.org/
 Deeplearning4j  http://deeplearning4j.org/
 
 Theano          http://www.deeplearning.net/software/theano/
