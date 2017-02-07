@@ -3,6 +3,13 @@
 https://en.wikipedia.org/wiki/Comparison_of_deep_learning_software
 https://github.com/zer0n/deepframeworks
 
+Graphical visualization:    DIGITS, TensorBoard
+Machine learning workflow management (Dataset preparation, save/load training loop): Keras, TensorFlow slim
+Computational graph(CG) management (Build/optimize CGs, forward/back propagation): Theano, TensorFlow, Torch.nn
+Multi-dimensional array processing (High-level array manipulation): NumPy, CuPy, Eigen, Torch core, libgpuarray
+Numerical computation (Maxtrix operation, convolution): BLAS(OpenBLAS, MKL, AMD Core Math Library - ACML, Apple Accelerate Framework), cuBLAS, cuRAND, cuDNN, MKL DNN, CUDA, OpenCL CUDAToolkit
+Computational device: CPU, GPU, TPU, FPGA
+
 DIGITS          https://developer.nvidia.com/digits
 TensorBoard     https://github.com/tensorflow/tensorflow/tree/master/tensorflow/tensorboard
 
