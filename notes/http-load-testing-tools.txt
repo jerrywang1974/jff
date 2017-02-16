@@ -1,0 +1,9 @@
+With HTML report:
+    http://tsung.erlang-projects.org/
+    http://gatling.io/
+
+https://github.com/httperf/httperf
+https://github.com/JoeDog/siege
+https://github.com/wg/wrk
+http://locust.io/
+

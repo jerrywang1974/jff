@@ -1,0 +1,84 @@
+https://aws.amazon.com/ec2/instance-types/
+http://www.ec2instances.info/?min_memory=16&min_computeunits=4
+
+Models with configuration >= 4C/30G:
+
+    API Name    vCPU/Mem    Storage     EBS         hourly on-demand / hourly reserved
+    ==================================================================================
+*   r4.xlarge   4C/30.5G    EBS only    100MB/s     $0.266 / $0.187
+    r3.xlarge   4C/30.5G    80G SSD     62.5MB/s    $0.333 / $0.209
+*   m4.2xlarge  8C/32G      EBS only    125MB/s     $0.431 / $0.296
+    m2.2xlarge  4C/34.2G    850G        62.5MB/s    $0.490 / $0.222
+*   m3.2xlarge  8C/30G      160G SSD    125MB/s     $0.532 / $0.380
+    r4.2xlarge  8C/61G      EBS only    200MB/s     $0.532 / $0.373
+    r3.2xlarge  8C/61G      160G SSD    125MB/s     $0.665 / $0.418
+    d2.xlarge   4C/30.5G    6000GB      93.75MB/s   $0.690 / $0.402
+    c4.4xlarge  16C/30G     EBS only    250MB/s     $0.796 / $0.565
+    c3.4xlarge  16C/30G     320G SSD    250MB/s     $0.840 / $0.584
+    i2.xlarge   4C/30.5G    800G SSD    62.5MB/s    $0.853 / $0.424
+    m4.xlarge   16C/64G     EBS only    250MB/s     $0.862 / $0.592
+    p2.xlarge   16C/64G     EBS only    93.75MB/s   $0.900 / $0.684
+    m2.4xlarge  8C/68.4GB   1680G       125MB/s     $0.980 / $0.444
+
+
+## General purpose
+
+T2: 1C/0.5G ~ 8C/32G,  EBS-only
+    Websites and web applications, development environments, build servers,
+    code repositories, micro services, test and staging environments, and line
+    of business applications.
+
+M4: 2C/8G ~ 64C/256G,  EBS-only, 450M ~ 10G network
+M3: 1C/3.75G ~ 8C/30G, 4G ~ 160G SSD
+    Small and mid-size databases, data processing tasks that require
+    additional memory, caching fleets, and for running backend servers for
+    SAP, Microsoft SharePoint, cluster computing, and other enterprise
+    applications.
+
+## Compute optimized
+
+C4: 2C/3.75G ~ 36C/60G, EBS-only, 500M ~ 4G network
+C3: 2C/3.75G ~ 32C/60G, 32G ~ 640G SSD
+    High performance front-end fleets, web-servers, batch processing,
+    distributed analytics, high performance science and engineering
+    applications, ad serving, MMO gaming, and video-encoding.
+
+## Memory optimized
+
+X1: 64C/976G ~ 128C/1952G,  1920G ~ 3840G SSD, 5 ~ 10G network
+    in-memory databases like SAP HANA, big data processing engines like Apache
+    Spark or Presto, and high performance computing (HPC) applications.
+
+R4: 2C/15.25G ~ 64C/488G, EBS-only, 10G ~ 20G network
+R3: 2C/15.25G ~ 32C/244G, 32~640G SSD
+    high performance databases, data mining & analysis, in-memory databases,
+    distributed web scale in-memory caches, applications performing real-time
+    processing of unstructured big data, Hadoop/Spark clusters, and other
+    enterprise applications.
+
+## Accelerated Computing Instances
+
+P2: 4C/61G ~ 64C/732G CPU,  1C/12G ~ 16C/192G GPU, NVIDIA K80 GPU, 20G network
+    Machine learning, high performance databases, computational fluid
+    dynamics, computational finance, seismic analysis, molecular modeling,
+    genomics, rendering, and other server-side GPU compute workloads.
+
+G2: 8C/15G ~ 32C/60G CPU, 1C ~ 4C GPU, 60G ~ 240G SSD
+    3D application streaming, video encoding, and other server-side graphics
+    workloads.
+
+F1: 8C/122G ~ 64C/976G CPU, 1 ~ 8 FPGAs, 480 ~ 4 x 960GB SSD
+    Genomics research, financial analytics, real-time video processing, big
+    data search and analysis, and security.
+
+## Storage Optimized
+
+I2: 4C/30.5G ~ 32C/244G,  800G ~ 6400G SSD
+    NoSQL databases like Cassandra and MongoDB, scale out transactional
+    databases, data warehousing, Hadoop, and cluster file systems.
+
+D2: 4C/30.5G ~ 36C/244G,  6000G ~ 48000G HDD
+    Massively Parallel Processing (MPP) data warehousing, MapReduce and Hadoop
+    distributed computing, distributed file systems, network file systems, log
+    or data-processing applications
+

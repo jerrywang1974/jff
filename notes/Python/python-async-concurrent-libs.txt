@@ -1,0 +1,12 @@
+https://github.com/vinta/awesome-python#wsgi-servers
+
+* gunicorn with gevent or meinheld worker
+* bjoern    - super fast, no coroutine
+* meinheld  - super fast, limited monkey patch(only patch socket), has coroutine, support web socket
+* fapws3
+* uWSGI
+
+https://github.com/python-greenlet/greenlet
+http://eventlet.net/
+http://www.gevent.org/
+
