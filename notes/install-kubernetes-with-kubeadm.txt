@@ -24,7 +24,7 @@ AWS VPC 注意事项:
     ，导致子网间的 flannel 网段不通。
 
 Flannel aws-vpc 使用参考:
-* https://coreos.com/flannel/docs/latest/aws-vpc-backend.html
+* https://github.com/coreos/flannel/blob/master/Documentation/aws-vpc-backend.md
 * https://github.com/coreos/flannel#backends
 
 对 https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml
