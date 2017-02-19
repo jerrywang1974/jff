@@ -1,4 +1,4 @@
-Install Kubernetes with kubeadm
+Install Kubernetes with kubeadm on Ubuntu 16.04
 
 http://kubernetes.io/docs/getting-started-guides/kubeadm/
 
@@ -8,11 +8,22 @@ http://kubernetes.io/docs/getting-started-guides/kubeadm/
 # http://www.tldp.org/HOWTO/Adv-Routing-HOWTO/lartc.kernel.rpf.html
 for f in /proc/sys/net/ipv4/conf/*/rp_filter; do echo 0 > $f; done
 
-# both node01/node02, f**k GFW, 172.19.40.3 is a SNIProxy
-echo "172.19.40.3 gcr.io" >> /etc/hosts
+# both node01/node02, f**k GFW,  use "sudo tcpdump -vvv -s 0 -l -n port 53" to find out banned domain names
+echo "172.19.40.3     packages.cloud.google.com gcr.io quay-registry.s3.amazonaws.com. quay.io storage.googleapis.com" >> /etc/hosts
 
 # both node01/node02, accelerate docker pull
-#... add {"registry-mirrors": ["https://docker.mirrors.ustc.edu.cn"] } to /etc/docker/daemon.json, then kill -s HUP `pidof dockerd`
+#... add {"registry-mirrors": ["https://docker.mirrors.ustc.edu.cn"], "storage-driver": "overlay2" } to /etc/docker/daemon.json, then kill -s HUP `pidof dockerd`
+
+# both node01/node02
+curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key add -
+cat <<EOF > /etc/apt/sources.list.d/kubernetes.list
+deb http://apt.kubernetes.io/ kubernetes-xenial main
+EOF
+apt-get update
+# Install docker if you don't have it already.
+apt-get install -y docker.io
+apt-get install -y kubelet kubeadm kubectl kubernetes-cni
+
 
 # node01
 kubeadm init

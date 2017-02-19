@@ -1,0 +1,66 @@
+云服务商选择
+
+o   AWS CN
+o       kubeadm：Go 语言实现，不支持 k8s、etcd 高可用
+        kargo: 基于 Ansible，安装失败
+        conjure-up: 基于 Ubuntu Juju，安装失败
+        kops: Go 语言实现，需要使用 S3 存储配置，依赖 Route 53 域名服务，但 AWS cn-region-1 没有 Route 53 服务 （https://github.com/kubernetes/kops/issues/794）
+        kube-aws:  需要 host OS 为 CoreOS
+        机器配置: https://console.amazonaws.cn/billing/content?document=pricingplan&language=zh
+            t2.2xlarge:  8C/32G, reserved 1 yr,  3.13、2.672、2.618 元/小时 (无预付、部分预付、全部预付), on demand 3.392
+            m4.2xlarge: 8C/32G, reserved 1 yr, 2.086, 1.783, 1.747, on demand 5.624
+o           r4.xlarge: 4C/30.5G, reserved 1 yr, 1.239, 1.057, 1.037,  on demand 3.924
+        存储
+o           EBS gp2:  高性能随机读写, 0.746 元/GB-month
+o           EBS st1:  高吞吐顺序读写，~0.335 元/GB-month
+o           EBS sc1: 冷数据, ~0.186 元/GB-month
+    Aliyun
+        机器配置
+            n1.3xlarge: 16C/32G, ~2.175 元/小时
+            m2.medium: 4C/32G, ~1.4
+            n2.xlarge: 8C/32G, ~1.688
+            e3.large: 4C/32G, ~1.438
+            n4.4xlarge: 16C/32G, ~2.322
+            mn4.2xlarge: 8C/32G, ~1.777
+            e4.xlarge: 4C/32G, ~1.5
+    腾讯云
+
+主机操作系统
+
+    Amazon Linux: 2016.09 版本比 CentOS 7.3 老，Kubernetes 1.5.2 安装时需要 hack 下，有些依赖包版本不够新
+o   Ubuntu 16.04:  Aliyun VPC 环境下搭建 GRE 时导致主机挂住，AWS 运行正常
+    CentOS 7.2/7.3:
+
+Linux Kernel + Docker
+
+o   Ubuntu 16.04: Linux  kernel 4.4.0,  Docker 1.12.3
+    CentOS 7.3: Linux 3.10, Docker 1.12.5
+
+Docker drivers
+
+    storage driver
+o       overlay2: 需要 Linux kernel 4.4，容器间共享文件节约内核 IO cache
+        devicemapper(生产需使用direct-lvm，不能用 loop-lvm): RHEL 推荐; 容器间文件内存浪费
+        zfs: Ubuntu 有，RHEL 无; 需要较大内存，性能较慢
+        aufs: Ubuntu 16.04 和 CentOS 均无
+    networking
+        weave: 用户态 udp 封包，实现非常低效
+        flannel udp: 用户态 udp 封包，低效
+        flannel vxlan:  内核态 udp 封包，但AWS 和 Aliyun 均不支持vxlan offloading  (sudo ethtool -k eth0 显示 tx-udp_tnl-segmentation: off)
+        flannel host-gw: 通过路由表实现，需要节点间二层互通
+o       flannel aws-vpc:  直接操作 AWS VPC routing table，最多 50 个条目，去掉 local 和 internet gateway 两条还剩 48 条，也即 k8s 集群最多包含 48 个节点；需要给 EC 2 实例添加 IAM role 允许修改路由表，或者给 flannel 配置 AWS access key;
+        flannel ali-vpc:  Aliyun 专用 https://github.com/coreos/flannel
+        flannel aliyun: 直接操作 Aliyun VPC routing table，最多创建 48 个自定义条目，也即 k8s 集群最多包涵 48 个节点
+        calico bgp: 如果路由器不接受 BGP 广播，则所有节点只能在 VPC 里一个子网里
+        calico ipip:  内核态 ip 封包，可以在一个 VPC 里两个可用域之间跨子网
+        calico bgp + ipip 混合 (ipip_mode=cross-subnet):  同一子网 bgp，不同子网 ipip，2017/2/10 刚合并入 calico 主分支， 会是 2017Q1 之后的推荐用法
+        canal: 融合 flannel + calico，很新，开发不活跃 https://kubernetes.io/docs/admin/addons/
+        contiv: 不成熟 https://kubernetes.io/docs/admin/addons/
+        romana: 不成熟 https://kubernetes.io/docs/admin/addons/
+        kubenet:  kops 默认，kops 辅助路由配置，跟 flannel aws-vpc 类似，简单高效，不支持类似Calico 丰富的 network policy 控制 https://github.com/kubernetes/kops/blob/master/docs/networking.md, https://kubernetes.io/docs/admin/network-plugins/
+        macvlan, ipvlan: 性能最好，但工具还不足 https://github.com/containernetworking/cni/tree/master/Documentation
+
+Web UI
+
+o   Kubernetes Dashboard: 官方 Web UI
+    Weave Scope:  用于非生产环境
