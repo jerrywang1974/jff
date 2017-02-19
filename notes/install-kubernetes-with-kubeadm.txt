@@ -30,38 +30,39 @@ Flannel aws-vpc 使用参考:
 对 https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml
 需要如下补丁，否则 flannel 在调用 AWS web api 时会因为无法验证 TLS 证书而失败:
 ```
-    $ diff -u kube-flannel.yml.orig kube-flannel.yml
-    --- kube-flannel.yml.orig       2017-02-19 13:13:50.882676257 +0000
-    +++ kube-flannel.yml    2017-02-19 12:21:15.798848533 +0000
-    @@ -24,7 +24,7 @@
-         {
-           "Network": "10.244.0.0/16",
-           "Backend": {
-    -        "Type": "vxlan"
-    +        "Type": "aws-vpc"
-           }
-         }
-     ---
-    @@ -64,6 +64,8 @@
-             volumeMounts:
-             - name: run
-               mountPath: /run
-    +        - name: sslcerts
-    +          mountPath: /etc/ssl/certs
-             - name: flannel-cfg
-               mountPath: /etc/kube-flannel/
-           - name: install-cni
-    @@ -78,6 +80,9 @@
-             - name: run
-               hostPath:
-                 path: /run
-    +        - name: sslcerts
-    +          hostPath:
-    +            path: /etc/ssl/certs
-             - name: cni
-               hostPath:
-                 path: /etc/cni/net.d
-    $ kubectl apply -f ./kube-flannel.yml
+$ diff -u kube-flannel.yml.orig kube-flannel.yml
+--- kube-flannel.yml.orig	2017-02-19 23:25:33.000000000 +0800
++++ kube-flannel.yml	2017-02-19 23:28:52.000000000 +0800
+@@ -24,7 +24,7 @@
+     {
+       "Network": "10.244.0.0/16",
+       "Backend": {
+-        "Type": "vxlan"
++        "Type": "aws-vpc"
+       }
+     }
+ ---
+@@ -64,6 +64,9 @@
+         volumeMounts:
+         - name: run
+           mountPath: /run
++        - name: sslcerts
++          mountPath: /etc/ssl/certs
++          readOnly: true
+         - name: flannel-cfg
+           mountPath: /etc/kube-flannel/
+       - name: install-cni
+@@ -78,6 +81,9 @@
+         - name: run
+           hostPath:
+             path: /run
++        - name: sslcerts
++          hostPath:
++            path: /etc/ssl/certs
+         - name: cni
+           hostPath:
+             path: /etc/cni/net.d
+$ kubectl apply -f ./kube-flannel.yml
 ```
 
 
