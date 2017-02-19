@@ -1,8 +1,30 @@
-Install Kubernetes with kubeadm on Ubuntu 16.04
+Install Kubernetes 1.5.2 with kubeadm on Ubuntu 16.04
 
 http://kubernetes.io/docs/getting-started-guides/kubeadm/
 
+AWS VPC 注意事项:
 
+*   使用 community AMI: ubuntu/images/hvm-ssd/ubuntu-xenial-16.04-amd64-server-20170202
+    (ami-a0e136cd)，创建 EC2 instance，在每个 EC2 instance 的 security group
+    里允许 source 为 10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16, 169.254.0.0/16
+    网段的 All Traffic，否则 k8s 跨节点之间不能联通。
+
+*   注意创建子网时把 auto assign public IP 选中，否则 VPC 里机器不能连接
+    Internet(可以分配 Elastic IP，但只有 5 个免费 EIP)。 同时在创建第二个以及
+    以后的子网时，需要额外配置这个子网的路由表，把 0.0.0.0/0 到因特网网关的路
+    由加上（默认没加），否则第一个子网之外的子网也不能连接 Internet。
+
+*   关掉每个 EC2 instance 的 source/dest check，否则同一个 VPC subnet 里不能使
+    用 Calico BGP 方式，也不能使用 flannel aws-vpc (flannel 会分配自己的网段)。
+
+*   关闭 rp\_filter，否则跨机器不同网段的通讯会失败
+
+*   同一个 VPC 里的不同 subnet 要使用同一个路由表（在VPC 路由表设置界面显式关
+    联到所有子网)，否则 flannel aws-vpc 下不同子网里的 flannel 更新各自路由表
+    ，导致子网间的 flannel 网段不通。
+
+
+```sh
 # both node01/node02, or the packets from Calico subnets will be dropped
 # https://nrocco.github.io/2013/04/13/disable-rp-filter.html
 # http://www.tldp.org/HOWTO/Adv-Routing-HOWTO/lartc.kernel.rpf.html
@@ -26,7 +48,7 @@ apt-get install -y kubelet kubeadm kubectl kubernetes-cni
 
 
 # node01
-kubeadm init
+kubeadm init    # 如果使用 flannel: kubeadm init --pod-network-cidr 10.244.0.0/16
 kubectl taint nodes --all dedicated-
 
 ## v2.0 有 bug: https://github.com/projectcalico/k8s-policy/commit/0bb96287de8877c2882c4a38350f13a5e56fab26
@@ -53,4 +75,6 @@ kubectl apply -n sock-shop -f 'https://github.com/microservices-demo/microservic
 ## https://github.com/kubernetes/heapster/blob/master/docs/influxdb.md
 git clone git@github.com:kubernetes/heapster.git
 cd heapster && kubectl create -f deploy/kube-config/influxdb/
+```
 
+# vi: ft=markdown
