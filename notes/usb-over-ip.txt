@@ -1,0 +1,25 @@
+USB device sharing over IP
+
+https://kernelnewbies.org/Linux_3.17#head-ad2bdd52ff1be7c7fc7cb3045a4cfd6032514933
+
+https://bugs.launchpad.net/ubuntu/+source/usbip/+bug/1541855
+https://github.com/solarkennedy/wiki.xkyle.com/wiki/USB-over-IP-On-Ubuntu
+
+
+apt install linux-tools-generic     (don't use obsolete package "usbip")
+apt install linux-image-extra-`uname -r`       # sometimes linux-image-generic doesn't depend on latest linux-image-extra-`uname -r`
+
+server side:
+    modprobe usbip_host
+    usbipd -D
+    usbip list -l           # show local USB device
+    usbip bind -b x-y       # to export a USB device
+
+client side:
+    modprobe vhci-hcd
+    usbip list -r SERVER-IP
+    usbip attach -r SERVER-IP -b x-y
+    usbip list -l           # show local USB device
+    usbip port
+    usbip detach -p PORT
+
