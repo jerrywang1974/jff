@@ -1,0 +1,10 @@
+*.rpm
+*.tar.gz
+*.zip
+*.swp
+*~
+extra-vars.yml
+fact_cache
+site.retry
+hosts
+clusters/*/node*

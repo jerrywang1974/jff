@@ -1,0 +1,13 @@
+# vi: et ts=2 sts=2 sw=2 ai
+---
+
+- name: save /etc after all plays
+  hosts: all
+
+  tasks:
+    - name: run "etckeeper save" if necessary after all plays
+      shell: chdir=/etc
+             test -e .git || etckeeper init;
+             ! etckeeper unclean || etckeeper commit "by Ansible after all plays";
+      tags: etckeeper
+

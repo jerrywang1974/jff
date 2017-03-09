@@ -1,0 +1,17 @@
+# vi: et ts=2 sts=2 sw=2 ai
+---
+
+- name: save /etc before all plays
+  hosts: all
+
+  tasks:
+    - name: install package etckeeper
+      apt: name=etckeeper state=present
+      tags: etckeeper
+
+    - name: run "etckeeper save" if necessary before all plays
+      shell: chdir=/etc
+             test -e .git || etckeeper init;
+             ! etckeeper unclean || etckeeper commit "by Ansible before all plays";
+      tags: etckeeper
+

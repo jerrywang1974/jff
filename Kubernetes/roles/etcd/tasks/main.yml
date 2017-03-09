@@ -1,0 +1,36 @@
+# vi: et ts=2 sts=2 sw=2 ai
+---
+
+- name: inject etcd_node_name and etcd_node_ip to hostvars possibly from role defaults
+  set_fact: etcd_node_name={{ etcd_node_name }}
+            etcd_node_ip={{ etcd_node_ip }}
+  tags: etcd
+
+- name: start etcd container
+  docker_container:
+    name: etcd-{{ etcd_node_name }}
+    image: "{{ etcd_docker_image }}"
+    command: /usr/local/bin/etcd
+             --name {{ etcd_node_name }}
+             --data-dir /var/lib/etcd
+             --listen-peer-urls http://0.0.0.0:{{ etcd_peer_port }}
+             --listen-client-urls http://0.0.0.0:{{ etcd_client_port }}
+             --advertise-client-urls http://{{ etcd_node_ip }}:{{ etcd_client_port }}
+             --initial-advertise-peer-urls http://{{ etcd_node_ip }}:{{ etcd_peer_port }}
+             --initial-cluster {% for host in groups['etcd'] %}{{ hostvars[host]['etcd_node_name'] }}=http://{{ hostvars[host]['etcd_node_ip'] }}:{{ etcd_peer_port }}{% if not loop.last %},{% endif %}{% endfor %}
+             --initial-cluster-state new
+             --initial-cluster-token {{ etcd_initial_cluster_token }}
+             --metrics extensive
+             --strict-reconfig-check
+             --auto-compaction-retention 1
+    state: started
+    ignore_image: yes
+    network_mode: host
+    restart_policy: always
+    detach: yes
+    tty: yes
+    volumes:
+      - "{{ etcd_data_volume }}:/var/lib/etcd"
+      - /etc/ssl/certs:/etc/ssl/certs:ro
+  tags: etcd
+

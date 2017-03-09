@@ -1,0 +1,131 @@
+# vi: et ts=2 sts=2 sw=2 ai
+---
+
+- name: use Aliyun Ubuntu repository mirror
+  copy: src=aliyun.list dest=/etc/apt/sources.list backup=yes
+        group=root owner=root mode=0644
+  register: sources_list_changed
+
+- name: copy Google Cloud Packages Automatic Signing Key
+  copy: src=https_packages.cloud.google.com_apt_doc_apt-key.gpg
+        dest=/tmp/https_packages.cloud.google.com_apt_doc_apt-key.gpg
+        backup=yes group=root owner=root mode=0644
+
+- name: install Google Cloud Packages Automatic Signing Key
+  apt_key: id=A7317B0F state=present
+           file=/tmp/https_packages.cloud.google.com_apt_doc_apt-key.gpg
+
+- name: use Aliyun Kubernetes repository mirror
+  copy: src=kubernetes.list dest=/etc/apt/sources.list.d/kubernetes.list
+        backup=yes group=root owner=root mode=0644
+  register: kubernetes_list_changed
+
+- name: run apt update if necessary
+  command: apt update
+  when: (sources_list_changed | changed) or (kubernetes_list_changed | changed)
+
+- name: install some essential utilities
+  apt: name={{ item }} state=present
+  with_items:
+    - atop
+    - ctop
+    - htop
+    - iftop
+    - iotop
+    - iperf3
+    - linux-tools-generic
+    - numatop
+    - powertop
+    - sysdig
+    - bzip2
+    - curl
+    - debianutils
+    - dos2unix
+    - file
+    - fish
+    - gzip
+    - lsof
+    - man-db
+    - netcat-openbsd
+    - pdsh
+    - pssh
+    - rsync
+    - screen
+    - socat
+    - strace
+    - sudo
+    - sysstat
+    - tar
+    - tcpdump
+    - telnet
+    - tmux
+    - unzip
+    - wget
+    - xz-utils
+    - zip
+    - zsh
+
+- name: install at
+  apt: name=at state=present
+  tags: at
+
+- name: start at
+  service: name=atd state=started enabled=yes
+  tags: at
+
+- name: install cron
+  apt: name=cron state=present
+  tags: cron
+
+- name: start cron
+  service: name=cron state=started enabled=yes
+  tags: cron
+
+- name: install rsyslog, cronolog, logrotate, logcheck, logwatch
+  apt: name={{ item }} state=present
+  with_items:
+    - cronolog
+    - logcheck
+    - logrotate
+    - logwatch
+    - rsyslog
+    - rsyslog-relp
+  tags: syslog
+
+- name: start rsyslog
+  service: name=rsyslog state=started enabled=yes
+  tags: syslog
+
+- name: install openssh server and clients
+  apt: name={{ item }} state=present
+  with_items:
+    - openssh-server
+    - openssh-client
+  tags: ssh
+
+- name: start openssh-server
+  service: name=ssh state=started enabled=yes
+  tags: ssh
+
+- name: install ntp server and utilities
+  apt: name=ntp state=present
+  tags: ntp
+
+- name: start ntp server if not in virtualized environment
+  service: name=ntp state=started enabled=yes
+  when: ansible_virtualization_type is undefined
+  tags: ntp
+
+- name: stop ntp server if in virtualized environment
+  service: name=ntp state=stopped enabled=no
+  when: ansible_virtualization_type is defined
+  tags: ntp
+
+- name: install Postfix server
+  apt: name=postfix state=present
+  tags: postfix
+
+- name: start Postfix server
+  service: name=postfix state=started enabled=yes
+  tags: postfix
+

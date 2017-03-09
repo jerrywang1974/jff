@@ -1,0 +1,9 @@
+# vi: et ts=2 sts=2 sw=2 ai
+---
+
+- name: install docker
+  hosts: all
+
+  roles:
+    - docker
+

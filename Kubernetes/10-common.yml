@@ -1,0 +1,9 @@
+# vi: et ts=2 sts=2 sw=2 ai
+---
+
+- name: apply common configuration to all nodes
+  hosts: all
+
+  roles:
+    - common
+

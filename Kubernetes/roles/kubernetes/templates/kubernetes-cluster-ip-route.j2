@@ -1,0 +1,17 @@
+#!/bin/sh
+
+# Check interfaces(5) for variables below.
+
+set -e
+
+case "$IFACE" in
+{{ primary_internal_iface }}) ;;
+*) exit 0 ;;
+esac
+
+case "$PHASE" in
+post-up) ip route add to {{ kubernetes_service_cidr }} dev "$IFACE" ;;
+pre-down) ip route del to {{ kubernetes_service_cidr }} dev "$IFACE" ;;
+*) exit 0 ;;
+esac
+

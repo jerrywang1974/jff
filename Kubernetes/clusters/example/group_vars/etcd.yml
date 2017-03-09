@@ -1,0 +1,5 @@
+# vi: et ts=2 sts=2 sw=2 ai
+---
+
+etcd_initial_cluster_token: my-etcd-token
+

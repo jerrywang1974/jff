@@ -1,0 +1,90 @@
+# vi: et ts=2 sts=2 sw=2 ai
+---
+
+- name: disable rp_filter
+  copy: src=99-disable-rp_filter.conf dest=/etc/sysctl.d/99-disable-rp_filter.conf
+        group=root owner=root mode=0644
+  register: sysctl_changed
+  when: kubernetes_disable_rp_filter | bool
+  tags: kubernetes
+
+- name: restart service procps if necessary
+  service: name=procps state=restarted
+  when: sysctl_changed | changed
+  tags: kubernetes
+
+- name: install kubernetes
+  apt: name={{ item }} state=present
+  with_items:
+    - kubelet
+    - kubeadm
+    - kubectl
+    - kubernetes-cni
+  tags: kubernetes
+
+- name: install /etc/network/if-up.d/kubernetes-cluster-ip-route
+  template: src=kubernetes-cluster-ip-route.j2
+            dest=/etc/network/if-up.d/kubernetes-cluster-ip-route
+            group=root owner=root mode=0755
+  register: if_up_script_installed
+  tags: kubernetes
+
+- name: install /etc/network/if-down.d/kubernetes-cluster-ip-route
+  template: src=kubernetes-cluster-ip-route.j2
+            dest=/etc/network/if-down.d/kubernetes-cluster-ip-route
+            group=root owner=root mode=0755
+  register: if_down_script_installed
+  tags: kubernetes
+
+- name: add route for kubernetes cluster ip range if necessary
+  shell: ip route del to {{ kubernetes_service_cidr }}; ip route add to {{ kubernetes_service_cidr }} dev {{ primary_internal_iface }}
+  when: if_up_script_installed | changed or if_down_script_installed | changed
+  tags: kubernetes
+
+- name: override /etc/systemd/system/kubelet.service.d/10-kubeadm.conf
+  template: src=60-kubeadm-override.conf.j2
+            dest=/etc/systemd/system/kubelet.service.d/60-kubeadm-override.conf
+            group=root owner=root mode=0640
+  register: kubeadm_conf_overridden
+  tags: kubernetes
+
+- name: reload systemd if necessary
+  command: systemctl daemon-reload
+  when: kubeadm_conf_overridden | changed
+  tags: kubernetes
+
+- name: restart kubelet if necessary
+  service: name=kubelet state=restarted
+  when: kubeadm_conf_overridden | changed
+  tags: kubernetes
+
+- name: start kubelet
+  service: name=kubelet state=started enabled=yes
+  tags: kubernetes
+
+- name: initialize Kubernetes master
+  command: creates=/etc/kubernetes/kubelet.conf
+           kubeadm init --token={{ kubernetes_token }}
+           --api-advertise-addresses {{ kubernetes_api_advertise_addresses }}
+           --api-external-dns-names {{ kubernetes_api_external_dns_names }}
+           --external-etcd-endpoints {{ kubernetes_external_etcd_endpoints }}
+           --pod-network-cidr {{ kubernetes_pod_network_cidr }}
+           --service-cidr {{ kubernetes_service_cidr }}
+           --use-kubernetes-version {{ kubernetes_version }}
+  when: inventory_hostname == groups['kubernetes'][0]
+  tags: kubernetes
+
+- name: install Flannel
+  shell: creates=/etc/cni/net.d/10-flannel.conf
+         curl -s https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml | sed -e
+         's|"10\.244\.0\.0/16"|"{{ kubernetes_pod_network_cidr }}"|g; s|"/opt/bin/flanneld"|"/opt/bin/flanneld", --iface={{ primary_internal_iface }}|' | kubectl -n
+         kube-system apply -f -
+  when: inventory_hostname == groups['kubernetes'][0]
+  tags: kubernetes
+
+- name: initialize Kubernetes worker
+  command: creates=/etc/kubernetes/kubelet.conf
+           kubeadm join --token={{ kubernetes_token }} {{ kubernetes_master_ip }}
+  when: inventory_hostname != groups['kubernetes'][0]
+  tags: kubernetes
+

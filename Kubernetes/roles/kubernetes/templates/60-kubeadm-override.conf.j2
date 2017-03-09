@@ -1,0 +1,4 @@
+[Service]
+Environment="KUBELET_DNS_ARGS=--cluster-dns={{ kubernetes_cluster_dns }}  --cluster-domain={{ kubernetes_cluster_domain }}"
+Environment="KUBELET_EXTRA_ARGS=$KUBELET_EXTRA_ARGS --node-ip={{ kubernetes_node_ip }}"
+

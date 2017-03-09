@@ -1,0 +1,7 @@
+# vi: et ts=2 sts=2 sw=2 ai
+---
+
+ansible_python_interpreter: /usr/bin/python3
+
+primary_internal_iface: enp0s8
+

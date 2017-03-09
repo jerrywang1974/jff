@@ -1,0 +1,19 @@
+# vi: et ts=2 sts=2 sw=2 ai
+---
+
+kubernetes_disable_rp_filter: no
+
+primary_internal_iface: "{{ ansible_default_ipv4.interface }}"
+kubernetes_node_ip: "{{ hostvars[inventory_hostname]['ansible_' ~ primary_internal_iface].ipv4.address }}"
+kubernetes_master_ip: "{{ hostvars[groups['kubernetes'][0]]['ansible_' ~ primary_internal_iface].ipv4.address }}"
+kubernetes_api_advertise_addresses: "{{ kubernetes_master_ip }}"
+kubernetes_api_external_dns_names: kubernetes.example.com,kube.example.com,k8s.example.com
+kubernetes_external_etcd_endpoints: "{% for host in groups['etcd'] %}http://{{ hostvars[host]['etcd_node_ip'] }}:{{ etcd_client_port }}{% if not loop.last %},{% endif %}{% endfor %}"
+kubernetes_pod_network_cidr: 172.16.0.0/16
+kubernetes_service_cidr: 172.31.0.0/16
+kubernetes_cluster_dns: 172.31.0.10
+kubernetes_cluster_domain: cluster.local
+kubernetes_version: stable
+
+etcd_client_port: 2379
+

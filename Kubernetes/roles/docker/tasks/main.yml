@@ -1,0 +1,19 @@
+# vi: et ts=2 sts=2 sw=2 ai
+---
+
+- name: install linux-image-generic for aufs kernel driver
+  apt: name=linux-image-generic state=present
+  tags: docker
+
+- name: install docker.io
+  apt: name=docker.io state=present
+  tags: docker
+
+- name: install python3-docker for Ansible module docker_container
+  apt: name=python3-docker state=present
+  tags: docker
+
+- name: start docker
+  service: name=docker state=started enabled=yes
+  tags: docker
+
