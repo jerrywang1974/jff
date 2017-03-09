@@ -111,8 +111,7 @@ kubeadm join --token=ede318.d293b35f94a866c7 192.168.31.100
 kubectl apply -f https://cloud.weave.works/launch/k8s/weavescope.yaml
 
 ## http://kubernetes.io/docs/getting-started-guides/kubeadm/#optional-installing-a-sample-application
-kubectl create namespace sock-shop
-kubectl apply -n sock-shop -f 'https://github.com/microservices-demo/microservices-demo/blob/master/deploy/kubernetes/complete-demo.yaml?raw=true'
+kubectl apply -f 'https://github.com/microservices-demo/microservices-demo/blob/master/deploy/kubernetes/complete-demo.yaml?raw=true'
 
 ## https://github.com/kubernetes/heapster/blob/master/docs/influxdb.md
 git clone git@github.com:kubernetes/heapster.git
