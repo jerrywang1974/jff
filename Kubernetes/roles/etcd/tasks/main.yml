@@ -4,7 +4,9 @@
 - name: inject etcd_node_name and etcd_node_ip to hostvars possibly from role defaults
   set_fact: etcd_node_name={{ etcd_node_name }}
             etcd_node_ip={{ etcd_node_ip }}
-  tags: etcd
+  tags:
+    - etcd
+    - kubernetes
 
 - name: start etcd container
   docker_container:
