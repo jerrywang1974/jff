@@ -1,8 +1,8 @@
 # vi: et ts=2 sts=2 sw=2 ai
 ---
 
-- name: use Aliyun Ubuntu repository mirror
-  copy: src=aliyun.list dest=/etc/apt/sources.list backup=yes
+- name: install Ubuntu APT repository
+  template: src=aliyun.list.j2 dest=/etc/apt/sources.list backup=yes
         group=root owner=root mode=0644
   register: sources_list_changed
 
@@ -15,8 +15,8 @@
   apt_key: id=A7317B0F state=present
            file=/tmp/https_packages.cloud.google.com_apt_doc_apt-key.gpg
 
-- name: use Aliyun Kubernetes repository mirror
-  copy: src=kubernetes.list dest=/etc/apt/sources.list.d/kubernetes.list
+- name: install Kubernetes APT repository
+  template: src=kubernetes.list.j2 dest=/etc/apt/sources.list.d/kubernetes.list
         backup=yes group=root owner=root mode=0644
   register: kubernetes_list_changed
 

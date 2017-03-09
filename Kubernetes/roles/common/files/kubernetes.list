@@ -1,2 +1,0 @@
-deb http://apt.kubernetes.io/ kubernetes-xenial main
-#deb http://mirrors.aliyun.com/kubernetes/apt/ kubernetes-xenial main
