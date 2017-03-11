@@ -11,7 +11,7 @@
 
 Install [Homebrew](https://brew.sh) and [Vagrant](https://www.vagrantup.com/), then run these commands:
 
-```
+```sh
 ./scripts/bootstrap-vagrant-example-cluster.sh
 
 brew install --HEAD ansible     # Ansible >= 2.2
@@ -22,4 +22,20 @@ echo $KUBERNETES_TOKEN
 
 ansible-playbook -i clusters/example/hosts -b site.yml -e "kubernetes_token=$KUBERNETES_TOKEN"
 ```
+
+## Use private Docker registry for infra images
+
+Set these variables in group\_vars/kubernetes.yml:
+
+```yaml
+kubernetes_pod_infra_container_image: some.host.name/google_containers/pause-amd64:3.0
+kubernetes_version: v1.5.4
+kubernetes_kubeadm_env:
+  KUBE_REPO_PREFIX: some.host.name/google_containers
+  KUBE_DISCOVERY_IMAGE: some.host.name/google_containers/kube-discovery-amd64:1.0
+```
+
+By default kubernetes\_version is "stable", Kubeadm will request
+https://storage.googleapis.com/kubernetes-release/release/stable.txt to
+resolve the version.
 
