@@ -72,6 +72,7 @@
            --service-cidr {{ kubernetes_service_cidr }}
            --use-kubernetes-version {{ kubernetes_version }}
   when: inventory_hostname == groups['kubernetes'][0]
+  environment: "{{ kubernetes_kubeadm_env }}"
   tags: kubernetes
 
 - name: install Flannel
@@ -86,5 +87,6 @@
   command: creates=/etc/kubernetes/kubelet.conf
            kubeadm join --token={{ kubernetes_token }} {{ kubernetes_master_ip }}
   when: inventory_hostname != groups['kubernetes'][0]
+  environment: "{{ kubernetes_kubeadm_env }}"
   tags: kubernetes
 
