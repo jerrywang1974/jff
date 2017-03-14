@@ -2,6 +2,8 @@ http://wenq.org/index.cgi?CJKFontList
 http://en.wikipedia.org/wiki/Unicode_typefaces
 http://www.unifont.org/fontguide/
 http://wiki.debian.org.hk/w/Where_can_I_find_fonts_for_GNU/Linux
+http://tex.stackexchange.com/questions/215564/what-chinese-fonts-can-i-rely-on-to-be-in-mac-and-linux
+http://tex.stackexchange.com/questions/185817/chinese-typing-on-mac/193333?noredirect=1#comment506001_193333
 
 字体测试：
 http://www.chinesecj.com/code/ext-a.php
