@@ -16,6 +16,8 @@ RUN         set -e -x && \
                 cronolog \
                 curl \
                 dos2unix \
+                fonts-arphic-uming \
+                fonts-dejavu \
                 gdb \
                 git \
                 htop \
@@ -56,11 +58,11 @@ RUN         set -e -x && \
 RUN         set -e -x && \
             export DEBIAN_FRONTEND=noninteractive && \
             cd /opt && \
-            tarball=jdk-8u112-linux-x64.tar.gz && \
-            curl -L -b oraclelicense=a -O http://download.oracle.com/otn-pub/java/jdk/8u112-b15/$tarball && \
-            [ `sha256sum -b $tarball | awk '{print $1}'` = 777bd7d5268408a5a94f5e366c2e43e720c6ce4fe8c59d9a71e2961e50d774a5 ] && \
+            tarball=jdk-8u121-linux-x64.tar.gz && \
+            curl -L -b oraclelicense=a -O http://download.oracle.com/otn-pub/java/jdk/8u121-b13/e9e7ea248e2c4826b92b3f075a80e441/$tarball && \
+            [ `sha256sum -b $tarball | awk '{print $1}'` = 97e30203f1aef324a07c94d9d078f5d19bb6c50e638e4492722debca588210bc ] && \
             tar xvf $tarball && \
-            ln -snf jdk1.8.0_112 jdk && \
+            ln -snf jdk1.8.0_121 jdk && \
             ln -snf /opt/jdk/bin/* /usr/local/bin/ && \
             rm $tarball
 
@@ -117,7 +119,7 @@ RUN         set -e -x && \
 RUN         set -e -x && \
             export DEBIAN_FRONTEND=noninteractive && \
             apt-get install -y software-properties-common && \
-            add-apt-repository ppa:vbernat/haproxy-1.6 && \
+            add-apt-repository ppa:vbernat/haproxy-1.7 && \
             apt-get update && \
             apt-get install -y haproxy
 
@@ -125,9 +127,9 @@ RUN         set -e -x && \
 RUN         set -e -x && \
             export DEBIAN_FRONTEND=noninteractive && \
             cd /opt && \
-            debball=mysql-apt-config_0.8.1-1_all.deb && \
-            curl -L -O http://repo.mysql.com/$debball && \
-            [ `sha256sum -b $debball | awk '{print $1}'` = cbee2a94486d7b3e0729f6b9111b7d71bb591a7d541a0786e80ad724dcad1249 ] && \
+            debball=mysql-apt-config_0.8.3-1_all.deb && \
+            curl -L -O https://dev.mysql.com/get/$debball && \
+            [ `sha256sum -b $debball | awk '{print $1}'` = 1bcd0510a9c7034da20d43bbb971b98efcef41ca0c51dee0828f56c467e9dab8 ] && \
             dpkg -i $debball && \
             rm $debball && \
             apt-get update && \
@@ -157,17 +159,17 @@ RUN         set -e -x && \
 RUN         set -e -x && \
             export DEBIAN_FRONTEND=noninteractive && \
             cd /usr/local/bin && \
-            curl -L -o tini https://github.com/krallin/tini/releases/download/v0.13.2/tini-static-amd64 && \
-            [ `sha256sum -b tini | awk '{print $1}'` = 1b20578e2c178c9f7e53af6320adfd5223cdcc4a651b7ad95202a4c43d3cb972 ] && \
+            curl -L -o tini https://github.com/krallin/tini/releases/download/v0.14.0/tini-static-amd64 && \
+            [ `sha256sum -b tini | awk '{print $1}'` = 6c41ec7d33e857d4779f14d9c74924cab0c7973485d2972419a3b7c7620ff5fd ] && \
             chmod 555 tini
 
 # consul-template
 RUN         set -e -x && \
             export DEBIAN_FRONTEND=noninteractive && \
             cd /opt && \
-            zipball=consul-template_0.16.0_linux_amd64.zip && \
-            curl -L -O https://releases.hashicorp.com/consul-template/0.16.0/$zipball && \
-            [ `sha256sum -b $zipball | awk '{print $1}'` = 064b0b492bb7ca3663811d297436a4bbf3226de706d2b76adade7021cd22e156 ] && \
+            zipball=consul-template_0.18.1_linux_amd64.zip && \
+            curl -L -O https://releases.hashicorp.com/consul-template/0.18.1/$zipball && \
+            [ `sha256sum -b $zipball | awk '{print $1}'` = 99dcee0ea187c74d762c5f8f6ceaa3825e1e1d4df6c0b0b5b38f9bcb0c80e5c8 ] && \
             unzip $zipball -d /usr/local/bin/ && \
             rm $zipball
 
