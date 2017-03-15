@@ -1,0 +1,4 @@
+Associate IAM role to created EC2 instances:
+
+$ aws ec2 associate-iam-instance-profile --iam-instance-profile Name=<IAM-Role-Name>  --instance-id <Instance-ID>
+
