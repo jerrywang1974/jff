@@ -16,6 +16,7 @@ Bash
     C-r         增量搜索命令历史
 
 Fish
+    Alt-e or Alt-v  在编辑器中编辑命令 (由于键盘映射，可能要同时按 ESC-e 或者ESC-v)
     Alt ->      向行末跳一个单词
     Alt <-      向行首跳一个单词
     Alt-p or ESC-p              在命令行末尾添加 ^&1 | less;
