@@ -7,6 +7,11 @@
 * Kubernetes v1.5.4 with Flannel vxlan backend
 * External etcd cluster, v3.1.2
 
+See:
+
+* https://github.com/kubernetes/kubernetes/issues/40182#issuecomment-276392353
+* https://github.com/kubernetes/kubernetes/blob/master/CHANGELOG.md#external-dependency-version-information
+
 ## Run on Mac OS X
 
 Install [Homebrew](https://brew.sh) and [Vagrant](https://www.vagrantup.com/), then run these commands:

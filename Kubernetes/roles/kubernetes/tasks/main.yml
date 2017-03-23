@@ -71,6 +71,7 @@
            --pod-network-cidr {{ kubernetes_pod_network_cidr }}
            --service-cidr {{ kubernetes_service_cidr }}
            --use-kubernetes-version {{ kubernetes_version }}
+           {{ kubeadm_extra_args }}
   when: inventory_hostname == groups['kubernetes'][0]
   environment: "{{ kubernetes_kubeadm_env }}"
   tags: kubernetes
@@ -85,7 +86,7 @@
 
 - name: initialize Kubernetes worker
   command: creates=/etc/kubernetes/kubelet.conf
-           kubeadm join --token={{ kubernetes_token }} {{ kubernetes_master_ip }}
+           kubeadm join --token={{ kubernetes_token }} {{ kubernetes_master_ip }} {{ kubeadm_extra_args }}
   when: inventory_hostname != groups['kubernetes'][0]
   environment: "{{ kubernetes_kubeadm_env }}"
   tags: kubernetes

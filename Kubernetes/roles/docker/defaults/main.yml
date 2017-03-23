@@ -1,0 +1,5 @@
+# vi: et ts=2 sts=2 sw=2 ai
+---
+
+docker_engine_version: 1.12.*
+

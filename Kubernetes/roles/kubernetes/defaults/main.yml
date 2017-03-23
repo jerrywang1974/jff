@@ -18,5 +18,6 @@ kubernetes_version: stable
 
 etcd_client_port: 2379
 
+kubeadm_extra_args: ""
 #kubernetes_root_dir: /data0/var/lib/kubelet
 
