@@ -61,6 +61,7 @@
     - lsof
     - man-db
     - netcat-openbsd
+    - nfs-common
     - pdsh
     - pssh
     - rsync
