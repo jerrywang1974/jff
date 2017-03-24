@@ -52,9 +52,10 @@ LibSVM
 
 NuPIC           http://numenta.org/
 
+RapidMiner      https://rapidminer.com/pricing/     (Free edition supports 1 logical processor and 10000 data rows)
+KNIME           http://www.knime.org/products/product-matrix (KNIME Analytics Platform is open source and free)
 Weka            http://www.cs.waikato.ac.nz/ml/weka/
-Knime           http://www.knime.org/
-RapidMiner      https://rapidminer.com/
+Orange          http://orange.biolab.si/
 
 
 ## NLP
