@@ -5,6 +5,9 @@ http://mysqlhighavailability.com/performance-evaluation-mysql-5-7-group-replicat
 http://www.gpfeng.com/?p=603
 http://feed.askmaclean.com/archives/group-replication-is-ga-with-mysql-5-7-17-comparison-with-galera.html
 
+https://www.percona.com/blog/2017/02/24/battle-for-synchronous-replication-in-mysql-galera-vs-group-replication/
+
+
 基于binlog复制和Paxos 一致性协议，确保事务的全序，通过主键判断事务间是否冲突。
 * 组通讯传播 binlog, 各节点提取 writeset(修改的行的主键的hash值) 判断冲突；
 * 两两全连接；
@@ -13,7 +16,7 @@ http://feed.askmaclean.com/archives/group-replication-is-ga-with-mysql-5-7-17-co
 Galera 和 GR 非常像，比较大的区别：
 
 * Oracle 官方宣称 GR 性能高一倍 (http://mysqlhighavailability.com/performance-evaluation-mysql-5-7-group-replication/ ，作者是 Oracle 的性能工程师);
-* 用的一致性协议算法不一样(http://lefred.be/content/group-replication-vs-galera/)，GR 用的是 Paxos 变种 (http://sysnet.ucsd.edu/~yamao/pub/mencius-osdi.pdf), 
+* 用的一致性协议算法不一样(http://lefred.be/content/group-replication-vs-galera/)，GR 用的是 Paxos 变种 (http://sysnet.ucsd.edu/~yamao/pub/mencius-osdi.pdf),
   Galera 用的 Virtual Synchrony (http://dsn.jhu.edu/~yairamir/Yair_phd.pdf)， 大致意思是 GR 节点间两两通讯，而 VS 是令牌环，同一时刻只能一个节点发消息，所以 GR 的通讯效率更好;
 * Galera 支持不存储数据的 Arbitrator 节点，GR 不支持;
 * Galera 有一个 State Snapshot Transfer，在新节点或者落后太多节点加入时，可以自动传输快照（类似 redis 复制，如果 aof 断档跟不上则 dump rdb 给 slave），
