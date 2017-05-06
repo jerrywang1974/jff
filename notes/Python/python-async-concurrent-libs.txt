@@ -3,6 +3,7 @@ https://github.com/vinta/awesome-python#wsgi-servers
 * gunicorn with gevent or meinheld worker
 * bjoern    - super fast, no coroutine
 * meinheld  - super fast, limited monkey patch(only patch socket), has coroutine, support web socket
+* japronto  - https://github.com/squeaky-pl/japronto
 * fapws3
 * uWSGI
 
