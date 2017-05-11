@@ -1,0 +1,83 @@
+MySQL on ZFS
+
+Create file systems:
+
+    # zpool create -f vol1 /dev/vdb
+    # zfs set compression=lz4 vol1
+
+    # zfs create -o mountpoint=/home vol1/home
+    # zfs mount vol1/home
+
+    # zfs create -p -o mountpoint=/home/mysql-db10/mysql-data
+                      vol1/home/mysql-db10/mysql-data
+    # zfs create -o mountpoint=/home/mysql-db10/mysql-binlog
+                      vol1/home/mysql-db10/mysql-binlog
+    # zfs set primarycache=metadata vol1/home/mysql-db10
+    # zfs set recordsize=16k vol1/home/mysql-db10/mysql-data
+    # zfs set logbias=throughput vol1/home/mysql-db10/mysql-data
+
+    # cd /home && tar xf /root/home-backup.tar.gz
+
+    # echo "options zfs zfs_arc_max=2147483648" > /etc/modprobe.d/zfs.conf
+    # echo "options zfs zfs_prefetch_disable=1" >> /etc/modprobe.d/zfs.conf
+    # echo 1 > /sys/module/zfs/parameters/zfs_prefetch_disable
+    # echo 2147483648 > /sys/module/zfs/parameters/zfs_arc_max
+
+
+Create MySQL extra config /home/mysql-db10/mysql-config/z_extra.cnf:
+
+[mysqld]
+server-id=10
+read_only=ON
+ 
+skip-innodb_doublewrite     # only for ZFS: https://blogs.oracle.com/realneel/entry/mysql_innodb_zfs_best_practices
+ 
+innodb_buffer_pool_size=5G
+innodb_flush_method=O_DSYNC
+innodb_flush_neighbors=0
+innodb_io_capacity=1000
+innodb_log_file_size=1G
+query_cache_type=0
+query_cache_size=0
+ 
+max_execution_time=600000
+wait_timeout=600
+interactive_timeout=600
+ 
+character-set-client-handshake=FALSE
+character-set-server=utf8mb4
+collation-server=utf8mb4_unicode_ci
+init-connect='SET NAMES utf8'
+ 
+lower_case_table_names=1
+show_compatibility_56=on
+max_connections=1000
+max_allowed_packet=16M
+ 
+log-bin=/var/lib/mysql-binlog/mysql-bin
+relay-log=/var/lib/mysql-binlog/mysql-relay-bin
+expire_logs_days=10
+gtid_mode=on
+enforce_gtid_consistency=on
+log-slave-updates=1
+skip_slave_start=1
+master-info-repository=TABLE
+relay-log-info-repository=TABLE
+
+
+Create MySQL docker container:
+
+	$ NAME=mysql-db10
+	 
+	$ docker run --rm -v /home/$NAME/mysql-data:/var/lib/mysql -v /home/$NAME/mysql-binlog:/var/lib/mysql-binlog \
+	-v /home/$NAME/mysql-files:/var/lib/mysql-files -v /home/$NAME/mysql-log:/var/log/mysql -v /home/$NAME/mysql-run:/run/mysqld \
+	mysql:5.7.18 bash -c 'chown -R mysql:mysql /var/lib/mysql* /run/mysqld; chown -R mysql:adm /var/log/mysql'
+	 
+	$ docker run -dt --net=host --restart unless-stopped --name $NAME \
+	-e MYSQL_ALLOW_EMPTY_PASSWORD=true \
+	-v /home/$NAME/mysql-data:/var/lib/mysql -v /home/$NAME/mysql-binlog:/var/lib/mysql-binlog \
+	-v /home/$NAME/mysql-files:/var/lib/mysql-files -v /home/$NAME/mysql-log:/var/log/mysql -v /home/$NAME/mysql-run:/run/mysqld \
+	-v /home/$NAME/mysql-config/z_extra.cnf:/etc/mysql/conf.d/z_extra.cnf:ro \
+	-v /etc/timezone:/etc/timezone:ro -v /etc/localtime:/etc/localtime:ro \
+	mysql:5.7.18
+	
