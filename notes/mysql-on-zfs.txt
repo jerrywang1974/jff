@@ -63,9 +63,13 @@ master-info-repository=TABLE
 relay-log-info-repository=TABLE
 
 
+Restore with XtraBackup full backup:
+    $ rsync -avrP full-backup/  root@db-server:/home/mysql-db10/mysql-data/
+
 Create MySQL docker container:
 
 	$ NAME=mysql-db10
+
 
 	$ docker run --rm -v /home/$NAME/mysql-data:/var/lib/mysql -v /home/$NAME/mysql-binlog:/var/lib/mysql-binlog \
 	-v /home/$NAME/mysql-files:/var/lib/mysql-files -v /home/$NAME/mysql-log:/var/log/mysql -v /home/$NAME/mysql-run:/run/mysqld \
@@ -78,4 +82,44 @@ Create MySQL docker container:
 	-v /home/$NAME/mysql-config/z_extra.cnf:/etc/mysql/conf.d/z_extra.cnf:ro \
 	-v /etc/timezone:/etc/timezone:ro -v /etc/localtime:/etc/localtime:ro \
 	mysql:5.7.18
+
+
+    $ docker exec -it $NAME mysql_upgrade -p
+    $ docker restart $NAME
+    $ cat /home/$NAME/mysql-data/xtrabackup_binlog_info
+    $ docker exec -it $NAME mysql -p
+    mysql> CHANGE MASTER TO MASTER_HOST="...", MASTER_PORT=3306,
+    MASTER_USER='xxx', MASTER_PASSWORD='xxxx', MASTER_LOG_FILE='...',
+    MASTER_LOG_POS=xxxx;
+    mysql> START SLAVE;
+
+
+Create a MySQL container based on ZFS snapshot:
+
+    docker exec -it mysql-db10 mysql -p
+    mysql> FLUSH TABLES WITH READ LOCK;
+
+    TIMESTAMP=`date +%Y%m%d-%H%M%S`
+    zfs snapshot -r vol1/home/mysql-db10@$TIMESTAMP
+    zfs list -t all
+    ls -l /home/mysql-db10/.zfs/snapshot  # .zfs 目录默认不能被 ls -a 看到，需要 zfs set snapdir=visible vol1/home/mysql-db10 才行，不过不影响直接访问.zfs目录。
+
+    zfs clone vol1/home/mysql-db10@$TIMESTAMP vol1/home/mysql-db20
+    zfs clone vol1/home/mysql-db10/mysql-binlog@$TIMESTAMP vol1/home/mysql-db20/mysql-binlog
+    zfs clone vol1/home/mysql-db10/mysql-data@$TIMESTAMP vol1/home/mysql-db20/mysql-data
+
+    mysql> UNLOCK TABLES;
+
+
+    ... edit /home/mysql-db10/mysql-config/z_extra.cnf, replace "server-id=10" with "server-id=20";
+    ... remove /home/mysql-db10/mysql-data/auto.cnf to make mysql server generate new server-uuid.
+
+    NAME=mysql-db20
+    docker run -dt -p 23306:3306 --restart unless-stopped --name $NAME \
+    -e MYSQL_ALLOW_EMPTY_PASSWORD=true \
+    -v /home/$NAME/mysql-data:/var/lib/mysql -v /home/$NAME/mysql-binlog:/var/lib/mysql-binlog \
+    -v /home/$NAME/mysql-files:/var/lib/mysql-files -v /home/$NAME/mysql-log:/var/log/mysql -v /home/$NAME/mysql-run:/run/mysqld \
+    -v /home/$NAME/mysql-config/z_extra.cnf:/etc/mysql/conf.d/z_extra.cnf:ro \
+    -v /etc/timezone:/etc/timezone:ro -v /etc/localtime:/etc/localtime:ro \
+    mysql:5.7.18
 
