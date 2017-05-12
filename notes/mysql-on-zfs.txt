@@ -7,7 +7,6 @@ Create file systems:
     # zfs set compression=lz4 vol1
 
     # zfs create -o mountpoint=/home vol1/home
-    # zfs mount vol1/home
 
     # zfs create -p -o mountpoint=/home/mysql-db10/mysql-data
                       vol1/home/mysql-db10/mysql-data
