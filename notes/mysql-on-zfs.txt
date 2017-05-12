@@ -104,9 +104,9 @@ Create a MySQL container based on ZFS snapshot:
     zfs list -t all
     ls -l /home/mysql-db10/.zfs/snapshot  # .zfs 目录默认不能被 ls -a 看到，需要 zfs set snapdir=visible vol1/home/mysql-db10 才行，不过不影响直接访问.zfs目录。
 
-    zfs clone vol1/home/mysql-db10@$TIMESTAMP vol1/home/mysql-db20
+    zfs clone -o primarycache=meta vol1/home/mysql-db10@$TIMESTAMP vol1/home/mysql-db20
     zfs clone vol1/home/mysql-db10/mysql-binlog@$TIMESTAMP vol1/home/mysql-db20/mysql-binlog
-    zfs clone vol1/home/mysql-db10/mysql-data@$TIMESTAMP vol1/home/mysql-db20/mysql-data
+    zfs clone -o recordsize=16k -o logbias=throughput vol1/home/mysql-db10/mysql-data@$TIMESTAMP vol1/home/mysql-db20/mysql-data
 
     mysql> UNLOCK TABLES;
 
