@@ -123,3 +123,15 @@ Create a MySQL container based on ZFS snapshot:
     -v /etc/timezone:/etc/timezone:ro -v /etc/localtime:/etc/localtime:ro \
     mysql:5.7.18
 
+
+Setup NFS share for backup:
+
+    zfs create -o recordsize=16k -o logbias=throughput -o primarycache=metadata vol1/backup
+    zfs create vol1/backup/stg-db-01
+    apt install nfs-kernel-server
+    zfs set sharenfs=rw=stg-db-01.int.frontnode.net,sync,no_root_squash,no_subtree_check vol1/backup/stg-db-01
+    zfs share /vol1/backup/stg-db-01
+    showmount -e localhost
+
+    sed -i -e "s/^ZFS_SHARE='no'/ZFS_SHARE='yes'/" /etc/default/zfs    # mount ZFS nfs shares on boot
+
