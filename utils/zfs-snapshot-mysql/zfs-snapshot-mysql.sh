@@ -92,7 +92,7 @@ if [ "$FORKED" ]; then
 
     log "successfully backuped $@ at timestamp $TIMESTAMP"
 else
-    $MYSQL -Be 'SHOW GRANTS' | fgrep RELOAD | fgrep -q 'LOCK TABLES' || {
+    $MYSQL -e 'SHOW GRANTS' | fgrep RELOAD | fgrep -q 'LOCK TABLES' || {
         echo "ERROR: Privileges RELOAD and LOCK TABLES are not granted!"
         exit 1
     }
