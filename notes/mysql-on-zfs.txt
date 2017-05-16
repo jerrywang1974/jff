@@ -3,7 +3,9 @@ MySQL on ZFS
 Create file systems:
 
     # apt install zfs-dkms zfsutils-linux
-    # zpool create -f vol1 /dev/vdb
+    # zpool create -o ashift=12 -f vol1 /dev/vdb    # default ashift=9 for 512 bytes sector
+                                                    # NOTICE ashift is for vdev not for zpool, so
+                                                    # always specify it when adding vdev to pool
     # zfs set compression=lz4 vol1
 
     # zfs create -o mountpoint=/home vol1/home
