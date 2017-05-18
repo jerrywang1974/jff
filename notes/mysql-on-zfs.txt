@@ -7,6 +7,7 @@ Create file systems:
                                                     # NOTICE ashift is for vdev not for zpool, so
                                                     # always specify it when adding vdev to pool
     # zfs set compression=lz4 vol1
+    # zfs set xattr=sa vol1
 
     # zfs create -o mountpoint=/home vol1/home
 
