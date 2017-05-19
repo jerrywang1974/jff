@@ -68,6 +68,12 @@ skip_slave_start=1
 master-info-repository=TABLE
 relay-log-info-repository=TABLE
 
+# https://dev.mysql.com/doc/refman/5.7/en/replication-solutions-unexpected-slave-halt.html
+#slave_preserve_commit_order=0
+#slave_parallel_type=LOGICAL_CLOCK
+#slave_parallel_workers=8
+#relay_log_recovery=1
+
 
 Restore with XtraBackup full backup:
     $ rsync -avrP full-backup/  root@db-server:/home/mysql-db10/mysql-data/
