@@ -1,0 +1,17 @@
+ffmpeg      http://ffmpeg.org/
+mencoder    http://www.mplayerhq.hu/design7/news.html
+handbrake   https://handbrake.fr/
+
+MediaCoder
+MeGUI       https://sourceforge.net/projects/megui/
+
+https://en.wikipedia.org/wiki/Comparison_of_video_converters
+https://en.wikipedia.org/wiki/List_of_video_editing_software
+https://en.wikipedia.org/wiki/Comparison_of_video_editing_software
+
+
+Video formats: HEVC/H.265, AVC/H.264, VP9, AOMedia Video 1(AV1), Xiph's Daala, Theora
+Audio formats: FLAC, Monkey's Audio(.ape), WavPack(.wv), Apple Loseless Audio Codec(ALAC, .m4a), TTA, DTS;
+               Opus, AAC, AC3, Vorbis
+Container formats: MKV, MP4, WebM, AVI, OGG, FLV/F4V
+
