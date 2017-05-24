@@ -28,10 +28,10 @@ Create file systems:
 Create MySQL extra config /home/mysql-db10/mysql-config/z_extra.cnf:
 
 [mysqld]
-server-id=10
-read_only=ON
+server_id=10
+read_only=ON				 # for MySQL slave
 
-skip-innodb_doublewrite     # only for ZFS: https://blogs.oracle.com/realneel/entry/mysql_innodb_zfs_best_practices
+skip_innodb_doublewrite     # only for ZFS: https://blogs.oracle.com/realneel/entry/mysql_innodb_zfs_best_practices
 
 innodb_buffer_pool_size=5G
 innodb_flush_method=O_DSYNC
@@ -45,34 +45,39 @@ max_execution_time=600000
 wait_timeout=600
 interactive_timeout=600
 
-character-set-client-handshake=FALSE
-character-set-server=utf8mb4
-collation-server=utf8mb4_unicode_ci
-init-connect='SET NAMES utf8'
+character_set_client_handshake=FALSE
+character_set_server=utf8mb4
+collation_server=utf8mb4_unicode_ci
+init_connect='SET NAMES utf8'
 
 lower_case_table_names=1
-show_compatibility_56=on
+show_compatibility_56=ON
 max_connections=1000
 max_allowed_packet=16M
 
-log-bin=/var/lib/mysql-binlog/mysql-bin
-relay-log=/var/lib/mysql-binlog/mysql-relay-bin
+log_bin=/var/lib/mysql-binlog/mysql-bin
+relay_log=/var/lib/mysql-binlog/mysql-relay-bin
 expire_logs_days=10
-gtid_mode=on
-enforce_gtid_consistency=on
+gtid_mode=ON
+enforce_gtid_consistency=ON
 innodb_flush_log_at_trx_commit=1
-binlog-format=ROW
 sync_binlog=1
-log-slave-updates=1
-skip_slave_start=1
-master-info-repository=TABLE
-relay-log-info-repository=TABLE
+binlog_format=ROW
+binlog_row_image=minimal
+binlog_rows_query_log_events=ON
+slave_rows_search_algorithms='INDEX_SCAN,HASH_SCAN'
+log_slave_updates=ON
+skip_slave_start=ON
+master_info_repository=TABLE
+relay_log_info_repository=TABLE
+sync_master_info=1000
+sync_relay_log=1000
 
 # https://dev.mysql.com/doc/refman/5.7/en/replication-solutions-unexpected-slave-halt.html
-#slave_preserve_commit_order=0
-#slave_parallel_type=LOGICAL_CLOCK
-#slave_parallel_workers=8
-#relay_log_recovery=1
+slave_preserve_commit_order=ON
+slave_parallel_type=LOGICAL_CLOCK
+slave_parallel_workers=8
+relay_log_recovery=ON
 
 
 Restore with XtraBackup full backup:
