@@ -1,0 +1,13 @@
+bCache from Google: in kernel, 需要格式化 backing device
+
+dm-cache: in kernel, for LVM, 一个 ssd LV 只能用来为一个 backing device 做缓存
+
+flashcache: out of kernel
+
+EnhanceIO: https://wiki.archlinux.org/index.php/EnhanceIO
+          "As of October 2015 EnhanceIO is completely broken on newer kernels."
+
+External journal for ext4 with mount option "journal_async_commit"
+
+SLC ssd for ZFS ZIL and MLC ssd for ZFS L2ARC
+
