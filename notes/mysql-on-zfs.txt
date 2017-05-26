@@ -47,7 +47,7 @@ interactive_timeout=600
 
 character_set_client_handshake=FALSE
 character_set_server=utf8mb4
-collation_server=utf8mb4_unicode_ci
+collation_server=utf8mb4_unicode_520_ci     # mysql 8.0 use utf8mb4_0900_ai_ci by default
 init_connect='SET NAMES utf8'
 
 lower_case_table_names=1
