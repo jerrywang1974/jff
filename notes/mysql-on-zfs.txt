@@ -24,6 +24,12 @@ Create file systems:
     # echo 1 > /sys/module/zfs/parameters/zfs_prefetch_disable
     # echo 2147483648 > /sys/module/zfs/parameters/zfs_arc_max
 
+    ## https://access.redhat.com/solutions/46111
+    # echo never > /sys/kernel/mm/transparent_hugepage/enabled
+    # echo never > /sys/kernel/mm/transparent_hugepage/defrag
+    # grep -q transparent_hugepage /etc/default/grub || echo 'GRUB_CMDLINE_LINUX_DEFAULT="$GRUB_CMDLINE_LINUX_DEFAULT transparent_hugepage=never"' >> /etc/default/grub
+    # grub-mkconfig -o /boot/grub/grub.cfg
+
 
 Create MySQL extra config /home/mysql-db10/mysql-config/z_extra.cnf:
 
