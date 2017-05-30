@@ -1,0 +1,49 @@
+TokuDB for Percona Server and MariaDB
+
+Percona Server 5.7
+    https://www.percona.com/doc/percona-server/LATEST/tokudb/tokudb_intro.html
+
+    apt update && apt install percona-server-tokudb-5.7
+
+MariaDB
+    https://mariadb.com/kb/en/mariadb/tokudb/
+
+    apt update && apt install mariadb-plugin-tokudb
+
+
+Tuning:
+
+    tokudb_row_format: tokudb_zlib (default), tokudb_quicklz, tokudb_lzma, tokudb_snappy, tokudb_uncompressed
+
+    read free replication:
+        mysql master: binlog_format=ROW     # SBR leads to non-deterministic interleaving of the auto-increment values with TokuDB:
+                                            # https://www.percona.com/doc/percona-server/5.7/tokudb/tokudb_troubleshooting.html
+                                            #
+                                            # REPLACE INTO and INSERT IGNORE may not be optimized: https://tokutek.atlassian.net/browse/DB-952
+
+                      make sure all TokuDB tables have primary keys!!!
+
+        mysql slave: read_only=1
+                     tokudb_rpl_unique_checks=0
+                     tokudb_rpl_lookup_rows=0
+
+    check disk write cache: http://xfs.org/index.php/XFS_FAQ#Q:_How_can_I_tell_if_I_have_the_disk_write_cache_enabled.3F
+
+    tokudb_cache_size: 50% physical memory by default, better >= 2G
+
+    tokudb_data_dir: default is mysql data dir
+    tokudb_log_dir: default is mysql data dir, recommend to keep same dir with tokudb_data_dir
+    tokudb_tmp_dir: default is mysql data dir
+
+    tokudb_dir_per_db: ON (default OFF on mariadb, ON on percona)
+
+    tokudb_directio: default to OFF. Increase tokudb_cache_size if set to ON because more memory can be used for cache.
+
+    tokudb_disable_prefetching: default to OFF.
+
+    tokudb_lock_timeout_debug: default 1.
+            2 => print to mysql error log.
+            3 => log to session variable 'tokudb_last_lock' and print to mysql error log
+    select @@tokudb_last_lock_timeout: a JSON object to show lock conflicts.
+
+

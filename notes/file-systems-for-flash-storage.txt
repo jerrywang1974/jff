@@ -10,7 +10,7 @@ On raw flash storage:
 
 On raw flash storage or block device(flash storage with Flash Translation Layer):
 
-    LogFS: intend to replace JFFS 2
+    LogFS: intend to replace JFFS 2, removed from 4.10 kernel tree, broken and unmaintained
     F2FS(Flash-Friendly File System): for high-throughput
     NILFS 2: for low-latency and continuous snapshot
 
