@@ -1,0 +1,30 @@
+https://www.percona.com/blog/2016/02/15/mysql-mariadb-with-mariadb-auditing-plugin/
+
+MySQL Auditing with MariaDB Auditing Plugin
+
+
+
+* MySQL Enterprise Audit Plugin – This plugin is not open source and is only
+available with MySQL Enterprise, which has a significant cost attached to it.
+It is the most stable and robust.
+
+* Percona Audit Log Plugin – Percona provides an open source auditing solution
+that installs with Percona Server 5.5.37+ and 5.6.17+. This plugin has quite a
+few output features as it outputs XML, JSON and to syslog. Percona’s
+implementation is the first to be a drop-in replacement for MySQL Enterprise
+Audit Plugin. As it has some internal hooks to the server to be
+feature-compatible with Oracle’s plugin, it is not available as a standalone
+for other versions of MySQL. This plugin is actively maintained by Percona.
+
+* McAfee MySQL Audit Plugin – Around the longest and has been used widely. It
+is open source and robust, while not using the official auditing API. It isn’
+t updated as often as one may like. There hasn’t been any new features in
+some time. It was recently updated to support MySQL 5.7.
+
+* MariaDB Audit Plugin – The only plugin that claims to support MySQL, Percona
+Server and MariaDB. It is open source and constantly upgraded with new
+versions of MariaDB. Versions starting at 1.2 are most stable, and it may be
+risky to use versions below that in your production environment. Versions
+below 1.2 may be unstable and I have seen it crash production servers. Older
+versions also log clear text passwords.
+
