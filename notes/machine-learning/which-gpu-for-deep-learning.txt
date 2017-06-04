@@ -1,0 +1,15 @@
+http://timdettmers.com/2017/04/09/which-gpu-for-deep-learning/
+
+Best GPU overall (by a small margin): Titan Xp
+Cost efficient but expensive: GTX 1080 Ti, GTX 1070, GTX 1080
+Cost efficient and cheap:  GTX 1060 (6GB)
+I work with data sets > 250GB: GTX Titan X (Maxwell), NVIDIA Titan X Pascal, or NVIDIA Titan Xp
+I have little money: GTX 1060 (6GB)
+I have almost no money: GTX 1050 Ti (4GB)
+I do Kaggle: GTX 1060 (6GB) for any “normal” competition, or GTX 1080 Ti for “deep learning competitions”
+I am a competitive computer vision researcher: NVIDIA Titan Xp; do not upgrade from existing Titan X (Pascal or Maxwell)
+I am a researcher: GTX 1080 Ti. In some cases, like natural language processing, a GTX 1070 or GTX 1080 might also be a solid choice — check the memory requirements of your current models
+I want to build a GPU cluster: This is really complicated, you can get some ideas here
+I started deep learning and I am serious about it: Start with a GTX 1060 (6GB). Depending of what area you choose next (startup, Kaggle, research, applied deep learning) sell your GTX 1060 and buy something more appropriate
+I want to try deep learning, but I am not serious about it: GTX 1050 Ti (4 or 2GB)
+
