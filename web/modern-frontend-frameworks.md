@@ -44,6 +44,7 @@ http://vuejs.org/ 官方 vue-cli.
     * https://github.com/facebookincubator/create-react-app
     * https://github.com/kriasoft/react-starter-kit
     * https://github.com/react-boilerplate/react-boilerplate
+    * https://github.com/Microsoft/TypeScript-React-Starter
     * https://github.com/zeit/next.js
     * https://github.com/erikras/react-redux-universal-hot-example
     * https://github.com/davezuko/react-redux-starter-kit
