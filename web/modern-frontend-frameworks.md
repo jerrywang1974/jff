@@ -4,10 +4,9 @@
 
 # Angular
 
-https://angular.io/，官方 angular-cli.
-
-https://github.com/ngrx/store#examples
-https://github.com/qdouble/angular-webpack2-starter
+* https://angular.io/ 官方 angular-cli.
+* https://github.com/ngrx/store#examples
+  * https://github.com/qdouble/angular-webpack2-starter
     A complete Angular 2 and Webpack 2 starter seed with minimal and
     full featured branches. Full featured branch includes: Material
     Design 2 (Bootstrap 4 branch available as well), @ngrx, HMR, DLLs
@@ -17,7 +16,7 @@ https://github.com/qdouble/angular-webpack2-starter
 
 # VueJS
 
-http://vuejs.org/，官方 vue-cli.
+http://vuejs.org/ 官方 vue-cli.
 
 # React
 
