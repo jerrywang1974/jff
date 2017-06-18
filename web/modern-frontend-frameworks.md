@@ -2,6 +2,8 @@
 
 前端资源：https://github.com/dexteryy/spellbook-of-modern-webdev
 
+http://bestof.js.org/
+
 # Angular
 
 * https://angular.io/ 官方 angular-cli.
