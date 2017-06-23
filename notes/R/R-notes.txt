@@ -27,3 +27,8 @@ Awesome R       *****
 Data Science R
     https://github.com/ujjwalkarn/DataScienceR
 
+R for Data Science by Garrett Grolemund and Hadley Wickham
+    http://r4ds.had.co.nz/
+
+Advanced R
+    http://adv-r.had.co.nz/
