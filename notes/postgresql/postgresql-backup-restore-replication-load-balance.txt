@@ -1,0 +1,136 @@
+PostgreSQL 备份、恢复、复制、负载均衡
+
+备份与恢复:
+    https://www.postgresql.org/docs/10/static/backup.html
+
+    (1) pg_dump + psql
+
+        pg_dumpall --globals-only       # cluster-wide roles, tablespaces
+        pg_dump dbname > dbname.sql     # relative to template0
+
+        CREATE DATABASE dbname TEMPLATE template0   # if template1 is different with template0
+        psql --set ON_ERROR_STOP=on dbname < dbname.sql
+
+    (2) pg_dump + pg_restore
+
+    pg_dump -Fc dbname > filename
+    pg_restore -d dbname filename
+
+    pg_dump -j num -Fd -f dir dbname
+    pg_restore -j num -d dbname dir
+
+    (3) pg_dumpall + psql
+
+        pg_dumpall > outfile        # 一个 pgsql server 里的多个 db 之间导出不是原子性的
+        psql -f infile postgres
+
+    (4) snapshot
+
+        optionally, perform a CHECKPOINT command;
+        do ZFS or LVM snapshot
+
+    (5) rsync
+
+        do rsync;
+        stop postgresql server;
+        do rsync --checksum;
+        start postgresql server;
+
+    (6) continuous archiving and point-in-time recovery
+
+        backup:
+            postgresql.conf on master:
+                wal_level = replica # or logical
+                archive_mode = on
+                archive_command = '...'
+
+            Run "pg_basebackup -D dir -R ...".
+
+        recovery:
+            https://www.postgresql.org/docs/10/static/continuous-archiving.html#backup-pitr-recovery
+            refer share/postgresql/recovery.conf.sample
+
+
+复制与负载均衡:
+    https://www.postgresql.org/docs/10/static/high-availability.html
+    https://wiki.postgresql.org/wiki/Replication,_Clustering,_and_Connection_Pooling
+    http://peter.eisentraut.org/blog/2015/03/03/the-history-of-replication-in-postgresql/
+
+    (1) Shared disk failover: NAS
+
+    (2) File system replication: DRBD
+
+    (3) log shipping: PostgreSQL builtin
+
+    * file-based log shipping (aka. log-shipping replication, file-based replication):
+    * record-based log shipping (aka. streaming replication):
+
+          setup continuous archiving on the primary;
+          create a role with REPLICATION and LOGIN privileges;
+          add the role to pg_hba.conf with database field set to 'replication';
+          check "max_wal_senders" and "max_replication_slots";
+          if no continuous archiving, increase wal_keep_segments or configure a replication slot for the standby to ensure WAL segments are not recycled too early;
+          optionally, configure "vacuum_defer_cleanup_age" and "old_snapshot_threshold";
+          configure "synchronous_commit = on | remote_apply" and "synchronous_standby_names='...'";
+          configure tcp_keepalives_{idle,interval,count};
+
+          pg_basebackup ...
+
+          setup recovery.conf on the standby server:
+            restore_command = '...'
+            standby_mode = on               # continuous recovery
+            primary_conninfo = '...'        # enable streaming replication
+            primary_slot_name = '...'
+            recovery_target_timeline = latest   # always follow latest timeline at failover
+            hot_standby = on
+            hot_standby_feedback = on
+            max_standby_archive_delay = ...
+            max_standby_streaming_delay = ...
+
+    logical replication:
+
+        publisher:
+            wal_level = logical
+            max_replication_slots = ...
+            max_wal_senders = ...
+
+            create role and configure pg_hba.conf
+
+            CREATE PUBLICATION mypub FOR TABLE users, departments;
+
+        subscriber:
+            max_replication_slots = ...
+            max_logical_replication_workers = ...
+            max_worker_processes = at least (max_logical_replication_workers + 1)
+
+            CREATE SUBSCRIPTION mysub CONNECTION 'dbname=foo host=bar user=repuser' PUBLICATION mypub;
+
+
+    https://stackoverflow.com/questions/33621906/difference-between-stream-replication-and-logical-replication
+
+        For backup and disaster recovery: continuous archiving and point-in-time recovery
+        For HA with zero data loss risk: synchronous streaming replication
+        For HA with low data loss risk and better performance: asynchronous streaming replication
+
+        logical replication:
+            + much more bandwidth-efficient
+            + multi-master replication
+            + local write transaction
+            + local long transaction won't be cancelled due to records recycle from WAL
+            - have to wait transaction commit, will lag much especially for big transaction
+            - replays transactions strictly in commit order, so small fast transactions can get stuck behind a big transaction and be delayed quite a while
+            - DDL isn't handled automatically
+            - take more resources on the replica to apply the transactions
+
+
+    (4) trigger-based master-standby replication: Slony, Skytools 3 Londiste
+
+    (5) statement-based replication middleware: pgpool-II
+
+    (6) Asynchronous multimaster replication: Bucardo
+
+    (7) Synchronous multimaster replication: PostgreSQL-XL
+
+    (8) BDR: https://www.2ndquadrant.com/en/resources/bdr/
+        PgLogical: https://www.2ndquadrant.com/en/resources/pglogical/
+
