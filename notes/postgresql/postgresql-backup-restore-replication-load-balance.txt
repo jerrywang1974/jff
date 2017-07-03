@@ -1,5 +1,7 @@
 PostgreSQL 备份、恢复、复制、负载均衡
 
+https://github.com/dhamaniasad/awesome-postgres
+
 备份与恢复:
     https://www.postgresql.org/docs/10/static/backup.html
 
@@ -133,4 +135,29 @@ PostgreSQL 备份、恢复、复制、负载均衡
 
     (8) BDR: https://www.2ndquadrant.com/en/resources/bdr/
         PgLogical: https://www.2ndquadrant.com/en/resources/pglogical/
+
+Docker images:
+
+    docker run -dt -P -e POSTGRES_PASSWORD=123456 -e POSTGRES_INITDB_ARGS="--data-checksums" -h postgres1 --name postgres1 postgres:10
+    docker exec postgres1 sed -i'' -e 's|apt.postgresql.org/pub|mirrors.tuna.tsinghua.edu.cn/postgresql|' /etc/apt/sources.list.d/pgdg.list
+    docker exec postgres1 sed -i'' -e 's|deb.debian.org|mirrors.tuna.tsinghua.edu.cn|' /etc/apt/sources.list
+    docker exec postgres1 sed -i'' -e 's|security.debian.org|mirrors.tuna.tsinghua.edu.cn/debian-security|' /etc/apt/sources.list
+
+High-Availability solutions:
+    https://github.com/zalando/patroni
+    https://bucardo.org/
+    http://slony.info/
+    http://pgfoundry.org/projects/skytools (Londiste)
+
+    * stolon proxy doesn't support read-only slave, all access go to primary.
+    * repmgr can't smoothly convert a failed primary to standby.
+
+Backup solutions:
+    http://www.pgbarman.org/
+    https://github.com/wal-e/wal-e
+
+Monitoring:
+    http://dalibo.github.io/pgbadger/       A fast PostgreSQL log analyzer
+    https://github.com/lesovsky/pgcenter    top-like admin tool for PostgreSQL.
+    https://github.com/julmon/pg_activity   a top like application for PostgreSQL server activity monitoring.
 
