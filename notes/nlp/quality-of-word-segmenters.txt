@@ -1,0 +1,81 @@
+不同中文分词器的质量
+
+根据 http://bosonnlp.com/dev/resource “11款开放中文分词引擎测试数据”汇总如下：
+
+脚本:
+
+    for s in auto_comments food_comments news weibo; do (
+        cd $s;
+        for f in *.txt; do
+            printf "%-30s %d\n" ${f%.txt} $(diff -u <(perl -pe 's/\s+/\n/g' $f) <(perl -pe 's/\s+/\n/g' ../benchmark/$s.txt) | diffstat | grep -F '|' | sed -e 's/^.*\|//; s/+.*$//; s/ //g');
+        done | sort -k2,2 -n
+        );
+        echo;
+    done
+
+数据来源:
+    benchmark 人工标注“标准答案”
+    origin 标注原始数据
+    news 新闻数据
+    weibo 微博数据
+    auto_comments 汽车论坛数据
+    food_comments 餐饮点评数据
+
+    itp_cloud 语言云
+    jieba 结巴分词
+    pangu 盘古分词
+    paoding 庖丁解牛分词器
+    qcloud 腾讯文智
+    sina 新浪云
+    sogou 搜狗分词
+
+下面第二列表示与标准答案的相对差距，越小越好。
+
+auto_comments_BosonNLP         3219
+auto_comments_itp_cloud        3983
+auto_comments_SCWS             5497
+auto_comments_jieba            6176
+auto_comments_sina             6358
+auto_comments_qcloud           6988
+auto_comments_NLPIR            7380
+auto_comments_sogou            7666
+auto_comments_pangu            11131
+auto_comments_IKAnalyzer       14270
+auto_comments_paoding          21210
+
+food_comments_bosonNLP         1795
+food_comments_itp_cloud        1835
+food_comments_jieba            2048
+food_comments_SCWS             2247
+food_comments_sina             2360
+food_comments_qcloud           2607
+food_comments_NLPIR            2782
+food_comments_sogou            3148
+food_comments_pangu            3824
+food_comments_IKAnalyzer       5075
+food_comments_paoding          7350
+
+news_bosonNLP                  3231
+news_itp_cloud                 3860
+news_NLPIR                     5458
+news_sina                      6970
+news_jieba                     7726
+news_sogou                     7726
+news_SCWS                      7913
+news_qcloud                    9073
+news_pangu                     11863
+news_IKAnalyzer                14833
+news_paoding                   22155
+
+weibo_boson                    1768
+weibo_itp_cloud                1930
+weibo_NLPIR                    2833
+weibo_jieba                    3070
+weibo_sina                     3265
+weibo_SCWS                     3390
+weibo_qcloud                   3689
+weibo_sogou                    3968
+weibo_pangu                    5030
+weibo_IKAnalyzer               6947
+weibo_paoding                  10410
+

@@ -30,6 +30,7 @@
     * https://spacy.io 中文分词使用的 jieba
     * https://github.com/sloria/TextBlob Python 版，基于 [NLTK](http://www.nltk.org/) 和 [Pattern](http://www.clips.ua.ac.be/pages/pattern-en)
     * https://github.com/isnowfy/snownlp Python 版，使用 HMM 模型，效果较好，功能比较丰富，但已不再积极维护
+    * https://github.com/aboSamoor/polyglot Python 版，使用 ICU boundary break algorithm 分词
     * http://bosonnlp.com/ Web service，质量非常高，商用收费
     * https://github.com/NLPchina/ansj_seg 基于 n-gram/HMM/CRF，文档缺乏，分词质量还行。注意默认词典没有放入 jar 包，容易被使用者误解分词质量不行。
     * https://github.com/FudanNLP/fnlp 质量比较差
