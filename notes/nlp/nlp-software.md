@@ -7,6 +7,24 @@
 * http://opencyc.org/
 * http://wordnet.princeton.edu/
 
+## Comparison of Features
+
+| Feature                                   | LTP | NLPIR | CoreNLP | HanLP | THULAC   | Jieba | spaCy | NLTK | TextBlob | SnowNLP | Polyglot | BosonNLP |
+|-------------------------------------------|-----|-------|---------|-------|----------|-------|-------|------|----------|---------|----------|----------|
+| Word Segmentation，分词                   | Y   | Y     | Y       | Y     | Y        | Y     | Y     | Y    | Y        | Y       | Y        | Y        |
+| Part-of-speech Tagging, 词性标注          | Y   | Y     | Y       | Y     | Y        | Y     | Y     | Y    | Y        | Y       | Y        | Y        |
+| Named Entity Recognition, 命名实体识别    | Y   | Y     | Y       | Y     |          |       | Y     | Y    | Y        |         | Y        | Y        |
+| Dependency Parsing, 依存句法分析          | Y   |       | Y       | Y     |          |       | Y     | Y    | Y        |         |          | Y        |
+| Semantic Role Labeling, 语义角色标注      | Y   |       |         |       |          |       |       |      |          |         |          |          |
+| Semantic Dependency Parsing，语义依存分析 | Y   |       |         |       |          |       |       |      |          |         |          |          |
+| Keyword Extraction，关键词提取            |     | Y     |         | Y     | (THUTAG) | Y     |       |      |          | Y       |          | Y        |
+| Topic Classification，主题分类            |     |       |         |       | (THUCTC) |       |       | Y    |          |         |          | Y        |
+| Sentiment Analysis，情感分析              |     |       | Y       |       |          |       |       | Y    | Y        | Y       | Y        | Y        |
+| Summary，摘要                             |     |       |         | Y     |          |       |       |      |          | Y       |          | Y        |
+| Similarity，相似度                        |     |       |         |       |          |       |       |      |          | Y       |          |          |
+| Word Embedding，词向量                    |     |       |         |       |          |       |       |      |          |         | Y        |          |
+
+
 ## Word Segmenter
 
 参考 https://www.zhihu.com/question/19578687 ，中文分词器有两种，
