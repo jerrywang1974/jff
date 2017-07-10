@@ -3,26 +3,26 @@
 * https://nlp.stanford.edu/software/
 * http://www.nltk.org/
 * https://spacy.io/
-* http://wwww.clips.ua.ac.be/pattern
+* https://github.com/clips/pattern
 * http://opencyc.org/
 * http://wordnet.princeton.edu/
 
 ## Comparison of Features
 
-| Feature                                   | LTP | NLPIR | CoreNLP | HanLP | THULAC   | Jieba | spaCy | NLTK | TextBlob | SnowNLP | Polyglot | BosonNLP |
-|-------------------------------------------|-----|-------|---------|-------|----------|-------|-------|------|----------|---------|----------|----------|
-| Word Segmentation，分词                   | Y   | Y     | Y       | Y     | Y        | Y     | Y     | Y    | Y        | Y       | Y        | Y        |
-| Part-of-speech Tagging, 词性标注          | Y   | Y     | Y       | Y     | Y        | Y     | Y     | Y    | Y        | Y       | Y        | Y        |
-| Named Entity Recognition, 命名实体识别    | Y   | Y     | Y       | Y     |          |       | Y     | Y    | Y        |         | Y        | Y        |
-| Dependency Parsing, 依存句法分析          | Y   |       | Y       | Y     |          |       | Y     | Y    | Y        |         |          | Y        |
-| Semantic Role Labeling, 语义角色标注      | Y   |       |         |       |          |       |       |      |          |         |          |          |
-| Semantic Dependency Parsing，语义依存分析 | Y   |       |         |       |          |       |       |      |          |         |          |          |
-| Keyword Extraction，关键词提取            |     | Y     |         | Y     | (THUTAG) | Y     |       |      |          | Y       |          | Y        |
-| Topic Classification，主题分类            |     |       |         |       | (THUCTC) |       |       | Y    |          |         |          | Y        |
-| Sentiment Analysis，情感分析              |     |       | Y       |       |          |       |       | Y    | Y        | Y       | Y        | Y        |
-| Summary，摘要                             |     |       |         | Y     |          |       |       |      |          | Y       |          | Y        |
-| Similarity，相似度                        |     |       |         |       |          |       |       |      |          | Y       |          |          |
-| Word Embedding，词向量                    |     |       |         |       |          |       |       |      |          |         | Y        |          |
+| Feature                                   | LTP | NLPIR | BosonNLP | CoreNLP | HanLP | THULAC   | Jieba | SnowNLP | spaCy | NLTK | TextBlob | Polyglot | Pattern |
+|-------------------------------------------|-----|-------|----------|---------|-------|----------|-------|---------|-------|------|----------|----------|---------|
+| Word Segmentation，分词                   | Y   | Y     | Y        | Y       | Y     | Y        | Y     | Y       | Y     | Y    | Y        | Y        | Y       |
+| Part-of-speech Tagging, 词性标注          | Y   | Y     | Y        | Y       | Y     | Y        | Y     | Y       | Y     | Y    | Y        | Y        | Y       |
+| Named Entity Recognition, 命名实体识别    | Y   | Y     | Y        | Y       | Y     |          |       |         | Y     | Y    | Y        | Y        |         |
+| Dependency Parsing, 依存句法分析          | Y   |       | Y        | Y       | Y     |          |       |         | Y     | Y    | Y        |          | Y       |
+| Semantic Role Labeling, 语义角色标注      | Y   |       |          |         |       |          |       |         |       |      |          |          | Y       |
+| Semantic Dependency Parsing，语义依存分析 | Y   |       |          |         |       |          |       |         |       |      |          |          |         |
+| Keyword Extraction，关键词提取            |     | Y     | Y        |         | Y     | (THUTAG) | Y     | Y       |       |      |          |          |         |
+| Topic Classification，主题分类            |     |       | Y        |         |       | (THUCTC) |       |         |       | Y    |          |          |         |
+| Sentiment Analysis，情感分析              |     |       | Y        | Y       |       |          |       | Y       |       | Y    | Y        | Y        | Y       |
+| Summary，摘要                             |     |       | Y        |         | Y     |          |       | Y       |       |      |          |          |         |
+| Similarity，相似度                        |     |       |          |         |       |          |       | Y       |       |      |          |          |         |
+| Word Embedding，词向量                    |     |       |          |         |       |          |       |         |       |      |          | Y        | Y       |
 
 
 ## Word Segmenter
@@ -46,7 +46,7 @@
     * https://github.com/thunlp/THULAC 清华大学 Lexical Analyzer for Chinese，商用收费，有一份很好的 LTP/ICTCLAS/THULAC/Jieba 的对比测试结果。只有分词以及词性分析，词性分析非常慢。
     * https://github.com/fxsjy/jieba 词典比较大，默认启用 HMM，效果比较好，只有分词、词性分析、关键词提取。
     * https://spacy.io 中文分词使用的 jieba
-    * https://github.com/sloria/TextBlob Python 版，基于 [NLTK](http://www.nltk.org/) 和 [Pattern](http://www.clips.ua.ac.be/pages/pattern-en)
+    * https://github.com/sloria/TextBlob Python 版，基于 [NLTK](http://www.nltk.org/) 和 [Pattern](https://github.com/clips/pattern)
     * https://github.com/isnowfy/snownlp Python 版，使用 HMM 模型，效果较好，功能比较丰富，但已不再积极维护
     * https://github.com/aboSamoor/polyglot Python 版，使用 ICU boundary break algorithm 分词
     * http://bosonnlp.com/ Web service，质量非常高，商用收费
