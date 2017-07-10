@@ -1,0 +1,7 @@
+https://github.com/kivy/pyjnius         (pip install pyjnius)
+
+https://github.com/originell/jpype      (pip install JPype1)
+https://github.com/tcalmant/jpype-py3   (pip install JPype1-py3)
+
+https://github.com/bartdag/py4j         (pip install py4j)
+
