@@ -13,7 +13,7 @@
 |-------------------------------------------|-----|-------|----------|---------|-------|----------|-------|---------|-------|------|----------|----------|---------|
 | Word Segmentation，分词                   | Y   | Y     | Y        | Y       | Y     | Y        | Y     | Y       | Y     | Y    | Y        | Y        | Y       |
 | Part-of-speech Tagging, 词性标注          | Y   | Y     | Y        | Y       | Y     | Y        | Y     | Y       | Y     | Y    | Y        | Y        | Y       |
-| Named Entity Recognition, 命名实体识别    | Y   | Y     | Y        | Y       | Y     |          |       |         | Y     | Y    | Y        | Y        |         |
+| Named Entity Recognition, 命名实体识别    | Y   |       | Y        | Y       | Y     |          |       |         | Y     | Y    | Y        | Y        |         |
 | Dependency Parsing, 依存句法分析          | Y   |       | Y        | Y       | Y     |          |       |         | Y     | Y    | Y        |          | Y       |
 | Semantic Role Labeling, 语义角色标注      | Y   |       |          |         |       |          |       |         |       |      |          |          | Y       |
 | Semantic Dependency Parsing，语义依存分析 | Y   |       |          |         |       |          |       |         |       |      |          |          |         |
