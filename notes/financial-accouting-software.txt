@@ -1,0 +1,27 @@
+GnuCash
+KMyMoney
+HomeBank
+Money Manager Ex
+jGnash
+Skrooge
+Grisbi
+
+
+Install KMyMoney with Homebrew:
+
+    brew tap haraldf/kf5        # https://github.com/haraldF/homebrew-kf5
+    brew install kf5-kmymoney
+
+    # https://github.com/haraldF/homebrew-kf5/issues/51
+    ln -s `brew --prefix`/share/kservicetype5/ "$HOME/Library/Application Support/"
+    cd `brew --prefix`/include && ln -s ../opt/openssl/include/openssl .
+
+    brew install kf5-kmymoney
+
+    brew services start dbus
+
+    # logout & login
+
+Then run /Applications/KDE/kmymoney.app, you may need to run "open -a kmymoney" if
+Homebrew isn't installed to standard path /usr/local..
+
