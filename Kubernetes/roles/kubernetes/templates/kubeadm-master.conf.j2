@@ -12,5 +12,9 @@ networking:
   dnsDomain: {{ kubernetes_cluster_domain }}
   serviceSubnet: {{ kubernetes_service_cidr }}
   podSubnet: {{ kubernetes_pod_network_cidr }}
+apiServerCertSANs:
+{% for san in kubernetes_apiserver_cert_extra_sans.split(',') %}
+  - {{ san }}
+{% endfor %}
 kubernetesVersion: {{ kubernetes_version }}
 token: {{ kubernetes_token }}

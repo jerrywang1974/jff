@@ -5,7 +5,7 @@ primary_internal_iface: "{{ ansible_default_ipv4.interface }}"
 etcd_node_name: "{{ inventory_hostname_short }}"
 etcd_node_ip: "{{ hostvars[inventory_hostname]['ansible_' ~ primary_internal_iface].ipv4.address }}"
 
-etcd_docker_image: quay.io/coreos/etcd:v3.2.0
+etcd_docker_image: quay.io/coreos/etcd:v3.2.4
 etcd_peer_port: 2380
 etcd_client_port: 2379
 

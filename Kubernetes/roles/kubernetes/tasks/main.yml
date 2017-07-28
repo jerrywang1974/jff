@@ -71,16 +71,7 @@
 
 - name: initialize Kubernetes master
   command: creates=/etc/kubernetes/kubelet.conf
-           kubeadm init --token={{ kubernetes_token }}
-           --apiserver-advertise-address {{ kubernetes_apiserver_advertise_address }}
-           --apiserver-bind-port {{ kubernetes_apiserver_bind_port }}
-           --apiserver-cert-extra-sans {{ kubernetes_apiserver_cert_extra_sans }}
-           --pod-network-cidr {{ kubernetes_pod_network_cidr }}
-           --service-cidr {{ kubernetes_service_cidr }}
-           --service-dns-domain {{ kubernetes_cluster_domain }}
-           --kubernetes-version {{ kubernetes_version }}
-           --config /etc/kubernetes/kubeadm-master.conf
-           {{ kubeadm_extra_args }}
+           kubeadm init --config /etc/kubernetes/kubeadm-master.conf {{ kubeadm_extra_args }}
   when: inventory_hostname == groups['kubernetes'][0]
   environment: "{{ kubernetes_kubeadm_env }}"
   tags: kubernetes
