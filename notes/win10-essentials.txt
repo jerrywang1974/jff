@@ -1,0 +1,7 @@
+Install Windows 10 with some essential tools
+
+https://www.microsoft.com/en-us/software-download/windows10ISO
+
+https://chocolatey.org/
+    install GoogleChrome git TeamViewer.host VisualStudioCode nodejs
+

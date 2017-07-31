@@ -8,9 +8,40 @@ Grisbi
 
 
 Install KMyMoney with Homebrew:
+https://github.com/Dieken/homebrew-kf5/commits/themeSearchPaths
 
     brew tap haraldf/kf5        # https://github.com/haraldF/homebrew-kf5
-    brew install kf5-kmymoney
+
+    brew edit kf5-kmymoney      # append below the "__END__" line
+-----8<-------------------------------------------------------------------
+diff --git a/kmymoney/kmymoney.cpp b/kmymoney/kmymoney.cpp
+index c6ec8da..4ebbec7 100644
+--- a/kmymoney/kmymoney.cpp
++++ b/kmymoney/kmymoney.cpp
+@@ -64,6 +64,7 @@
+ #include <QIcon>
+ #include <QInputDialog>
+ #include <QProgressDialog>
++#include <QStandardPaths>
+ #include <QStatusBar>
+
+ // ----------------------------------------------------------------------------
+@@ -537,6 +538,13 @@ KMyMoneyApp::KMyMoneyApp(QWidget* parent) :
+   layout->setSpacing(6);
+
+   {
++    // See http://doc.qt.io/qt-5/qstandardpaths.html
++    QStringList themeSearchPaths = QStandardPaths::locateAll(
++            QStandardPaths::AppDataLocation,
++            QStringLiteral("icons"),
++            QStandardPaths::LocateDirectory | QStandardPaths::LocateFile);
++    themeSearchPaths += QStringLiteral(":/icons");
++    QIcon::setThemeSearchPaths(themeSearchPaths);
+     QString themeName = KMyMoneySettings::iconsTheme();                 // get theme user wants
+     if (!themeName.isEmpty() && themeName != QLatin1Literal("system"))  // if it isn't default theme then set it
+       QIcon::setThemeName(themeName);
+----->8-------------------------------------------------------------------
+
 
     # https://github.com/haraldF/homebrew-kf5/issues/51
     ln -s `brew --prefix`/share/kservicetype5/ "$HOME/Library/Application Support/"
@@ -22,6 +53,18 @@ Install KMyMoney with Homebrew:
 
     # logout & login
 
-Then run /Applications/KDE/kmymoney.app, you may need to run "open -a kmymoney" if
-Homebrew isn't installed to standard path /usr/local..
+    cp -LR `brew --prefix`/share/icons "$HOME/Library/Application Support/kmymoney/icons"
+        # better to copy /usr/share/icons from Linux with kmymoney installed
+        # because the "Oxygen" and "Tango" thems lack "index.theme" files.
+    cp -LR `brew --prefix kf5-kmymoney`/share/kmymoney "$HOME/Library/Application Support/kmymoney/"
+
+
+    Run /Applications/KDE/kmymoney.app, you may need to run "open -a kmymoney" if
+    Homebrew isn't installed to standard path /usr/local..
+
+    Edit ~/Library/Preferences/kmymoneyrc, insert this section:
+        [List Options]
+        IconsTheme=oxygen
+
+    Restart KMyMoney.
 
