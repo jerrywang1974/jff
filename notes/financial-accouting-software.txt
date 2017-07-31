@@ -58,6 +58,7 @@ index c6ec8da..4ebbec7 100644
         # because the "Oxygen" and "Tango" thems lack "index.theme" files.
     cp -LR `brew --prefix kf5-kmymoney`/share/kmymoney "$HOME/Library/Application Support/kmymoney/"
 
+    ln -sfn `brew --prefix kf5-kmymoney`/lib/plugins /Applications/KDE/kmymoney.app/Contents/PlugIns
 
     Run /Applications/KDE/kmymoney.app, you may need to run "open -a kmymoney" if
     Homebrew isn't installed to standard path /usr/local..
