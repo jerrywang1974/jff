@@ -27,6 +27,9 @@
 ## NoSQL
 
 * Redis Cluster
+    * http://ssdb.io/
+    * https://github.com/Qihoo360/pika
+    * https://github.com/yinqiwen/ardb
 * Apache Geode
 
 ## Load Balancer
