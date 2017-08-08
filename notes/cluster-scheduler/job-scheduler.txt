@@ -1,4 +1,4 @@
 Oozie       http://oozie.apache.org/
-Azkaban     http://azkaban.github.io/
-Luigi       https://github.com/spotify/luigi
 Airflow     http://airflow.incubator.apache.org/
+Azkaban     http://azkaban.github.io/               不好用
+Luigi       https://github.com/spotify/luigi        已废弃
