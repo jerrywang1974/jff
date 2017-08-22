@@ -37,7 +37,7 @@ Set these variables in group\_vars/kubernetes.yml:
 
 ```yaml
 kubernetes_pod_infra_container_image: some.host.name/google_containers/pause-amd64:3.0
-kubernetes_version: v1.7.3
+kubernetes_version: v1.7.4
 kubernetes_kubeadm_env:
   KUBE_REPO_PREFIX: some.host.name/google_containers
 ```
