@@ -4,7 +4,8 @@
 ubuntu_apt_repo: http://mirrors.aliyun.com/ubuntu
 
 # It's a pity http://mirrors.aliyun.com/kubernetes/apt/ is broken.
-kubernetes_apt_repo: http://apt.kubernetes.io/
+#kubernetes_apt_repo: http://apt.kubernetes.io/
+kubernetes_apt_repo: http://mirrors.ustc.edu.cn/kubernetes/apt/
 
 # http://apt.dockerproject.org/repo
 # http://mirrors.tuna.tsinghua.edu.cn/docker/apt/repo
