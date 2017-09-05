@@ -1,0 +1,5 @@
+https://developer.mozilla.org/en-US/docs/Web/Security/Subresource_Integrity
+
+cat FILENAME.js | openssl dgst -sha384 -binary | openssl enc -base64 -A
+shasum -b -a 384 FILENAME.js | xxd -r -p | base64
+
