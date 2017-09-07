@@ -18,6 +18,7 @@ Ingress controller 实现:
 * Nginx.com's Nginx Ingress Controller: https://github.com/nginxinc/kubernetes-ingress
 * Linkerd: https://linkerd.io/config/1.1.3/linkerd/index.html#ingress-identifier
 * Traefik: https://docs.traefik.io/toml/#kubernetes-ingress-backend
+* Istio: https://istio.io/docs/tasks/ingress.html
 * AWS Application Load Balancer Ingress Controller: https://github.com/coreos/alb-ingress-controller
 * https://github.com/zalando-incubator/kube-ingress-aws-controller
 * TrafficServer: https://github.com/torchbox/k8s-ts-ingress
