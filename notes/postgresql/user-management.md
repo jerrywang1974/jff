@@ -30,3 +30,7 @@ SELECT distinct * FROM (
 ) AS privileges WHERE grantee = 'some_user' ORDER BY catalog, schema, privilege_type;
 ```
 
+```
+SELECT relname, relkind, relacl, nspname, nspacl FROM pg_class LEFT JOIN pg_namespace ON relnamespace = pg_namespace.oid
+WHERE relacl IS NOT NULL AND nspacl IS NOT NULL AND (relacl::text ~ 'some_user=' OR nspacl::text ~ 'some_user=');
+```
