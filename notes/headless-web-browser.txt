@@ -1,20 +1,30 @@
 https://github.com/dhamaniasad/HeadlessBrowsers
 
-ihttp://seleniumhq.org/
-    multiple native drivers for different web browsers
+    http://seleniumhq.org/
+        multiple native drivers for different web browsers
 
-http://phantomjs.org/
-    headless WebKit scriptable with NodeJS API
+    http://phantomjs.org/
+        headless WebKit scriptable with NodeJS API
 
-http://slimerjs.org/
-    headless Gecko
+    http://slimerjs.org/
+        headless Gecko
 
-http://triflejs.org/
-    headless IE
+    http://triflejs.org/
+        headless IE
 
-https://github.com/bard/mozrepl
-    REPL for Firefox
+    https://github.com/bard/mozrepl
+        REPL for Firefox
 
-https://github.com/ui4j/ui4j
-    a Java wrapper library around the JavaFX WebKit engine
+    https://github.com/ui4j/ui4j
+        a Java wrapper library around the JavaFX WebKit engine
+
+
+http://nightwatchjs.org/
+    Write End-to-End tests in Node.js quickly and effortlessly that run against a Selenium/WebDriver server.
+
+https://github.com/GoogleChrome/puppeteer
+    Headless Chrome Node API
+
+https://github.com/angular/protractor
+    E2E test framework for Angular apps
 
