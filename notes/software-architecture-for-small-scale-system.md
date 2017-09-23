@@ -4,6 +4,7 @@
 
 * ZFS
 * MooseFS
+* GlusterFS
 
 ## Scheduling
 
@@ -17,7 +18,7 @@
 
 * MaxScale or ProxySQL + Percona XtraDB Cluster
 * PGBouncer or PGPool-II or PL/Proxy + Patroni + PostgreSQL + Barman or Wal-E
-* Postgres-XL or Greenplum
+* PostgreSQL + cstore\_fdw or CitusDB or Postgres-XL or Greenplum
 
 ## Message Queue
 
@@ -51,4 +52,10 @@
 
 * https://redash.io/
 * https://github.com/apache/incubator-superset
+
+## Big Data
+
+* KDB+, ClickHouse, Vertica, Greenplum, HAWQ, MonetDB,
+  Impala, Spark SQL, Presto, Apache Drill, Hive
+  Druid, Apache Kylin, Apache Phoenix
 

@@ -11,7 +11,7 @@ BlinkDB         http://blinkdb.org/
 
 hypergraphdb    http://www.hypergraphdb.org/
 infogrid        http://infogrid.org/
-Titan           http://thinkaurelius.github.com/titan/
+JanusGraph      http://janusgraph.org/
 flockdb
 Spark
 Haloop
@@ -34,4 +34,15 @@ Cluster-based graphs(Bulk Synchronous Parallel Processing)
     GraphLab        http://graphlab.org/
 
 Affinity (http://affinity.cloudfoundry.com/ by VMware Inc.)
+
+https://github.com/arangodb/arangodb
+    A native multi-model database with flexible data models for documents,
+    graphs, and key-values. Build high performance applications using a
+    convenient SQL-like query language or JavaScript extensions.
+
+https://cayley.io/
+    Cayley is an open-source graph inspired by the graph database behind Freebase and Google's Knowledge Graph.
+
+https://dgraph.io/
+    Fastest graph database in the market.
 
