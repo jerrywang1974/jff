@@ -78,7 +78,6 @@
 
 - name: install Flannel
   shell: creates=/etc/cni/net.d/10-flannel.conf
-         curl -s https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel-rbac.yml | kubectl --kubeconfig=/etc/kubernetes/admin.conf -n kube-system apply -f - &&
          curl -s https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml | sed -e
          's|"10\.244\.0\.0/16"|"{{ kubernetes_pod_network_cidr }}"|g; s|"/opt/bin/flanneld"|"/opt/bin/flanneld", --iface={{ primary_internal_iface }}|' | kubectl --kubeconfig=/etc/kubernetes/admin.conf -n
          kube-system apply -f -

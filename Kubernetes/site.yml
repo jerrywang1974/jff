@@ -1,10 +1,10 @@
 # vi: et ts=2 sts=2 sw=2 ai
 ---
 
-- include: 00-pre.yml
-- include: 10-common.yml
-- include: 20-docker.yml
-- include: 30-etcd.yml
-- include: 50-kubernetes.yml
-- include: 99-post.yml
+- import_playbook: 00-pre.yml
+- import_playbook: 10-common.yml
+- import_playbook: 20-docker.yml
+- import_playbook: 30-etcd.yml
+- import_playbook: 50-kubernetes.yml
+- import_playbook: 99-post.yml
 

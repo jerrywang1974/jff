@@ -8,8 +8,19 @@
     - linux-image-extra-{{ ansible_kernel }}
   tags: docker
 
-- name: install docker-engine
-  apt: name=docker-engine{{ '=' ~ docker_engine_version if docker_engine_version is defined else '' }} state=present
+- name: make sure /etc/docker exist
+  file: path=/etc/docker state=directory mode=0755 owner=root group=root
+  tags: docker
+
+- name: configure /etc/docker/daemon.json
+  template: src=daemon.json.j2 dest=/etc/docker/daemon.json backup=yes
+            mode=0644 owner=root group=root
+  notify:
+  - restart docker
+  tags: docker
+
+- name: install docker
+  apt: name=docker-ce{{ '=' ~ docker_engine_version if docker_engine_version is defined else '' }} state=present
   tags: docker
 
 - name: install python3-docker for Ansible module docker_container

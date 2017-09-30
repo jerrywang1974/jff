@@ -1,5 +1,15 @@
 # vi: et ts=2 sts=2 sw=2 ai
 ---
 
-docker_engine_version: 1.12.*
+docker_engine_version: 17.*
+
+docker_daemon_json:
+  ipv6: false
+  live-restore: true
+  log-driver: json-file
+  log-opts:
+    max-size: 10m
+    max-file: '3'
+  registry-mirrors:
+  - https://docker.mirrors.ustc.edu.cn
 

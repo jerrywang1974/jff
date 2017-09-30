@@ -1,0 +1,6 @@
+# vi: et ts=2 sts=2 sw=2 ai
+---
+
+- name: restart docker
+  service: name=docker state=restarted
+
