@@ -35,6 +35,17 @@ mtd_write write lede-ramips-mt7621-r6220-squashfs-kernel.bin Kernel
 reboot
 ```
 
+# More packages
+
+```
+opkg update
+opkg install luci
+opkg install luci-i18n-base-zh-cn
+opkg install luci-theme-material
+opkg install luci-app-upnp
+opkg install luci-app-sqm
+```
+
 # Rescue
 
 1. 下载 https://github.com/jclehner/nmrpflash
