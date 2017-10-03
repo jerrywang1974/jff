@@ -1,4 +1,8 @@
 #!/usr/bin/perl
+# Usage:
+#   ssh root@openwrt-or-lede-device uci show | ./visualize-openwrt-network-config.pl > a.dot
+#   dot -Tpdf -o a.pdf a.dot
+#
 use strict;
 use warnings;
 
