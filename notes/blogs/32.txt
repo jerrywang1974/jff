@@ -426,6 +426,23 @@ Burp 的 Windows 客户端挺土，就一个 windows 定时任务，没图形界
 
 总结： 值得评估试用。
 
+* Bup
+
+https://github.com/bup/bup
+
+使用 Python 编写，存储格式类似 GIT 的思路。
+
+* BorgBackup
+
+https://github.com/borgbackup/borg
+
+使用 Python/Cython/C 编写，存储格式类似 GIT 的思路。
+
+* Restic
+
+https://github.com/restic/restic
+
+使用 Go 编写，存储格式类似 GIT 的思路。
 
 * backupninja
 
@@ -444,6 +461,7 @@ backupninja 基本是一个 shell 写成的备份框架，依靠插件（称为 
 
 * obnam
 
+
 Python 编写，很新的备份工具，一些特点：
    * 快照似的备份，每一个备份看起来都像是完整备份
    * 跨备份、跨文件的去重
@@ -456,6 +474,8 @@ Python 编写，很新的备份工具，一些特点：
 备份出错导致数据丢失的可能性很大，作者有点玩弄技巧似的。
 
 总结：不稳定，不推荐。
+
+Obnam 已停止开发：https://blog.liw.fi/posts/2017/08/13/retiring_obnam/
 
 
 * duplicity
