@@ -30,13 +30,17 @@ while (my ($k, $v) = each %h) {
         my $network = substr($k, length('network.'));
         printf "    \"%s\"[shape=box,label=\"\\N\\ntype=%s\\nproto=%s\\nip=%s\"];\n",
             $network, $h{"$k.type"} || "NONE", $h{"$k.proto"}, $h{"$k.ipaddr"} || "NONE";
-        printf "    \"%s\" -> \"%s\";\n", $network, $h{"$k.ifname"};
+        printf "    \"%s\" -> \"%s\";\n", $network, $h{"$k.ifname"} if $h{"$k.ifname"};
     }
 }
 
 while (my ($k, $v) = each %h) {
     if ($v eq 'wifi-iface') {
-        my $iface = $h{"$k.ifname"} || substr($k, length('wireless.'));
+        my $iface = $h{"$k.ifname"};
+        unless ($iface) {
+            ($iface) = $k =~ /\[(\d+)\]/;
+            $iface = "wlan$iface";
+        }
         $iface =~ s/default_radio/wlan/;
         printf "    \"%s\"[shape=diamond];\n", $h{"$k.device"};
         printf "    \"%s\"[label=\"\\N\\nmode=%s\\nssid=%s\\nencryption=%s\"];\n",
