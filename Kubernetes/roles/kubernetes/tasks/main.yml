@@ -76,11 +76,16 @@
   environment: "{{ kubernetes_kubeadm_env }}"
   tags: kubernetes
 
+# hairpinMode isn't enabled by "kubelet --hairpin-mode=hairpin-veth" when CNI is used.
+#   https://github.com/coreos/flannel/issues/846
+#   https://github.com/kubernetes/kubernetes/issues/45790
+#   https://github.com/kubernetes/kubernetes/issues/20475
 - name: install Flannel
-  shell: creates=/etc/cni/net.d/10-flannel.conf
+  shell: >-
+         creates=/etc/cni/net.d/10-flannel.conf
          curl -s https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml | sed -e
-         's|"10\.244\.0\.0/16"|"{{ kubernetes_pod_network_cidr }}"|g; s|"/opt/bin/flanneld"|"/opt/bin/flanneld", --iface={{ primary_internal_iface }}|' | kubectl --kubeconfig=/etc/kubernetes/admin.conf -n
-         kube-system apply -f -
+         's|"10\.244\.0\.0/16"|"{{ kubernetes_pod_network_cidr }}"|g; s|"/opt/bin/flanneld"|"/opt/bin/flanneld", "--iface={{ primary_internal_iface }}"|; /"delegate"/a\ \ \ \ \ \ \ \ "hairpinMode": true,' | kubectl
+         --kubeconfig=/etc/kubernetes/admin.conf -n kube-system apply -f -
   when: inventory_hostname == groups['kubernetes'][0]
   tags: kubernetes
 
