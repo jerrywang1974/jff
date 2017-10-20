@@ -12,6 +12,8 @@
     - name: run "etckeeper save" if necessary before all plays
       shell: chdir=/etc
              test -e .git || etckeeper init;
+             git config --get user.name >/dev/null || git config user.name "root";
+             git config --get user.email >/dev/null || git config user.email "root@localhost";
              ! etckeeper unclean || etckeeper commit "by Ansible before all plays";
       tags: etckeeper
 
