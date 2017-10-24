@@ -38,8 +38,7 @@ Set these variables in group\_vars/kubernetes.yml:
 ```yaml
 kubernetes_pod_infra_container_image: some.host.name/google_containers/pause-amd64:3.0
 kubernetes_version: v1.8.1
-kubernetes_kubeadm_env:
-  KUBE_REPO_PREFIX: some.host.name/google_containers
+kubernetes_image_repository: some.host.name/google_containers
 ```
 
 By default kubernetes\_version is "stable-1.8", Kubeadm will request

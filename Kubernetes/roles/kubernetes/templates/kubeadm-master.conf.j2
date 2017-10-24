@@ -16,5 +16,8 @@ apiServerCertSANs:
 {% for san in kubernetes_apiserver_cert_extra_sans.split(',') %}
   - {{ san }}
 {% endfor %}
+{% if kubernetes_image_repository is defined %}
+imageRepository: {{ kubernetes_image_repository }}
+{% endif %}
 kubernetesVersion: {{ kubernetes_version }}
 token: {{ kubernetes_token }}

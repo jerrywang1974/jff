@@ -73,7 +73,17 @@
   command: creates=/etc/kubernetes/kubelet.conf
            kubeadm init --config /etc/kubernetes/kubeadm-master.conf {{ kubeadm_extra_args }}
   when: inventory_hostname == groups['kubernetes'][0]
-  environment: "{{ kubernetes_kubeadm_env }}"
+  tags: kubernetes
+
+- name: obtain discovery token ca cert hash
+  shell: >-
+         openssl x509 -pubkey -in /etc/kubernetes/pki/ca.crt |
+         openssl rsa -pubin -outform der 2>/dev/null |
+         openssl dgst -sha256 -hex |
+         sed 's/^.* //'
+  when: inventory_hostname != groups['kubernetes'][0]
+  delegate_to: "{{ groups['kubernetes'][0] }}"
+  register: discovery_token_ca_cert_hash_cmd
   tags: kubernetes
 
 # hairpinMode isn't enabled by "kubelet --hairpin-mode=hairpin-veth" when CNI is used.
@@ -91,8 +101,7 @@
 
 - name: initialize Kubernetes worker
   command: creates=/etc/kubernetes/kubelet.conf
-           kubeadm join --token={{ kubernetes_token }} {{ kubernetes_master_ip }}:{{ kubernetes_apiserver_bind_port }} {{ kubeadm_extra_args }}
+           kubeadm join --token={{ kubernetes_token }} {{ kubernetes_master_ip }}:{{ kubernetes_apiserver_bind_port }} {{ kubeadm_extra_args }} --discovery-token-ca-cert-hash sha256:{{ discovery_token_ca_cert_hash_cmd.stdout }}
   when: inventory_hostname != groups['kubernetes'][0]
-  environment: "{{ kubernetes_kubeadm_env }}"
   tags: kubernetes
 

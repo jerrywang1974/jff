@@ -2,7 +2,6 @@
 ---
 
 kubernetes_disable_rp_filter: no
-kubernetes_kubeadm_env: {}
 
 primary_internal_iface: "{{ ansible_default_ipv4.interface }}"
 kubernetes_node_ip: "{{ hostvars[inventory_hostname]['ansible_' ~ primary_internal_iface].ipv4.address }}"
@@ -27,5 +26,5 @@ kubernetes_cni_version: "*"
 etcd_client_port: 2379
 
 kubeadm_extra_args: ""
-#kubernetes_root_dir: /data0/var/lib/kubelet
+#kubernetes_root_dir: /data/var/lib/kubelet
 
