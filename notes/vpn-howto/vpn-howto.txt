@@ -20,9 +20,9 @@ client:
 FreeS/WAN: 不再维护，派生出 OpenSWAN 和 StrongSWAN。
 
 StrongSWAN      (recommended)
+LibreSWAN       forked by original developers of OpenSWAN in 2012 after a lawsuit
 OpenSWAN        https://github.com/xelerance/Openswan (almost dead)
-LibreSWARN      forked by original developers of OpenSWAN in 2012 after a lawsuit
-ipsec-tools     (racoon, used by FreeBSD/NetBSD/MacOSX and Linux, least features, doesn't support IKEv2)
+ipsec-tools     (racoon, used by FreeBSD/NetBSD/MacOSX and Linux, least features, doesn't support IKEv2, not developed since 2011)
 
 clients:
     ike         http://www.shrew.net/
