@@ -86,18 +86,20 @@
   register: discovery_token_ca_cert_hash_cmd
   tags: kubernetes
 
+- name: install /etc/kubernetes/kube-flannel.yml
+  template: src=kube-flannel.yml.j2 dest=/etc/kubernetes/kube-flannel.yml
+            group=root owner=root mode=0644
+  when: inventory_hostname == groups['kubernetes'][0]
+  tags: kubernetes
+
 - name: install Flannel
-  shell: >-
-         creates=/etc/cni/net.d/10-flannel.conf
-         curl -s https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml | sed -e
-         's|"10\.244\.0\.0/16"|"{{ kubernetes_pod_network_cidr }}"|g; s|"/opt/bin/flanneld"|"/opt/bin/flanneld", "--iface={{ primary_internal_iface }}"|' | kubectl
-         --kubeconfig=/etc/kubernetes/admin.conf -n kube-system apply -f -
+  command: kubectl --kubeconfig=/etc/kubernetes/admin.conf -n kube-system apply -f /etc/kubernetes/kube-flannel.yml
   when: inventory_hostname == groups['kubernetes'][0]
   tags: kubernetes
 
 - name: initialize Kubernetes worker
   command: creates=/etc/kubernetes/kubelet.conf
            kubeadm join --token={{ kubernetes_token }} {{ kubernetes_master_ip }}:{{ kubernetes_apiserver_bind_port }} {{ kubeadm_extra_args }} --discovery-token-ca-cert-hash sha256:{{ discovery_token_ca_cert_hash_cmd.stdout }}
-  when: inventory_hostname != groups['kubernetes'][0]
+  when: inventory_hostname != groups['kubernetes'][0] and discovery_token_ca_cert_hash_cmd.stdout is defined
   tags: kubernetes
 
