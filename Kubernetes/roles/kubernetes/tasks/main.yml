@@ -4,13 +4,19 @@
 - name: disable rp_filter
   copy: src=99-disable-rp_filter.conf dest=/etc/sysctl.d/99-disable-rp_filter.conf
         group=root owner=root mode=0644
-  register: sysctl_changed
+  register: sysctl_rp_filter_changed
   when: kubernetes_disable_rp_filter | bool
+  tags: kubernetes
+
+- name: enable ip_forward
+  copy: src=99-enable-ip_forward.conf dest=/etc/sysctl.d/99-enable-ip_forward.conf
+        group=root owner=root mode=0644
+  register: sysctl_ip_forward_changed
   tags: kubernetes
 
 - name: restart service procps if necessary
   service: name=procps state=restarted
-  when: sysctl_changed | changed
+  when: sysctl_rp_filter_changed | changed or sysctl_ip_forward_changed | changed
   tags: kubernetes
 
 - name: install kubernetes
