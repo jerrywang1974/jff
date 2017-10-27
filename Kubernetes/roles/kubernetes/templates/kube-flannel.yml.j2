@@ -110,6 +110,13 @@ spec:
       - name: kube-flannel
         image: quay.io/coreos/flannel:v0.9.0-amd64
         command: [ "/opt/bin/flanneld", "--iface={{ primary_internal_iface }}", "--ip-masq", "--kube-subnet-mgr" ]
+        resources:
+          requests:
+            cpu: "10m"
+            memory: "50Mi"
+          limits:
+            cpu: "10m"
+            memory: "50Mi"
         securityContext:
           privileged: true
         env:
