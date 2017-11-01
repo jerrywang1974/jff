@@ -1,0 +1,37 @@
+diff --git a/kubernetes/manifests/kube-apiserver.yaml b/kubernetes/manifests/kube-apiserver.yaml
+index cc3b850..5489dbe 100755
+--- a/kubernetes/manifests/kube-apiserver.yaml
++++ b/kubernetes/manifests/kube-apiserver.yaml
+@@ -41,7 +41,7 @@ spec:
+     - --audit-log-maxbackup=10
+     - --audit-log-maxsize=100
+     - --audit-log-path=/var/log/kubernetes/kube-audit.log
+-    - --audit-policy-file=/etc/kubernetes/pki/audit-policy.yaml
++    - --audit-policy-file=/etc/kubernetes/audit-policy.yaml
+     image: reg.frontnode.net/google_containers/kube-apiserver-amd64:v1.8.2
+     livenessProbe:
+       failureThreshold: 8
+@@ -66,6 +66,11 @@ spec:
+     - mountPath: /etc/pki
+       name: ca-certs-etc-pki
+       readOnly: true
++    - mountPath: /etc/kubernetes/audit-policy.yaml
++      name: audit-policy
++      readOnly: true
++    - mountPath: /var/log/kubernetes
++      name: kube-log
+   hostNetwork: true
+   volumes:
+   - hostPath:
+@@ -80,4 +85,11 @@ spec:
+       path: /etc/pki
+       type: DirectoryOrCreate
+     name: ca-certs-etc-pki
++  - hostPath:
++      path: /etc/kubernetes/audit-policy.yaml
++    name: audit-policy
++  - hostPath:
++      path: /var/log/kubernetes
++      type: DirectoryOrCreate
++    name: kube-log
+ status: {}

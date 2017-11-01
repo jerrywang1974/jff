@@ -68,6 +68,25 @@
   service: name=kubelet state=started enabled=yes
   tags: kubernetes
 
+- name: make sure /etc/kubernetes/pki/ exist
+  file: path=/etc/kubernetes/pki state=directory recurse=yes
+        group=root owner=root mode=0755
+  tags: kubernetes
+
+- name: setup /etc/kubernetes/audit-policy.yaml
+  copy: src=audit-policy.yaml dest=/etc/kubernetes/audit-policy.yaml
+        group=root owner=root mode=0644
+  tags: kubernetes
+
+# XXX: kubeadm-1.8.2 doesn't support customization of volumes and
+# volumeMounts for kube-apiserver yet, so we have to put audit-policy.yaml
+# into /etc/kubernetes/pki which is a predefined volume & volumeMount
+# in /etc/kubernetes/manifests/kube-apiserver.yaml.
+- name: setup /etc/kubernetes/pki/audit-policy.yaml
+  copy: src=audit-policy.yaml dest=/etc/kubernetes/pki/audit-policy.yaml
+        group=root owner=root mode=0644
+  tags: kubernetes
+
 - name: setup /etc/kubernetes/kubeadm-master.conf
   template: src=kubeadm-master.conf.j2
             dest=/etc/kubernetes/kubeadm-master.conf
@@ -100,6 +119,11 @@
 
 - name: install Flannel
   command: kubectl --kubeconfig=/etc/kubernetes/admin.conf -n kube-system apply -f /etc/kubernetes/kube-flannel.yml
+  when: inventory_hostname == groups['kubernetes'][0]
+  tags: kubernetes
+
+- name: adjust Kubernetes auditing on kube-apiserver
+  patch: src=etc_kubernetes_manifests_kube-apiserver.yaml.patch dest=/etc/kubernetes/manifests/kube-apiserver.yaml
   when: inventory_hostname == groups['kubernetes'][0]
   tags: kubernetes
 

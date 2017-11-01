@@ -23,25 +23,25 @@ kubernetesVersion: {{ kubernetes_version }}
 token: {{ kubernetes_token }}
 {%if kubernetes_apiserver_extra_args is defined %}
 apiServerExtraArgs:
-{% for k, v in kubernetes_apiserver_extra_args.iteritems() %}
+{% for k, v in kubernetes_apiserver_extra_args | dictsort %}
   {{ k }}: "{{ v }}"
 {% endfor %}
 {% endif %}
 {%if kubernetes_controllermanager_extra_args is defined %}
 controllerManagerExtraArgs:
-{% for k, v in kubernetes_controllermanager_extra_args.iteritems() %}
+{% for k, v in kubernetes_controllermanager_extra_args | dictsort %}
   {{ k }}: "{{ v }}"
 {% endfor %}
 {% endif %}
 {% if kubernetes_scheduler_extra_args is defined %}
 schedulerExtraArgs:
-{% for k, v in kubernetes_scheduler_extra_args.iteritems() %}
+{% for k, v in kubernetes_scheduler_extra_args | dictsort %}
   {{ k }}: "{{ v }}"
 {% endfor %}
 {% endif %}
 {%if kubernetes_feature_gates is defined %}
 featureGates:
-{% for k, v in kubernetes_feature_gates.iteritems() %}
+{% for k, v in kubernetes_feature_gates | dictsort %}
   {{ k }}: "{{ v }}"
 {% endfor %}
 {% endif %}

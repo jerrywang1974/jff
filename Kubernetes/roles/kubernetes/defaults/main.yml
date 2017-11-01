@@ -28,3 +28,26 @@ etcd_client_port: 2379
 kubeadm_extra_args: ""
 #kubernetes_root_dir: /data/var/lib/kubelet
 
+kubelet_extra_args: >-
+  --eviction-hard memory.available<5%,nodefs.available<10%,nodefs.inodesFree<5%,imagefs.available<10%,imagefs.inodesFree<5%
+  --eviction-max-pod-grace-period 60
+  --eviction-minimum-reclaim memory.available=200Mi,nodefs.available=500Mi,imagefs.available=2Gi
+  --eviction-soft memory.available<10%,nodefs.available<15%,nodefs.inodesFree<10%,imagefs.available<15%,imagefs.inodesFree<10%
+  --eviction-soft-grace-period memory.available=1m30s,nodefs.available=5m0s,nodefs.inodesFree=5m0s,imagefs.available=5m0s,imagefs.inodesFree=5m0s
+  --eviction-pressure-transition-period 5m0s
+  --node-status-update-frequency 10s
+  --kube-reserved cpu=100m,memory=200Mi,ephemeral-storage=1Gi
+  --system-reserved cpu=100m,memory=1Gi,ephemeral-storage=1Gi
+
+# XXX: kubeadm-1.8.2 doesn't support customization of volumes and
+# volumeMounts for kube-apiserver yet, so we have to put audit-policy.yaml
+# into /etc/kubernetes/pki which is a predefined volume & volumeMount
+# in /etc/kubernetes/manifests/kube-apiserver.yaml.
+kubernetes_apiserver_extra_args:
+  audit-log-format: json
+  audit-log-maxage: "10"
+  audit-log-maxbackup: "10"
+  audit-log-maxsize: "100"
+  audit-log-path: /var/log/kubernetes/kube-audit.log
+  audit-policy-file: /etc/kubernetes/pki/audit-policy.yaml
+
