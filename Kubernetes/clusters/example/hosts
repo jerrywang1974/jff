@@ -1,17 +1,5 @@
 # require Ansible >= 2.2
 
-[mysql]
-node01
-node02
-node03
-node04
-
-[redis]
-node01
-node02
-node03
-node04
-
 [etcd]
 node01
 node02

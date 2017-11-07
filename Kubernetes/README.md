@@ -38,6 +38,9 @@ Set these variables in group\_vars/kubernetes.yml:
 ```yaml
 kubernetes_pod_infra_container_image: some.host.name/google_containers/pause-amd64:3.0
 kubernetes_version: v1.8.2
+kubeadm_version: 1.8.2-*
+kubectl_version: 1.8.2-*
+kubelet_version: 1.8.2-*
 kubernetes_image_repository: some.host.name/google_containers
 ```
 

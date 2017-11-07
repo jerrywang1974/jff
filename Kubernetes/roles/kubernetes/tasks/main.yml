@@ -8,15 +8,9 @@
   when: kubernetes_disable_rp_filter | bool
   tags: kubernetes
 
-- name: enable ip_forward
-  copy: src=99-enable-ip_forward.conf dest=/etc/sysctl.d/99-enable-ip_forward.conf
-        group=root owner=root mode=0644
-  register: sysctl_ip_forward_changed
-  tags: kubernetes
-
 - name: restart service procps if necessary
   service: name=procps state=restarted
-  when: sysctl_rp_filter_changed | changed or sysctl_ip_forward_changed | changed
+  when: sysctl_rp_filter_changed | changed
   tags: kubernetes
 
 - name: install kubernetes
@@ -122,8 +116,20 @@
   when: inventory_hostname == groups['kubernetes'][0]
   tags: kubernetes
 
-- name: adjust Kubernetes auditing on kube-apiserver
+# XXX: Because kubeadm doesn't properly sort apiserver's arguments, we can't
+# reliably patch on kube-apiserver.yaml.
+- name: adjust Kubernetes auditing on kube-apiserver - volumes and volumeMounts
   patch: src=etc_kubernetes_manifests_kube-apiserver.yaml.patch dest=/etc/kubernetes/manifests/kube-apiserver.yaml
+  when: inventory_hostname == groups['kubernetes'][0]
+  tags: kubernetes
+
+- name: adjust Kubernetes auditing on kube-apiserver - apiserver arguments
+  replace: path=/etc/kubernetes/manifests/kube-apiserver.yaml
+           regexp=/etc/kubernetes/pki/audit-policy.yaml
+           replace=/etc/kubernetes/audit-policy.yaml
+           group=root
+           owner=root
+           mode=0700
   when: inventory_hostname == groups['kubernetes'][0]
   tags: kubernetes
 

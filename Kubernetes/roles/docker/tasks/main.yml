@@ -1,6 +1,17 @@
 # vi: et ts=2 sts=2 sw=2 ai
 ---
 
+- name: enable ip_forward
+  copy: src=99-enable-ip_forward.conf dest=/etc/sysctl.d/99-enable-ip_forward.conf
+        group=root owner=root mode=0644
+  register: sysctl_ip_forward_changed
+  tags: docker
+
+- name: restart service procps if necessary
+  service: name=procps state=restarted
+  when: sysctl_ip_forward_changed | changed
+  tags: docker
+
 - name: install linux-image-generic for aufs kernel driver
   apt: name={{ item }} state=present
   with_items:
