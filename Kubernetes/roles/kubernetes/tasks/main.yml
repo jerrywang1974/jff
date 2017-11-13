@@ -160,3 +160,11 @@
   when: inventory_hostname != groups['kubernetes'][0] and discovery_token_ca_cert_hash_cmd.stdout is defined
   tags: kubernetes
 
+- name: fix permissions on files in /etc/kubernetes
+  shell: >-
+         chmod 700 /etc/kubernetes &&
+         chmod 600 /etc/kubernetes/*.conf /etc/kubernetes/manifests/*.yaml /etc/kubernetes/pki/*.key &&
+         chmod 644 /etc/kubernetes/pki/*.crt /etc/kubernetes/pki/*.pub
+  ignore_errors: yes
+  tags: kubernetes
+

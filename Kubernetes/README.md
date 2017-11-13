@@ -31,6 +31,15 @@ ansible-playbook -i clusters/example/hosts -b site.yml -e "kubernetes_token=$KUB
 kubectl taint nodes --all node-role.kubernetes.io/master-
 ```
 
+Use `scripts/setup-kubernetes-high-availability.sh` to setup Kubernetes HA, and run these commands
+if these standby nodes shouldn't be used as worker nodes:
+
+```
+kubectl get nodes --show-labels
+kubectl label nodes NODE_NAME node-role.kubernetes.io/master=
+kubectl taint nodes NODE_NAME node-role.kubernetes.io/master=:NoSchedule
+```
+
 ## Use private Docker registry for infra images
 
 Set these variables in group\_vars/kubernetes.yml:
