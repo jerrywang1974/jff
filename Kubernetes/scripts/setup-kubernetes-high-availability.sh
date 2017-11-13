@@ -81,6 +81,6 @@ echo "update configmap kube-proxy ..."
 kubectl get configmap kube-proxy -n kube-system -o yaml | perl -pe "s|\bserver:.*$|server: $API_SERVER|" | kubectl apply -f -
 
 echo
-echo "!!! You may need to run 'kubectl delete pod -n kube-system -l k8s-app=kube-proxy'."
-echo "!!! You may need to update \"server\" in /etc/kubernetes/kubelet.conf on all your worker nodes."
+echo "!!! You may need to run 'kubectl delete pod -n kube-system -l k8s-app=kube-proxy' to pick new kube-proxy configmap."
+echo "!!! You may need to update \"server: $API_SERVER\" in /etc/kubernetes/kubelet.conf on all your worker nodes."
 
