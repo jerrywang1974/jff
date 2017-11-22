@@ -23,3 +23,7 @@ Fish
     Alt-<UP>  or ESC-<UP>       在命令行历史搜索
     Alt-<DOWN> or ESC-<DOWN>    在命令行历史搜索
 
+    accept auto-suggestion:
+        ->  or Ctrl-f       accept whole line
+        Alt ->              accept single word
+
