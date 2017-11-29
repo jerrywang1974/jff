@@ -322,6 +322,8 @@ openssl 软件包里的 srp 代码：
     * https://en.wikipedia.org/wiki/Extensible_Authentication_Protocol
     * https://w1.fi/wpa_supplicant/
     * http://wiki.freeradius.org/protocol/EAP
+    * https://developer.android.com/reference/android/net/wifi/WifiEnterpriseConfig.Eap.html
+    * https://developer.android.com/reference/android/net/wifi/WifiEnterpriseConfig.Phase2.html
 
 Extensible Authentication Protocol，EAP 是一个认证框架，常用于无线网以
 及点对点网络中。具体的认证方法称为 EAP method，目前定义了大约四十种。
@@ -333,7 +335,7 @@ EAP-POTP: 使用 OTP token 做双因子认证
 
 EAP-PSK: 使用 pre-shared key 做互相认证，认证成功后信道被加密
 
-EAP-PWD: 从一系列共享密码中挑选一个做认证，被 Android 4.0, FreeRADIUS, Radiator 支持
+EAP-PWD: 从一系列共享密码中挑选一个做认证，被 Android 4.0, FreeRADIUS, Radiator, wpa_supplicatn 支持
 
 EAP-IKEv2
 
@@ -341,9 +343,18 @@ EAP-FAST
 
 EAP-AKA
 
+EAP-SIM
+
 EAP-GTC: 使用各种令牌比如 RSA SecurID 认证
 
 EAP-TTLS,  PEAP: 为 EAP methods 提供加密保护
+
+支持比较广的EAP method:
+   * EAP-AKA: 需要手机
+   * EAP-SIM: 需要手机
+   * EAP-TLS: 需要客户端证书，会泄漏 user identity
+   * PEAP + {EAP-AKA | EAP-SIM | EAP-GTC | EAP-MSCHAPv2 | EAP-TLS }
+   * EAP-TTLS + {EAP-AKA | EAP-SIM | EAP-GTC | EAP-MSCHAPv2 | EAP-TLS }
 
 #### RADIUS ####
 
