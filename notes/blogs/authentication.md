@@ -317,6 +317,12 @@ openssl 软件包里的 srp 代码：
 
 #### EAP ####
 
+参考:
+
+    * https://en.wikipedia.org/wiki/Extensible_Authentication_Protocol
+    * https://w1.fi/wpa_supplicant/
+    * http://wiki.freeradius.org/protocol/EAP
+
 Extensible Authentication Protocol，EAP 是一个认证框架，常用于无线网以
 及点对点网络中。具体的认证方法称为 EAP method，目前定义了大约四十种。
 

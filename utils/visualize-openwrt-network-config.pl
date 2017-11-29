@@ -38,7 +38,7 @@ while (my ($k, $v) = each %h) {
     if ($v eq 'wifi-iface') {
         my $iface = $h{"$k.ifname"};
         unless ($iface) {
-            ($iface) = $k =~ /\[(\d+)\]/;
+            ($iface) = $k =~ /\[?(\d+)\]?/;
             $iface = "wlan$iface";
         }
         $iface =~ s/default_radio/wlan/;

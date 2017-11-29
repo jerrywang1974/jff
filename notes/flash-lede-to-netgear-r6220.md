@@ -39,11 +39,12 @@ reboot
 
 ```
 opkg update
-opkg install luci
+opkg install luci luci-ssl
 opkg install luci-i18n-base-zh-cn
 opkg install luci-theme-material
 opkg install luci-app-upnp
 opkg install luci-app-sqm
+opkg install adblock luci-app-adblock
 ```
 
 # Rescue
