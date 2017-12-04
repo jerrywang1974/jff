@@ -1,0 +1,22 @@
+Internet-of-thing operating system
+
+https://en.wikipedia.org/wiki/Comparison_of_real-time_operating_systems
+
+https://www.freertos.org/
+    support by Amazon.
+
+https://github.com/zephyrproject-rtos/zephyr
+
+https://www.mbed.com/en/
+https://github.com/ARMmbed/mbed-os
+    support by Arm.
+
+
+https://www.rtems.org/
+
+
+http://www.riot-os.org/
+https://github.com/RIOT-OS/RIOT
+
+https://github.com/contiki-os/contiki
+
