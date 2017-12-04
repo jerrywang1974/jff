@@ -6,10 +6,11 @@ https://www.freertos.org/
     support by Amazon.
 
 https://github.com/zephyrproject-rtos/zephyr
+    support by Linux foundation, come from WindRiver Rocket RTOS.
 
 https://www.mbed.com/en/
 https://github.com/ARMmbed/mbed-os
-    support by Arm.
+    support by Arm, come from Keil RTX.
 
 
 https://www.rtems.org/
