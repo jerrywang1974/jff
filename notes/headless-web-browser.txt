@@ -6,6 +6,9 @@ https://github.com/dhamaniasad/HeadlessBrowsers
     http://phantomjs.org/
         headless WebKit scriptable with NodeJS API
 
+    https://github.com/GoogleChrome/puppeteer
+        headless Chrome
+
     http://slimerjs.org/
         headless Gecko
 
@@ -18,12 +21,18 @@ https://github.com/dhamaniasad/HeadlessBrowsers
     https://github.com/ui4j/ui4j
         a Java wrapper library around the JavaFX WebKit engine
 
+    https://github.com/casperjs/casperjs
+        Navigation scripting and testing utility for PhantomJS and SlimerJS
+
+    https://github.com/segmentio/nightmare
+        uses Electron, which is similar to PhantomJS but roughly twice as fast
+        and more modern. Because Nightmare uses Electron, it is your
+        responsibility to ensure that the webpages loaded by Nightmare are not
+        malicious. If you do load a malicious website, that website can
+        execute arbitrary code on your computer.
 
 http://nightwatchjs.org/
     Write End-to-End tests in Node.js quickly and effortlessly that run against a Selenium/WebDriver server.
-
-https://github.com/GoogleChrome/puppeteer
-    Headless Chrome Node API
 
 https://github.com/angular/protractor
     E2E test framework for Angular apps
