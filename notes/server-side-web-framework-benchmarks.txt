@@ -1,0 +1,18 @@
+Web Framework Benchmarks
+
+https://www.techempower.com/benchmarks/
+
+Plain text:
+    Python japronto
+    Python api-star + Meinheld
+    Python wheezy.web + Meinheld
+    Python falcon + Meinheld
+    Python uvicorn (https://github.com/encode/uvicorn)
+    Python bottle + Meinheld
+    Python weppy + Meinheld
+
+    Clojure aleph + Netty
+    Clojure http-kit
+
+    NodeJS Mitol (https://github.com/Helidium/Mitol)
+
