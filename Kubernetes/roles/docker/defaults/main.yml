@@ -11,5 +11,6 @@ docker_daemon_json:
     max-size: 10m
     max-file: '3'
   registry-mirrors:
+  - https://registry.docker-cn.com
   - https://docker.mirrors.ustc.edu.cn
 
