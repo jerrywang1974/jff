@@ -1,0 +1,30 @@
+#!/bin/bash
+
+# On gitlab server:
+#   cd git-data/repositories/path/to/project.git
+#   mkdir -p custom_hooks/update.d
+#   cp path/to/dont-push-merge-to-master custom_hooks/update.d
+#   chmod a+rx custom_hooks/update.d
+#
+# Reference:
+#   https://docs.gitlab.com/ce/administration/custom_hooks.html
+
+set -e
+set -o pipefail
+
+ref="$1"
+old="$2"
+new="$3"
+
+if [ "$ref" = refs/heads/master ]; then
+    n=$(git cat-file commit "$new" | head -4 | grep -c "^parent ")
+    if [ "$n" != 1 ]; then
+        echo
+        echo 'ERROR: pushing merge to refs/heads/master is forbidden, execute commands below to try again:'
+        echo '          git config pull.rebase true     # just do once'
+        echo '          git pull && git push'
+        echo
+        exit 1
+    fi
+fi
+
