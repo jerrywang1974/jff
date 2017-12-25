@@ -126,12 +126,12 @@
   apt: name=ntp state=present
   tags: ntp
 
-- name: start ntp server if not in virtualized environment
+- name: start ntp server if asked
   service: name=ntp state=started enabled=yes
   when: enable_ntp
   tags: ntp
 
-- name: stop ntp server if in virtualized environment
+- name: stop ntp server if asked
   service: name=ntp state=stopped enabled=no
   when: not enable_ntp
   tags: ntp
