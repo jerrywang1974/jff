@@ -30,6 +30,9 @@ MySQL
         pymysql:                        9.5s
         mysql-connector with raw=False: 10.3s       (use_pure=True)
 
+PostgreSQL
+    https://github.com/MagicStack/asyncpg
+
 Better REPL
     bPython
     ptPython and ptipython
@@ -44,4 +47,7 @@ Date frame
 
 Property based testing
     https://hypothesis.readthedocs.io/en/latest/index.html
+
+Plotting
+    https://github.com/bokeh/bokeh
 

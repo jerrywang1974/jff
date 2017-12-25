@@ -4,6 +4,7 @@ https://www.techempower.com/benchmarks/
 
 Plain text:
     Python japronto
+    Python Sanic + uvloop + httptools
     Python api-star + Meinheld
     Python wheezy.web + Meinheld
     Python falcon + Meinheld
