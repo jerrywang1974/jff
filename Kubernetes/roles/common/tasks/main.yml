@@ -128,12 +128,12 @@
 
 - name: start ntp server if not in virtualized environment
   service: name=ntp state=started enabled=yes
-  when: ansible_virtualization_type is undefined
+  when: enable_ntp
   tags: ntp
 
 - name: stop ntp server if in virtualized environment
   service: name=ntp state=stopped enabled=no
-  when: ansible_virtualization_type is defined
+  when: not enable_ntp
   tags: ntp
 
 - name: install Postfix server

@@ -12,3 +12,5 @@ kubernetes_apt_repo: http://mirrors.ustc.edu.cn/kubernetes/apt/
 # https://mirrors.tuna.tsinghua.edu.cn/docker-ce/linux/ubuntu
 docker_apt_repo: http://mirrors.ustc.edu.cn/docker-ce/linux/ubuntu
 
+enable_ntp: true
+
