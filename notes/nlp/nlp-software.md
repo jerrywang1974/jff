@@ -6,23 +6,24 @@
 * https://github.com/clips/pattern
 * http://opencyc.org/
 * http://wordnet.princeton.edu/
+* https://github.com/rockyzhengwu/FoolNLTK
 
 ## Comparison of Features
 
-| Feature                                   | LTP | NLPIR | BosonNLP | CoreNLP | HanLP | THULAC   | Jieba | SnowNLP | spaCy | NLTK | TextBlob | Polyglot | Pattern |
-|-------------------------------------------|-----|-------|----------|---------|-------|----------|-------|---------|-------|------|----------|----------|---------|
-| Word Segmentation，分词                   | Y   | Y     | Y        | Y       | Y     | Y        | Y     | Y       | Y     | Y    | Y        | Y        | Y       |
-| Part-of-speech Tagging, 词性标注          | Y   | Y     | Y        | Y       | Y     | Y        | Y     | Y       | Y     | Y    | Y        | Y        | Y       |
-| Named Entity Recognition, 命名实体识别    | Y   |       | Y        | Y       | Y     |          |       |         | Y     | Y    | Y        | Y        |         |
-| Dependency Parsing, 依存句法分析          | Y   |       | Y        | Y       | Y     |          |       |         | Y     | Y    | Y        |          | Y       |
-| Semantic Role Labeling, 语义角色标注      | Y   |       |          |         |       |          |       |         |       |      |          |          | Y       |
-| Semantic Dependency Parsing，语义依存分析 | Y   |       |          |         |       |          |       |         |       |      |          |          |         |
-| Keyword Extraction，关键词提取            |     | Y     | Y        |         | Y     | (THUTAG) | Y     | Y       |       |      |          |          |         |
-| Topic Classification，主题分类            |     |       | Y        |         |       | (THUCTC) |       |         |       | Y    |          |          |         |
-| Sentiment Analysis，情感分析              |     |       | Y        | Y       |       |          |       | Y       |       | Y    | Y        | Y        | Y       |
-| Summary，摘要                             |     |       | Y        |         | Y     |          |       | Y       |       |      |          |          |         |
-| Similarity，相似度                        |     |       |          |         |       |          |       | Y       |       |      |          |          |         |
-| Word Embedding，词向量                    |     |       |          |         |       |          |       |         |       |      |          | Y        | Y       |
+| Feature                                   | LTP | NLPIR | BosonNLP | CoreNLP | HanLP | THULAC   | Jieba | FoolNLTK | SnowNLP | spaCy | NLTK | TextBlob | Polyglot | Pattern |
+|-------------------------------------------|-----|-------|----------|---------|-------|----------|-------|----------|---------|-------|------|----------|----------|---------|
+| Word Segmentation，分词                   | Y   | Y     | Y        | Y       | Y     | Y        | Y     | Y        | Y       | Y     | Y    | Y        | Y        | Y       |
+| Part-of-speech Tagging, 词性标注          | Y   | Y     | Y        | Y       | Y     | Y        | Y     | Y        | Y       | Y     | Y    | Y        | Y        | Y       |
+| Named Entity Recognition, 命名实体识别    | Y   |       | Y        | Y       | Y     |          |       | Y        |         | Y     | Y    | Y        | Y        |         |
+| Dependency Parsing, 依存句法分析          | Y   |       | Y        | Y       | Y     |          |       |          |         | Y     | Y    | Y        |          | Y       |
+| Semantic Role Labeling, 语义角色标注      | Y   |       |          |         |       |          |       |          |         |       |      |          |          | Y       |
+| Semantic Dependency Parsing，语义依存分析 | Y   |       |          |         |       |          |       |          |         |       |      |          |          |         |
+| Keyword Extraction，关键词提取            |     | Y     | Y        |         | Y     | (THUTAG) | Y     |          | Y       |       |      |          |          |         |
+| Topic Classification，主题分类            |     |       | Y        |         |       | (THUCTC) |       |          |         |       | Y    |          |          |         |
+| Sentiment Analysis，情感分析              |     |       | Y        | Y       |       |          |       |          | Y       |       | Y    | Y        | Y        | Y       |
+| Summary，摘要                             |     |       | Y        |         | Y     |          |       |          | Y       |       |      |          |          |         |
+| Similarity，相似度                        |     |       |          |         |       |          |       |          | Y       |       |      |          |          |         |
+| Word Embedding，词向量                    |     |       |          |         |       |          |       |          |         |       |      |          | Y        | Y       |
 
 
 ## Word Segmenter
