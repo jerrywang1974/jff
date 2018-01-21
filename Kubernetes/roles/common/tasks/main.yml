@@ -40,35 +40,38 @@
 - name: install some essential utilities
   apt: name={{ item }} state=present
   with_items:
+    - apt-transport-https
     - atop
-    - ctop
-    - htop
-    - iftop
-    - iotop
-    - iperf3
-    - linux-tools-generic
-    - numatop
-    - powertop
-    - sysdig
     - bzip2
+    - ca-certificates
+    - ctop
     - curl
     - debianutils
     - dos2unix
     - file
     - fish
     - gzip
+    - htop
+    - iftop
+    - iotop
+    - iperf3
+    - linux-tools-generic
     - lsof
     - man-db
     - netcat-openbsd
     - nfs-common
+    - numatop
     - patch
     - pdsh
+    - powertop
     - pssh
     - rsync
     - screen
     - socat
+    - software-properties-common
     - strace
     - sudo
+    - sysdig
     - sysstat
     - tar
     - tcpdump

@@ -39,6 +39,13 @@ schedulerExtraArgs:
   {{ k }}: "{{ v }}"
 {% endfor %}
 {% endif %}
+apiServerExtraVolumes:
+- name: audit-policy
+  hostPath: /etc/kubernetes/audit-policy.yaml
+  mountPath: /etc/kubernetes/audit-policy.yaml
+- name: kube-log
+  hostPath: /var/log/kubernetes
+  mountPath: /var/log/kubernetes
 {%if kubernetes_feature_gates is defined %}
 featureGates:
 {% for k, v in kubernetes_feature_gates | dictsort %}

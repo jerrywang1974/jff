@@ -17,11 +17,11 @@ kubernetes_cluster_domain: cluster.local
 
 # https://github.com/kubernetes/kubernetes/blob/master/cmd/kubeadm/app/util/version.go#L33
 # it can be stable, latest, stable-1, latest-1, stable-1.0, latest-1.0, ...
-kubernetes_version: stable-1.8
-kubeadm_version: 1.8.*
-kubectl_version: 1.8.*
-kubelet_version: 1.8.*
-kubernetes_cni_version: 0.5.*
+kubernetes_version: stable-1.9
+kubeadm_version: 1.9.*
+kubectl_version: 1.9.*
+kubelet_version: 1.9.*
+kubernetes_cni_version: "*"
 
 etcd_client_port: 2379
 
@@ -40,15 +40,11 @@ kubelet_extra_args: >-
   --kube-reserved cpu=100m,memory=200Mi,ephemeral-storage=1Gi
   --system-reserved cpu=100m,memory=1Gi,ephemeral-storage=1Gi
 
-# XXX: kubeadm-1.8.x doesn't support customization of volumes and
-# volumeMounts for kube-apiserver yet, so we have to put audit-policy.yaml
-# into /etc/kubernetes/pki which is a predefined volume & volumeMount
-# in /etc/kubernetes/manifests/kube-apiserver.yaml.
 kubernetes_apiserver_extra_args:
   audit-log-format: json
   audit-log-maxage: "10"
   audit-log-maxbackup: "10"
   audit-log-maxsize: "100"
   audit-log-path: /var/log/kubernetes/kube-audit.log
-  audit-policy-file: /etc/kubernetes/pki/audit-policy.yaml
+  audit-policy-file: /etc/kubernetes/audit-policy.yaml
 
