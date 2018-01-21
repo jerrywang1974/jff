@@ -4,3 +4,8 @@ Disk Inventory X
 
 Omni Disk Sweeper
     https://www.omnigroup.com/more
+
+http://www.tobiasfeigl.de/2017/05/25/mac-free-mac-os-x-alternatives-of-daisydisk-disk-inventory-x-qdirstat-and-windirstat-sierra-10-12-x/
+
+https://github.com/shundhammer/qdirstat
+
