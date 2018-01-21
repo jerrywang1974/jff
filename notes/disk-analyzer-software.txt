@@ -1,0 +1,6 @@
+Disk Inventory X
+    http://www.derlien.com/
+    brew install caskroom/cask/disk-inventory-x
+
+Omni Disk Sweeper
+    https://www.omnigroup.com/more

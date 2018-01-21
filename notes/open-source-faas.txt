@@ -1,0 +1,4 @@
+Open source FaaS
+
+* https://github.com/openfaas/faas
+* https://github.com/fission/fission
