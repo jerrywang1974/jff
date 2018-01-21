@@ -2,10 +2,10 @@
 
 ## Environment
 
-* Ubuntu 16.04.2
-* Docker 17.09.0-ce with aufs
+* Ubuntu 16.04
+* Docker 17.12.0-ce with aufs
 * Kubernetes v1.8.x with Flannel vxlan backend
-* External etcd cluster, v3.2.4
+* External etcd cluster, v3.2.14
 
 See:
 
@@ -46,10 +46,11 @@ Set these variables in group\_vars/kubernetes.yml:
 
 ```yaml
 kubernetes_pod_infra_container_image: some.host.name/google_containers/pause-amd64:3.0
-kubernetes_version: v1.8.2
-kubeadm_version: 1.8.2-*
-kubectl_version: 1.8.2-*
-kubelet_version: 1.8.2-*
+kubernetes_version: v1.8.7
+kubeadm_version: 1.8.7-*
+kubectl_version: 1.8.7-*
+kubelet_version: 1.8.7-*
+kubernetes_cni_version: 0.5.*
 kubernetes_image_repository: some.host.name/google_containers
 ```
 

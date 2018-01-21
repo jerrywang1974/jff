@@ -1,0 +1,6 @@
+# vi: et ts=2 sts=2 sw=2 ai
+---
+
+# disable reserved memory for example cluster in VirtualBox
+kubelet_extra_args: ""
+

@@ -5,6 +5,9 @@
   hosts: all
 
   tasks:
+    - name: run apt update if etckeeper isn't installed
+      shell: etckeeper --version >/dev/null 2>/dev/null || apt update
+
     - name: install package etckeeper
       apt: name=etckeeper state=present
       tags: etckeeper

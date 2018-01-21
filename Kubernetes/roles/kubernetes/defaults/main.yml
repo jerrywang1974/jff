@@ -21,7 +21,7 @@ kubernetes_version: stable-1.8
 kubeadm_version: 1.8.*
 kubectl_version: 1.8.*
 kubelet_version: 1.8.*
-kubernetes_cni_version: "*"
+kubernetes_cni_version: 0.5.*
 
 etcd_client_port: 2379
 
@@ -29,6 +29,7 @@ kubeadm_extra_args: ""
 #kubernetes_root_dir: /data/var/lib/kubelet
 
 kubelet_extra_args: >-
+  --cgroup-driver cgroupfs
   --eviction-hard memory.available<5%,nodefs.available<10%,nodefs.inodesFree<5%,imagefs.available<10%,imagefs.inodesFree<5%
   --eviction-max-pod-grace-period 60
   --eviction-minimum-reclaim memory.available=200Mi,nodefs.available=500Mi,imagefs.available=2Gi
@@ -39,7 +40,7 @@ kubelet_extra_args: >-
   --kube-reserved cpu=100m,memory=200Mi,ephemeral-storage=1Gi
   --system-reserved cpu=100m,memory=1Gi,ephemeral-storage=1Gi
 
-# XXX: kubeadm-1.8.2 doesn't support customization of volumes and
+# XXX: kubeadm-1.8.x doesn't support customization of volumes and
 # volumeMounts for kube-apiserver yet, so we have to put audit-policy.yaml
 # into /etc/kubernetes/pki which is a predefined volume & volumeMount
 # in /etc/kubernetes/manifests/kube-apiserver.yaml.

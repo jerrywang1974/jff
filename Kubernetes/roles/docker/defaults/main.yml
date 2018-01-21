@@ -4,6 +4,8 @@
 docker_engine_version: 17.*
 
 docker_daemon_json:
+  exec-opts:
+  - native.cgroupdriver=cgroupfs
   ipv6: false
   live-restore: true
   log-driver: json-file
