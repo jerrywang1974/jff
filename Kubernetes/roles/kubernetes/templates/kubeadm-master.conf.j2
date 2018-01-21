@@ -39,13 +39,18 @@ schedulerExtraArgs:
   {{ k }}: "{{ v }}"
 {% endfor %}
 {% endif %}
-apiServerExtraVolumes:
-- name: audit-policy
-  hostPath: /etc/kubernetes/audit-policy.yaml
-  mountPath: /etc/kubernetes/audit-policy.yaml
-- name: kube-log
-  hostPath: /var/log/kubernetes
-  mountPath: /var/log/kubernetes
+# XXX: kubeadm-1.9.2 doesn't support readOnly and type for volumes.
+#apiServerExtraVolumes:
+#- name: audit-policy
+#  hostPath: /etc/kubernetes/audit-policy.yaml
+#  mountPath: /etc/kubernetes/audit-policy.yaml
+#  readOnly: true
+#  type: File
+#- name: kube-log
+#  hostPath: /var/log/kubernetes
+#  mountPath: /var/log/kubernetes
+#  readOnly: false
+#  type: DirectoryOrCreate
 {%if kubernetes_feature_gates is defined %}
 featureGates:
 {% for k, v in kubernetes_feature_gates | dictsort %}
