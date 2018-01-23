@@ -26,3 +26,7 @@ Choices:
              (2x slower than pigz)
         gzip: pigz (no parallel decompression)
 
+
+// xz -T0 -1 比 lbzip2 快一倍，压缩比高 3%，bzip2 可以死了，而 pzstd -1 比 xz -T0 -1 快 5～9 倍，压缩比只损失了4%, xz 可以死了。
+// xz-5.2.3,  lbzip2-2.5,  zstd-1.3.2.
+
