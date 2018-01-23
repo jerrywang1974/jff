@@ -1,0 +1,28 @@
+Comparison of different compression programs
+
+compression ratio:
+
+    xz, lzip, plzip, pxz > bzip2, lbzip2, pbzip2 > brotli > zstd > zip, pigz, gzip
+
+compression speed:
+
+    pzstd > pigz > zstd > brotli >> lbzip2 > pbzip2 > zip > gzip > plzip > pxz > bzip2 > xz > lzip
+
+decompression speed:
+    zstd >> pigz > lbzip2 > plzip, pzstd > pbzip2 >> brotli > zip > gzip > xz, pxz > lzip > bzip2
+
+
+Choices:
+    compression speed: lz4 > lzop > quicklz > snappy > zstd > brotli
+    decompression speed: lz4 > snappy > zstd > lzop > quicklz > brotli
+
+          zstd has much higher compression ratio than lz4;
+          lz4 for highest speed, zstd/pzstd for high speed and compression ratio.
+
+    ratio:
+        lzma: pixz(non-standard options, indexed xz compressor) >~ xz -T0 > plzip >~ pxz -T0(use huge memory, combine temp files until the end) > lrzip/lrz -p<N> (use huge memory, bad parallel)
+             (default level 6 is 10x slower than lbzip2,  level 1 is almost same with lbzip2)
+        bzip2: lbzip2
+             (2x slower than pigz)
+        gzip: pigz (no parallel decompression)
+
