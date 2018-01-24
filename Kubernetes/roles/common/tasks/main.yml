@@ -42,6 +42,7 @@
   with_items:
     - apt-transport-https
     - atop
+    - aufs-tools
     - bzip2
     - ca-certificates
     - ctop
