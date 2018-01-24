@@ -58,6 +58,7 @@
     - linux-tools-generic
     - lsof
     - man-db
+    - moreutils
     - netcat-openbsd
     - nfs-common
     - numatop
