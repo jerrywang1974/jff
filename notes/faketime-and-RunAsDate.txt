@@ -1,0 +1,8 @@
+https://serverfault.com/questions/138325/faking-the-date-for-a-specific-shell-session
+https://packages.debian.org/sid/faketime
+https://packages.debian.org/sid/libfaketime
+    faketime and libfaketime: Faking the date for a specific shell session
+
+http://www.nirsoft.net/utils/run_as_date.html
+    RunAsDate v1.36 - Run a program with the specified date/time
+
