@@ -112,10 +112,12 @@
 
 # kubectl get pod -n kube-system -o custom-columns=NAMESPACE:.metadata.namespace,NAME:.metadata.name,QOS:.status.qosClass,START:.status.startTime,NODE:.spec.nodeName
 - name: change kube-proxy QoS class from BestEffort to Guaranteed
-  command: >-
-           kubectl --kubeconfig=/etc/kubernetes/admin.conf patch
-           daemonset kube-proxy -n kube-system -p
-           '{"spec": {"template": {"spec": {"containers": [{
+  shell: >-
+         resources=`kubectl --kubeconfig=/etc/kubernetes/admin.conf get daemonset kube-proxy -n kube-system
+         -o jsonpath='{..resources.limits.cpu},{..resources.limits.memory},{..resources.requests.cpu},{..resources.requests.memory}'`;
+         [ "$resources" = '100m,100Mi,100m,100Mi' ] ||
+         kubectl --kubeconfig=/etc/kubernetes/admin.conf patch daemonset kube-proxy -n kube-system -p
+         '{"spec": {"template": {"spec": {"containers": [{
              "name": "kube-proxy",
              "resources": {
                "requests": {
