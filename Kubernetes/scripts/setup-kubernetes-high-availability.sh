@@ -1,4 +1,7 @@
 #!/bin/bash
+#
+# Usage:
+#   ./setup-kubernetes-high-availability.sh apiserver-master-host-name apiserver-standby-host-name https://apiserver-slb-hostname:6443
 
 set -e
 set -o pipefail
@@ -56,11 +59,11 @@ done
 #
 for f in {controller-manager,scheduler}.conf; do
     echo "copy /etc/kubernetes/$f ..."
-    ssh root@$MASTER cat /etc/kubernetes/$f | perl -pe "s|\bserver:.*$|server: https://$advertise_ip:6443|" | ssh root@$STANDBY "umask 0077; cat > /etc/kubernetes/$f"
+    ssh root@$MASTER cat /etc/kubernetes/$f | perl -pe "s|\bserver:.*$|server: https://$STANDBY:6443|" | ssh root@$STANDBY "umask 0077; cat > /etc/kubernetes/$f"
 done
 
 echo "modify /etc/kubernetes/kubelet.conf ..."
-ssh root@$STANDBY "perl -i -pe 's|\bserver:.*$|server: https://$advertise_ip:6443|' /etc/kubernetes/kubelet.conf"
+ssh root@$STANDBY "perl -i -pe 's|\bserver:.*$|server: https://$STANDBY:6443|' /etc/kubernetes/kubelet.conf"
 
 #
 # /etc/kubernetes/manifests/kube-{apiserver,controller-manager,scheduler}.yaml
