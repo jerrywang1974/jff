@@ -33,6 +33,11 @@ ssh root@$STANDBY "echo | openssl s_client -connect ${API_SERVER#https://} 2>/de
 
 ssh root@$STANDBY '[ ! -x /usr/bin/etckeeper ] || ! etckeeper unclean || etckeeper commit "before setup K8S HA"'
 
+api_host=${API_SERVER#https://}
+api_host=${api_host%:*}
+api_ip=`ssh root@$STANDBY "host -4 -t A $api_host | grep 'has address' | head -1 | sed -e 's/^.*has address //'"`
+advertise_ip=`ssh root@$STANDBY "ip -4 -o route get $api_ip | sed -e 's/^.*src //; s/ .*$//'"`
+
 #
 # /etc/kubernetes/pki
 #
@@ -51,20 +56,15 @@ done
 #
 for f in {controller-manager,scheduler}.conf; do
     echo "copy /etc/kubernetes/$f ..."
-    ssh root@$MASTER cat /etc/kubernetes/$f | perl -pe "s|\bserver:.*$|server: $API_SERVER|" | ssh root@$STANDBY "umask 0077; cat > /etc/kubernetes/$f"
+    ssh root@$MASTER cat /etc/kubernetes/$f | perl -pe "s|\bserver:.*$|server: https://$advertise_ip:6443|" | ssh root@$STANDBY "umask 0077; cat > /etc/kubernetes/$f"
 done
 
 echo "modify /etc/kubernetes/kubelet.conf ..."
-ssh root@$STANDBY "perl -i -pe 's|\bserver:.*$|server: $API_SERVER|' /etc/kubernetes/kubelet.conf"
+ssh root@$STANDBY "perl -i -pe 's|\bserver:.*$|server: https://$advertise_ip:6443|' /etc/kubernetes/kubelet.conf"
 
 #
 # /etc/kubernetes/manifests/kube-{apiserver,controller-manager,scheduler}.yaml
 #
-api_host=${API_SERVER#https://}
-api_host=${api_host%:*}
-api_ip=`ssh root@$STANDBY "host -4 -t A $api_host | grep 'has address' | head -1 | sed -e 's/^.*has address //'"`
-advertise_ip=`ssh root@$STANDBY "ip -4 -o route get $api_ip | sed -e 's/^.*src //; s/ .*$//'"`
-
 for f in /etc/kubernetes/manifests/kube-{apiserver,controller-manager,scheduler}.yaml; do
     echo "copy $f [advertise_ip=$advertise_ip] ..."
     ssh root@$MASTER cat $f | perl -pe "s|--advertise-address=\S+$|--advertise-address=$advertise_ip|" | ssh root@$STANDBY "umask 0077 && mkdir -p /etc/kubernetes/manifests && cat > $f"
