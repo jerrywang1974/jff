@@ -1,0 +1,13 @@
+grep
+git grep
+
+ack         https://beyondgrep.com/ack3/        (Perl)
+
+ag          https://github.com/ggreer/the_silver_searcher   (C)
+ucg         https://github.com/gvansickle/ucg           (C++)
+
+pt          https://github.com/monochromegane/the_platinum_searcher  (Go)
+sift        https://github.com/svent/sift               (Go)
+
+ripgrep     https://github.com/BurntSushi/ripgrep       (Rust)
+
