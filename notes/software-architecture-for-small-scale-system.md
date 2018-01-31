@@ -9,7 +9,6 @@
 ## Scheduling
 
 * Kubernetes
-* Docker swarm
 * SLURM
 * HTCondor
 * Corosync + Pacemaker
