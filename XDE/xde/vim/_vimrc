@@ -1,6 +1,7 @@
 "===================================BEGIN========================================
 
 "------------------------------------from default .vimrc of GVIM 6.4 for Win32 --
+unlet! skip_defaults_vim
 set nocompatible
 source $VIMRUNTIME/vimrc_example.vim
 if !has('unix')

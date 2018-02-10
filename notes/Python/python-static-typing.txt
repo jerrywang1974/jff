@@ -1,0 +1,7 @@
+https://github.com/instagram/MonkeyType
+https://github.com/dropbox/pyannotate
+    自动生成类型标注
+
+http://www.mypy-lang.org/index.html
+    类型标注
+
