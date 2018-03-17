@@ -7,9 +7,10 @@ Ancestry of cryptocurrencies
 * http://www.8btc.com/
 
 ```
-Bitcoin
+Bitcoin         ***
     Bitcoin Cash
     Litecoin
+        Dash    **
         Luckycoin
             Dogecoin
     Zcash
@@ -17,15 +18,14 @@ Bitcoin
     Zcoin
 
 Ethereum Classic
-    Ethereum
+    Ethereum    ***
 
 Ripple
-    Stellar     *
+    Stellar
 
 Bytecoin
-    Monero      *
+    Monero      **
 
-Cardano         *
 Waves           *
 Crypti
     Lisk        *
