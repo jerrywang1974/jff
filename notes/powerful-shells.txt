@@ -5,3 +5,8 @@ zsh
 fish
     http://fishshell.com/
 
+    激活 GIT 提示:
+    set -x -U __fish_git_prompt_show_informative_status yes
+    set -x -U __fish_git_prompt_showcolorhints yes
+    在 ~/.config/fish/functions/fish_prompt.fish 中使用函数 __fish_git_prompt
+
