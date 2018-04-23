@@ -1,0 +1,5 @@
+Haiku: BeOS clone
+ReactOS: Windows clone
+AROS: AmigaOS clone
+FreeDOS: DOS clone
+xv6: Unix v6, https://github.com/mit-pdos/xv6-public
