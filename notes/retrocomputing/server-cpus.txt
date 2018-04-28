@@ -1,0 +1,11 @@
+服务端 CPU 架构
+
+MIPS: 龙芯，君正
+ALPHA: 申威
+SPARC: 富士通，2017-9 Oracle 宣布停止开发。
+PA-RISC: dead
+Power ISA: IBM
+Itanium: dead
+Xeon
+RISC-V
+
