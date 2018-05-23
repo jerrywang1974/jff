@@ -157,6 +157,7 @@ Backup solutions:
     https://github.com/wal-e/wal-e
 
 Monitoring:
+    https://github.com/ankane/pghero        a performance dashboard for Postgres
     http://dalibo.github.io/pgbadger/       a fast PostgreSQL log analyzer
     http://pgcluu.darold.net                a PostgreSQL performances monitoring and auditing tool
     https://github.com/lesovsky/pgcenter    top-like admin tool for PostgreSQL.
