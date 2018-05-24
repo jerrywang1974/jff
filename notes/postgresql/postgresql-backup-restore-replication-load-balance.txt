@@ -163,3 +163,7 @@ Monitoring:
     https://github.com/lesovsky/pgcenter    top-like admin tool for PostgreSQL.
     https://github.com/julmon/pg_activity   a top like application for PostgreSQL server activity monitoring.
 
+Tuning:
+    https://www.pgconfig.org
+    https://pgtune.leopard.in.ua
+
