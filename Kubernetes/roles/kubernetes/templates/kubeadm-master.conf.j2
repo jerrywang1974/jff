@@ -39,7 +39,7 @@ schedulerExtraArgs:
   {{ k }}: "{{ v }}"
 {% endfor %}
 {% endif %}
-# XXX: kubeadm-1.9.2 doesn't support readOnly and type for volumes.
+# XXX: kubeadm-1.9.8 doesn't support readOnly and type for volumes.
 #apiServerExtraVolumes:
 #- name: audit-policy
 #  hostPath: /etc/kubernetes/audit-policy.yaml

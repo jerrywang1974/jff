@@ -78,7 +78,7 @@
         group=root owner=root mode=0644
   tags: kubernetes
 
-# XXX: kubeadm-1.9.2 doesn't support readOnly and type for extra volumes
+# XXX: kubeadm-1.9.8 doesn't support readOnly and type for extra volumes
 # yet, so we have to put audit-policy.yaml into /etc/kubernetes/pki which
 # is a predefined volume & volumeMount in /etc/kubernetes/manifests/kube-apiserver.yaml.
 - name: setup /etc/kubernetes/pki/audit-policy.yaml

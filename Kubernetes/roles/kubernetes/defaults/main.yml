@@ -40,7 +40,7 @@ kubelet_extra_args: >-
   --kube-reserved cpu=100m,memory=200Mi,ephemeral-storage=1Gi
   --system-reserved cpu=100m,memory=1Gi,ephemeral-storage=1Gi
 
-# XXX: kubeadm-1.9.2 doesn't support readOnly and type for extra volumes
+# XXX: kubeadm-1.9.8 doesn't support readOnly and type for extra volumes
 # yet, so we have to put audit-policy.yaml into /etc/kubernetes/pki which
 # is a predefined volume & volumeMount in /etc/kubernetes/manifests/kube-apiserver.yaml.
 kubernetes_apiserver_extra_args:
