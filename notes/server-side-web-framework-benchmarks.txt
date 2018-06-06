@@ -3,12 +3,9 @@ Web Framework Benchmarks
 https://www.techempower.com/benchmarks/
 
 Plain text:
-    Python japronto
-    Python Sanic + uvloop + httptools
-    Python api-star + Meinheld
-    Python wheezy.web + Meinheld
-    Python falcon + Meinheld
-    Python uvicorn (https://github.com/encode/uvicorn)
+    Python api-star + Meinheld              **
+    Python falcon + Meinheld                **
+    Python wheezy.web + Meinheld            *
     Python bottle + Meinheld
     Python weppy + Meinheld
 
