@@ -1,0 +1,5 @@
+IRC client
+
+* weechat: https://weechat.org/
+* irssi: https://irssi.org/
+

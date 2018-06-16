@@ -3,6 +3,5 @@ Open source FaaS / Serverless
 * https://github.com/openfaas/faas
 * https://github.com/fission/fission
 * https://github.com/nuclio/nuclio
-* https://github.com/fnproject/fn
 * https://github.com/kubeless/kubeless
 
