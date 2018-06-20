@@ -3,3 +3,36 @@ IRC client
 * weechat: https://weechat.org/
 * irssi: https://irssi.org/
 
+weechat:
+    iTerm2 > Preferences > Profiles > Default > Keys: Left Options Key -> Esc+
+
+    export LC_ALL=zh_CN.UTF-8
+    /mouse enable
+
+    select text when mouse is enabled : shift + select
+                                        (alt + select for iTerm)
+
+    filter join/part/quit/message on IRC channels:
+        /set irc.look.smart_filter on
+        /filter add irc_smart * irc_smart_filter *
+
+    /help server
+
+    /server add freenode chat.freenode.net/6697 -ssl -autoconnect
+    /connect freenode
+    /disconnect
+    /join #xxx
+    /part /close
+    /quit
+
+    private message:
+    /query some_nick some message
+
+    /secure passphrase xxxxx
+    /secure set freenode_username USERNAME
+    /secure set freenode_password xxxxx
+    /set irc.server.freenode.sasl_username "${sec.data.freenode_username}"
+    /set irc.server.freenode.sasl_password "${sec.data.freenode_password}"
+
+    /set irc.server.freenode.autojoin "#channel1,#channel2"
+
