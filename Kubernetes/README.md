@@ -4,8 +4,8 @@
 
 * Ubuntu 16.04
 * Docker 17.12.0-ce with aufs
-* Kubernetes v1.9.x with Flannel vxlan backend
-* External etcd cluster, v3.2.14
+* Kubernetes v1.11.x with Flannel vxlan backend
+* External etcd cluster, v3.2.18: https://github.com/kubernetes/kubernetes/blob/master/cluster/images/etcd/migrate-if-needed.sh#L21
 
 See:
 
@@ -46,13 +46,13 @@ Set these variables in group\_vars/kubernetes.yml:
 
 ```yaml
 kubernetes_pod_infra_container_image: some.host.name/google_containers/pause-amd64:3.0
-kubernetes_version: v1.9.8
-kubeadm_version: 1.9.8-*
-kubectl_version: 1.9.8-*
-kubelet_version: 1.9.8-*
+kubernetes_version: v1.11.2
+kubeadm_version: 1.11.2-*
+kubectl_version: 1.11.2-*
+kubelet_version: 1.11.2-*
 kubernetes_image_repository: some.host.name/google_containers
 ```
 
-By default kubernetes\_version is "stable-1.9", Kubeadm will request
-https://storage.googleapis.com/kubernetes-release/release/stable-1.9.txt to
+By default kubernetes\_version is "stable-1.11", Kubeadm will request
+https://storage.googleapis.com/kubernetes-release/release/stable-1.11.txt to
 resolve the version.

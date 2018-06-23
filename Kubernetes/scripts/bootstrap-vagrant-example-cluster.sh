@@ -1,6 +1,6 @@
 #!/bin/bash
 
-for i in 1 2 3 4; do
+for i in 1 2 3; do
     mkdir -p clusters/example/node0$i && (
         cd clusters/example/node0$i
         vagrant init -f ubuntu/xenial64
@@ -11,7 +11,7 @@ done
 
 mkdir -m 0600 -p ~/.ssh
 
-for i in 1 2 3 4; do
+for i in 1 2 3; do
     (
         cd clusters/example/node0$i
         vagrant ssh-config | sed -e "s/^Host default/Host node0$i/"

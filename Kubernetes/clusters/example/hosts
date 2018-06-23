@@ -4,11 +4,9 @@
 node01
 node02
 node03
-node04
 
 [kubernetes]
 node01
 node02
 node03
-node04
 

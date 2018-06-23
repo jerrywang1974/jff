@@ -2,7 +2,7 @@
 
 # https://kubernetes.io/docs/setup/independent/create-cluster-kubeadm/#tear-down
 
-for i in 4 3 2 1; do
+for i in 3 2 1; do
     ssh node01 "sudo kubectl --kubeconfig=/etc/kubernetes/admin.conf drain node0$i --delete-local-data --force --ignore-daemonsets"
     ssh node01 "sudo kubectl --kubeconfig=/etc/kubernetes/admin.conf delete node node0$i"
     ssh node0$i 'sudo kubeadm reset'

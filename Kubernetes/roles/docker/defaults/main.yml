@@ -1,7 +1,7 @@
 # vi: et ts=2 sts=2 sw=2 ai
 ---
 
-docker_engine_version: 17.*
+docker_engine_version: 18.*
 
 docker_daemon_json:
   exec-opts:
