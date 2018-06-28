@@ -31,7 +31,7 @@ weechat:
     private message:
         /query some_nick some message
 
-    register freenode:
+    register freenode: https://freenode.net/kb/answer/registration
         /nick liuyb
         /msg nickserv register PASSWORD EMAIL       # then go to mailbox to confirm
 
