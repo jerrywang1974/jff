@@ -6,7 +6,7 @@ IRC client
 weechat:
     iTerm2 > Preferences > Profiles > Default > Keys: Left Options Key -> Esc+
 
-    export LC_ALL=zh_CN.UTF-8
+    export LANG=en_US.UTF-8
     /mouse enable
 
     select text when mouse is enabled : shift + select
@@ -25,8 +25,15 @@ weechat:
     /part /close
     /quit
 
+    /set irc.server_default.nicks "liuyb,liuyb1,liuyb2,liuyb3,liuyb4"
+    /set irc.server_default.username "liuyb"
+
     private message:
-    /query some_nick some message
+        /query some_nick some message
+
+    register freenode:
+        /nick liuyb
+        /msg nickserv register PASSWORD EMAIL       # then go to mailbox to confirm
 
     /secure passphrase xxxxx
     /secure set freenode_username USERNAME
