@@ -47,5 +47,4 @@ kubernetes_apiserver_extra_args:
   audit-log-maxsize: "100"
   audit-log-path: /var/log/kubernetes/kube-audit.log
   audit-policy-file: /etc/kubernetes/audit-policy.yaml
-  endpoint-reconciler-type: lease
 
