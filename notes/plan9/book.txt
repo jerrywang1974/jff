@@ -1,0 +1,9 @@
+Notes on the Plan 9 3rd edition Kernel Source
+    Francisco J Ballesteros
+    nemo@lsub.org
+    May 8, 2007
+
+Introduction to Operating Systems Abstractions: Using Plan 9 from Bell Labs
+    Francisco J Ballesteros
+    9/28/2007
+

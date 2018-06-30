@@ -1,0 +1,28 @@
+https://en.wikipedia.org/wiki/Plan_9_from_Bell_Labs
+    Date 	Release 	                Comment
+    1992 	Plan 9 1st edition 	        Released by Bell Labs to universities
+    1995 	Plan 9 2nd edition 	        Released by Bell Labs for non-commercial purposes[19]
+    2000 	Plan 9 3rd ed. (Brazil) 	Released by Lucent Technologies under an open source license
+    2002 	Plan 9 4th edition 	        Released by Lucent Technologies under a new free software license
+
+
+2015-1-10   last releast
+    https://bell-labs.com/plan9/
+    https://9p.io/plan9/
+    "9fs sources"  then check /n/sources/plan9
+    https://github.com/0intro/plan9
+    https://github.com/0intro/plan9-gpl   (0intro/plan9 + GPL relicense)
+    https://github.com/0intro/plan9-patch (same with 0intro/plan9)
+*** https://github.com/0intro/plan9-contrib (0intro/plan9 + patches = 9legacy)
+
+    https://github.com/brho/plan9   (UC Berkeley release of Plan 9 under the GPLv2, 2014)
+
+    https://bitbucket.org/plan9-from-bell-labs/plan9    (maintained by Charles Forsyth)
+
+9front
+    https://code.9front.org/hg/?sort=lastchange
+*** https://code.9front.org/hg/plan9front/          9front fork
+    https://code.9front.org/hg/plan9                (GPL relicensed plan9)
+
+Harvey-OS
+    https://github.com/Harvey-OS/harvey
