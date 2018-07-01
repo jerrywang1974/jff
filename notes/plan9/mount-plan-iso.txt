@@ -1,0 +1,13 @@
+Because plan9 and 9front iso doesn't specify "partition-name", it must be
+mounted with these instructions on macOS:
+
+    hdiutil attach -mountpoint some-dir plan9.iso
+
+or
+
+    hdiutil attach -nomount plan9.iso       # it outputs something like "/dev/disk2"
+    /System/Library/Filesystems/cd9660.fs/Contents/Resources/cd9660.util -m disk2 some-dir
+
+Check ISO image information:
+    hdiutil imageinfo plan9.iso
+
