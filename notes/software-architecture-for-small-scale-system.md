@@ -51,6 +51,8 @@
 
 * https://redash.io/
 * https://github.com/apache/incubator-superset
+* http://dask.pydata.org/
+* http://www.h5py.org/, http://bcolz.blosc.org/, https://github.com/zarr-developers/zarr
 
 ## Big Data
 

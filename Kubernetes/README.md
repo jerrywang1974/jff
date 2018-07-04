@@ -40,6 +40,13 @@ kubectl label nodes NODE_NAME node-role.kubernetes.io/master=
 kubectl taint nodes NODE_NAME node-role.kubernetes.io/master=:NoSchedule
 ```
 
+Setup metrics server:
+
+```
+git clone https://github.com/kubernetes-incubator/metrics-server.git
+kubectl create -f metrics-server/deploy/1.8+/
+```
+
 ## Use private Docker registry for infra images
 
 Set these variables in group\_vars/kubernetes.yml:
