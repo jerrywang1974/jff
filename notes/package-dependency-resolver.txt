@@ -8,3 +8,7 @@ SAT resolver:
     https://github.com/openSUSE/libsolv/
     https://github.com/akozumpl/hawkey  (base on libsolv)
 
+https://en.wikipedia.org/wiki/Binary_decision_diagram
+https://en.wikipedia.org/wiki/Boolean_satisfiability_problem
+https://github.com/johnyf/tool_lists/blob/master/bdd.md
+
