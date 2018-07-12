@@ -9,7 +9,7 @@
 
 - name: restart service procps if necessary
   service: name=procps state=restarted
-  when: sysctl_ip_forward_changed | changed
+  when: sysctl_ip_forward_changed is changed
   tags: docker
 
 - name: install linux-image-generic for aufs kernel driver

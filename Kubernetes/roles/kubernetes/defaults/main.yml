@@ -29,7 +29,6 @@ kubeadm_extra_args: ""
 #kubernetes_root_dir: /data/var/lib/kubelet
 
 kubelet_extra_args: >-
-  --cgroup-driver cgroupfs
   --eviction-hard memory.available<5%,nodefs.available<10%,nodefs.inodesFree<5%,imagefs.available<10%,imagefs.inodesFree<5%
   --eviction-max-pod-grace-period 60
   --eviction-minimum-reclaim memory.available=200Mi,nodefs.available=500Mi,imagefs.available=2Gi
@@ -40,11 +39,7 @@ kubelet_extra_args: >-
   --kube-reserved cpu=100m,memory=200Mi,ephemeral-storage=1Gi
   --system-reserved cpu=100m,memory=1Gi,ephemeral-storage=1Gi
 
-kubernetes_apiserver_extra_args:
-  audit-log-format: json
-  audit-log-maxage: "10"
-  audit-log-maxbackup: "10"
-  audit-log-maxsize: "100"
-  audit-log-path: /var/log/kubernetes/kube-audit.log
-  audit-policy-file: /etc/kubernetes/audit-policy.yaml
+kubernetes_feature_gates:
+  Auditing: true
+  HighAvailability: true
 

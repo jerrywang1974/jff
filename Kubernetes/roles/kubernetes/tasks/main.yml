@@ -16,7 +16,7 @@
 
 - name: restart service procps if necessary
   service: name=procps state=restarted
-  when: (sysctl_bridge_nf_call_iptables_changed | changed) or (sysctl_rp_filter_changed | changed)
+  when: (sysctl_bridge_nf_call_iptables_changed is changed) or (sysctl_rp_filter_changed is changed)
   tags: kubernetes
 
 - name: install kubernetes
@@ -26,6 +26,8 @@
     - kubectl={{ kubectl_version }}
     - kubelet={{ kubelet_version }}
     - kubernetes-cni={{ kubernetes_cni_version }}
+    - ipset
+    - ipvsadm
   tags: kubernetes
 
 - name: install /etc/network/if-up.d/kubernetes-cluster-ip-route
@@ -44,24 +46,19 @@
 
 - name: add route for kubernetes cluster ip range if necessary
   shell: ip route del to {{ kubernetes_service_cidr }}; ip route add to {{ kubernetes_service_cidr }} dev {{ primary_internal_iface }}
-  when: if_up_script_installed | changed or if_down_script_installed | changed
+  when: if_up_script_installed is changed or if_down_script_installed is changed
   tags: kubernetes
 
-- name: override /etc/systemd/system/kubelet.service.d/10-kubeadm.conf with 60-kubeadm-override.conf
-  template: src=60-kubeadm-override.conf.j2
-            dest=/etc/systemd/system/kubelet.service.d/60-kubeadm-override.conf
+- name: install /etc/default/kubelet
+  template: src=default.j2
+            dest=/etc/default/kubelet
             group=root owner=root mode=0640
-  register: kubeadm_conf_overridden
-  tags: kubernetes
-
-- name: reload systemd if necessary
-  command: systemctl daemon-reload
-  when: kubeadm_conf_overridden | changed
+  register: kubectl_default_changed
   tags: kubernetes
 
 - name: restart kubelet if necessary
   service: name=kubelet state=restarted
-  when: kubeadm_conf_overridden | changed
+  when: kubectl_default_changed is changed
   tags: kubernetes
 
 - name: start kubelet

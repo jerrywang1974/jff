@@ -1,65 +1,78 @@
 apiVersion: kubeadm.k8s.io/v1alpha2
 kind: MasterConfiguration
+kubernetesVersion: {{ kubernetes_version }}
 api:
   advertiseAddress: {{ kubernetes_apiserver_advertise_address }}
   bindPort: {{ kubernetes_apiserver_bind_port }}
-etcd:
-  endpoints:
-{% for host in groups['etcd'] %}
-  - http://{{ hostvars[host]['etcd_node_ip'] }}:{{ etcd_client_port }}
-{% endfor %}
-networking:
-  dnsDomain: {{ kubernetes_cluster_domain }}
-  serviceSubnet: {{ kubernetes_service_cidr }}
-  podSubnet: {{ kubernetes_pod_network_cidr }}
-apiServerCertSANs:
-{% for san in kubernetes_apiserver_cert_extra_sans.split(',') %}
-  - {{ san }}
-{% endfor %}
-{% if kubernetes_image_repository is defined %}
-imageRepository: {{ kubernetes_image_repository }}
-{% endif %}
-kubernetesVersion: {{ kubernetes_version }}
+
+auditPolicy:
+  logDir: /var/log/kubernetes/audit
+  logMaxAge: 2
+  path: /etc/kubernetes/audit-policy.yaml
+
 bootstrapTokens:
 - groups:
-    - system:bootstrappers:kubeadm:default-node-token
+  - system:bootstrappers:kubeadm:default-node-token
   token: {{ kubernetes_token }}
   ttl: 24h0m0s
   usages:
   - signing
   - authentication
+
+etcd:
+  external:
+    endpoints:
+{% for host in groups['etcd'] %}
+    - http://{{ hostvars[host]['etcd_node_ip'] }}:{{ etcd_client_port }}
+{% endfor %}
+
+{% if kubernetes_image_repository is defined %}
+imageRepository: {{ kubernetes_image_repository }}
+{% endif %}
+
+kubeProxy:
+  config:
+    mode: ipvs
+
+kubeletConfiguration:
+  baseConfig:
+    hairpinMode: hairpin-veth
+
+networking:
+  dnsDomain: {{ kubernetes_cluster_domain }}
+  serviceSubnet: {{ kubernetes_service_cidr }}
+  podSubnet: {{ kubernetes_pod_network_cidr }}
+
+apiServerCertSANs:
+{% for san in kubernetes_apiserver_cert_extra_sans.split(',') %}
+  - {{ san }}
+{% endfor %}
+
 {%if kubernetes_apiserver_extra_args is defined %}
 apiServerExtraArgs:
 {% for k, v in kubernetes_apiserver_extra_args | dictsort %}
   {{ k }}: "{{ v }}"
 {% endfor %}
 {% endif %}
+
 {%if kubernetes_controllermanager_extra_args is defined %}
 controllerManagerExtraArgs:
 {% for k, v in kubernetes_controllermanager_extra_args | dictsort %}
   {{ k }}: "{{ v }}"
 {% endfor %}
 {% endif %}
+
 {% if kubernetes_scheduler_extra_args is defined %}
 schedulerExtraArgs:
 {% for k, v in kubernetes_scheduler_extra_args | dictsort %}
   {{ k }}: "{{ v }}"
 {% endfor %}
 {% endif %}
-apiServerExtraVolumes:
-- name: audit-policy
-  hostPath: /etc/kubernetes/audit-policy.yaml
-  mountPath: /etc/kubernetes/audit-policy.yaml
-  writable: false
-  pathType: File
-- name: kube-log
-  hostPath: /var/log/kubernetes
-  mountPath: /var/log/kubernetes
-  writable: false
-  pathType: DirectoryOrCreate
+
 {%if kubernetes_feature_gates is defined %}
 featureGates:
 {% for k, v in kubernetes_feature_gates | dictsort %}
-  {{ k }}: "{{ v }}"
+  {{ k }}: {{ v }}
 {% endfor %}
 {% endif %}
+

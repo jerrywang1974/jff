@@ -1,4 +1,0 @@
-[Service]
-Environment="KUBELET_DNS_ARGS=--cluster-dns={{ kubernetes_cluster_dns }}  --cluster-domain={{ kubernetes_cluster_domain }}"
-Environment="KUBELET_EXTRA_ARGS=$KUBELET_EXTRA_ARGS --node-ip={{ kubernetes_node_ip }} {{ '--pod-infra-container-image=' ~ kubernetes_pod_infra_container_image if kubernetes_pod_infra_container_image is defined else '' }} {{ '--root-dir=' ~ kubernetes_root_dir if kubernetes_root_dir is defined else '' }} {{ kubelet_extra_args }}"
-
