@@ -8,6 +8,10 @@ weechat:
 
     export LANG=en_US.UTF-8
     /mouse enable
+    /aspell enable
+    /set aspell.check.default_dict "en"
+    /set aspell.check.suggestions 10
+    /set weechat.bar.status.items "....,[aspell_suggest]"
 
     select text when mouse is enabled : shift + select
                                         (alt + select for iTerm)
