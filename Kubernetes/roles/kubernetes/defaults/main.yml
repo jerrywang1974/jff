@@ -21,7 +21,7 @@ kubernetes_version: stable-1.11
 kubeadm_version: 1.11.*
 kubectl_version: 1.11.*
 kubelet_version: 1.11.*
-kubernetes_cni_version: "*"
+kubernetes_cni_version: 0.6.*
 
 etcd_client_port: 2379
 
