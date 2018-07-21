@@ -3,6 +3,14 @@ IRC client
 * weechat: https://weechat.org/
 * irssi: https://irssi.org/
 
+IRC proxy
+
+* https://github.com/znc/znc
+* http://psybnc.at/
+* https://quassel-irc.org/
+* https://www.bitlbee.org
+* https://github.com/matrix-org/synapse
+
 weechat:
     iTerm2 > Preferences > Profiles > Default > Keys: Left Options Key -> Esc+
 
