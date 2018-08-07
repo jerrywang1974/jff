@@ -35,7 +35,7 @@
         last (ledger (- n 1))]
     (conj (mapv #(vector (interval-days day0 (% 0)) (% 1))
                 (take (- n 1) ledger))
-          [(interval-days day0 (last 0)) (last 2)])))
+          [(interval-days day0 (last 0)) (+ (last 1) (last 2))])))
 
 ;; net present value:
 ;;   x = 1 / (1 + r)
