@@ -101,11 +101,10 @@
   service: name=cron state=started enabled=yes
   tags: cron
 
-- name: install rsyslog, cronolog, logrotate, logcheck, logwatch
+- name: install rsyslog, cronolog, logrotate, logwatch
   apt: name={{ item }} state=present
   with_items:
     - cronolog
-    - logcheck
     - logrotate
     - logwatch
     - rsyslog
