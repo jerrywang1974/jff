@@ -5,5 +5,4 @@ With HTML report:
 https://github.com/httperf/httperf
 https://github.com/JoeDog/siege
 https://github.com/wg/wrk
-http://locust.io/
 
