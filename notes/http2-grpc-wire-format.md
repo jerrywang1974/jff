@@ -82,6 +82,8 @@ grpc-message        percent-encoded-message
 * nghttp, nghttpx, h2load: https://nghttp2.org/
 * grpc\_cli: https://github.com/grpc/grpc/blob/master/doc/command_line_tool.md
 * polyglot: https://github.com/grpc-ecosystem/polyglot
+* h2c: https://github.com/fstab/h2c
+* h2i: https://github.com/golang/net/tree/master/http2/h2i
 
 ```
 # "00 00000000" means "not compressed"(1 byte) and zero payment length(4 bytes)
@@ -98,3 +100,5 @@ echo '{"name": "xxx"}' | java -jar polyglot.jar --command call --endpoint localh
 * HTTP/2 https://httpwg.org/specs/rfc7540.html
 * HPACK https://httpwg.org/specs/rfc7541.html
 * GRPC https://github.com/grpc/grpc/blob/master/doc/PROTOCOL-HTTP2.md
+* https://blog.cloudflare.com/tools-for-debugging-testing-and-using-http-2/
+
