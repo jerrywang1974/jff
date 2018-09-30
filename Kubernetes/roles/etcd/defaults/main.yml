@@ -6,7 +6,7 @@ etcd_node_name: "{{ inventory_hostname_short }}"
 etcd_node_ip: "{{ hostvars[inventory_hostname]['ansible_' ~ primary_internal_iface].ipv4.address }}"
 
 # https://github.com/kubernetes/kubernetes/blob/master/cluster/images/etcd/migrate-if-needed.sh#L21
-etcd_docker_image: quay.io/coreos/etcd:v3.2.18
+etcd_docker_image: quay.io/coreos/etcd:v3.2.24
 etcd_peer_port: 2380
 etcd_client_port: 2379
 

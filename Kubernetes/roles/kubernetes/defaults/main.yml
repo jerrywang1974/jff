@@ -17,10 +17,10 @@ kubernetes_cluster_domain: cluster.local
 
 # https://github.com/kubernetes/kubernetes/blob/master/cmd/kubeadm/app/util/version.go#L33
 # it can be stable, latest, stable-1, latest-1, stable-1.0, latest-1.0, ...
-kubernetes_version: stable-1.11
-kubeadm_version: 1.11.*
-kubectl_version: 1.11.*
-kubelet_version: 1.11.*
+kubernetes_version: stable-1.12
+kubeadm_version: 1.12.*
+kubectl_version: 1.12.*
+kubelet_version: 1.12.*
 kubernetes_cni_version: 0.6.*
 
 etcd_client_port: 2379
